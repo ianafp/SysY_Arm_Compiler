@@ -1,6 +1,5 @@
 %{
 #include <stdio.h>
-#include "y.tab.h"
 %}
 
 %%
@@ -33,12 +32,12 @@
 
 "," {return _comma;}
 ";" {return _semicolon;}
-""" {return _quotation;}
+\"[\s\S]*\" {return _string;}
 
-"+" {return _add;}
-"-" {return _sub;}
-"*" {return _mul;}
-"/" {return _div;}
+\+ {return _add;}
+\- {return _sub;}
+\* {return _mul;}
+\/ {return _div;}
 
 ">" {return _greater;}
 "<" {return _less;}
@@ -46,11 +45,11 @@
 "<=" {return _less_equal;}
 "==" {return _equal;}
 
-"&&" {return _logical_and;}
-"||" {return _logical_or;}
-"!" {return _logical_not;}
+&& {return _logical_and;}
+\|\| {return _logical_or;}
+! {return _logical_not;}
 
-/s 
+\s
 .
 
 
