@@ -4,17 +4,18 @@
 
 %%
 \/\/.*$ | \/\*[\s\S]*?\*\/ {return comment;}
-\b int \b {return _int;}
-\b bool \b {return _bool;}
-\b void \b {return _void;}
-\b const \b {return _const;}
-\b if \b {return _if;}
-\b else \b {return _else;}
-\b while \b {return _while;}
-\b break \b {return _break;}
-\b continue \b {return _continue;}
-\b return \b {return _return;}
-\b main \b {return _main;}
+
+\bint\b {return _int;}
+\bbool\b {return _bool;}
+\bvoid\b {return _void;}
+\bconst\b {return _const;}
+\bif\b {return _if;}
+\belse\b {return _else;}
+\bwhile\b {return _while;}
+\bbreak\b {return _break;}
+\bcontinue\b {return _continue;}
+\breturn\b {return _return;}
+\bmain\b {return _main;}
 
 \b [a-zA-Z_][a-zA-Z0-9_]* \b {return _identifier;}
 
