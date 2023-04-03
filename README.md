@@ -9,3 +9,7 @@ Our ultimate goal is to compile a LINUX OS, and run these codes on the board pro
 
 Developers: Zhang Xin, Ying Zhoujun, Yu Haoming.
 Start: 25, March, 2023
+
+# Reference
+1. https://norasandler.com/2017/11/29/Write-a-Compiler.html This is a good tutorial about AST generation
+2. https://github.com/DoctorWkt/acwj This is also a practical tutorial which contains much more details about construction and implementation.
