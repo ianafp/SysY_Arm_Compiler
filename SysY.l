@@ -1,4 +1,5 @@
 %{
+#include "y.tab.h"
 #include <stdio.h>
 %}
 
@@ -39,12 +40,14 @@
 \- {return _sub;}
 \* {return _mul;}
 \/ {return _div;}
+\% {return _mod;}
 
 ">" {return _greater;}
 "<" {return _less;}
 ">=" {return _greater_equal;}
 "<=" {return _less_equal;}
 "==" {return _equal;}
+"!=" {return _nequal;}
 
 && {return _logical_and;}
 \|\| {return _logical_or;}
