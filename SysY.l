@@ -17,7 +17,7 @@
 \breturn\b {return _return;}
 \bmain\b {return _main;}
 
-\b [a-zA-Z_][a-zA-Z0-9_]* \b {return _identifier;}
+\b[a-zA-Z_][a-zA-Z0-9_]*\b {return _identifier;}
 
  0  {;return _const_val;}
  0x[0-9a-fA-F]+ | 0X[0-9a-fA-F] \b {;return _const_val;}
