@@ -4,15 +4,23 @@
 #include <iostream>
 #include <memory>
 #include <string>
+
+#include "position.h"
 /*
  * This file contains AST classes' declarations
  *
 */
+
 // 所有 AST 的基类
 class BaseAST {
  public:
   virtual ~BaseAST() = default;
   virtual void Dump() const = 0;
+  virtual std::string type(void) const {
+    std::unique_ptr<std::string> rst_ptr(new std::string("BaseAST"));
+    return *rst_ptr;
+  }
+  pos_t position;
 };
 
 // CompUnit 是 BaseAST
@@ -24,6 +32,10 @@ class CompUnitAST : public BaseAST {
     std::cout << "CompUnitAST { ";
     func_def->Dump();
     std::cout << " }";
+  }
+  std::string type(void) const override {
+    std::unique_ptr<std::string> rst_ptr(new std::string("CompUnitAST"));
+    return *rst_ptr;
   }
 };
 
@@ -40,15 +52,23 @@ class FuncDefAST : public BaseAST {
     block->Dump();
     std::cout << " }";
   }
+  std::string type(void) const override {
+    std::unique_ptr<std::string> rst_ptr(new std::string("FuncDefAST"));
+    return *rst_ptr;
+  }
 };
 
 class FuncTypeAST : public BaseAST {
  public:
-  std::string type;
+  std::string type_ret;
   void Dump() const override {
     std::cout << "FuncTypeAST { ";
-    std::cout << type;
+    std::cout << type_ret;
     std::cout << " }";
+  }
+  std::string type(void) const override {
+    std::unique_ptr<std::string> rst_ptr(new std::string("FuncTypeAST"));
+    return *rst_ptr;
   }
 };
 
@@ -60,6 +80,10 @@ class BlockAST : public BaseAST {
     stmt->Dump();
     std::cout << " }";
   }
+  std::string type(void) const override {
+    std::unique_ptr<std::string> rst_ptr(new std::string("BlockAST"));
+    return *rst_ptr;
+  }
 };
 
 class StmtAST : public BaseAST {
@@ -70,6 +94,10 @@ class StmtAST : public BaseAST {
     std::cout << "StmtAST { ";
     std::cout << ret_string << ", " << ret_number;
     std::cout << " }";
+  }
+  std::string type(void) const override {
+    std::unique_ptr<std::string> rst_ptr(new std::string("StmtAST"));
+    return *rst_ptr;
   }
 };
 

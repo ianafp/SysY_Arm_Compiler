@@ -10,12 +10,14 @@
 #include <memory>
 #include <string>
 #include "headers/ast.h"
+#include "headers/position.h"
+
+extern pos_t cur_pos;
+using namespace std;
 
 // 声明 lexer 函数和错误处理函数
 int yylex();
 void yyerror(std::unique_ptr<BaseAST> &ast, const char *s);
-
-using namespace std;
 
 %}
 
@@ -63,6 +65,7 @@ CompUnit
     // this one need to be transmitted to the argument
     // thus must generate uique_ptr version of pointer.
     comp_unit->func_def = unique_ptr<BaseAST>($1);
+    comp_unit->position.line = cur_pos.line; comp_unit->position.column = cur_pos.column;
     ast = move(comp_unit);
   }
   ;
@@ -83,6 +86,7 @@ FuncDef
     ast->func_type = unique_ptr<BaseAST>($1);
     ast->ident = *unique_ptr<string>($2);
     ast->block = unique_ptr<BaseAST>($5);
+    ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
     $$ = ast;
   }
   ;
@@ -92,7 +96,8 @@ FuncType
   : INT {
     auto ast = new FuncTypeAST();
     unique_ptr<std::string> int_str(new std::string("int"));
-    ast->type = *int_str;
+    ast->type_ret = *int_str;
+    ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
     $$ = ast;
   }
   ;
@@ -101,6 +106,7 @@ Block
   : '{' Stmt '}' {
     auto ast = new BlockAST();
     ast->stmt = unique_ptr<BaseAST>($2);
+    ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
     $$ = ast;
   }
   ;
@@ -108,9 +114,10 @@ Block
 Stmt
   : RETURN Number ';' {
     auto ast = new StmtAST();
-    unique_ptr<std::string> p_ret(new std::string("return"));
+    unique_ptr<std::string> p_ret(new std::string("ret"));
     ast->ret_string = *p_ret;
     ast->ret_number = $2;
+    ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
     $$ = ast;
   }
   ;
