@@ -7,5 +7,5 @@
 
 int main() {
   // test line comment
-  return 0;
+  return 3;
 }
