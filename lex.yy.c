@@ -770,12 +770,12 @@ YY_RULE_SETUP
 case 18:
 YY_RULE_SETUP
 #line 27 "SysY.l"
-{return _left_parenthesis;}
+{return '(';}
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
 #line 28 "SysY.l"
-{return _right_parenthesis;}
+{return ')';}
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
@@ -815,12 +815,12 @@ YY_RULE_SETUP
 case 27:
 YY_RULE_SETUP
 #line 38 "SysY.l"
-{return _add;}
+{return '+';}
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
 #line 39 "SysY.l"
-{return _sub;}
+{return '-';}
 	YY_BREAK
 case 29:
 YY_RULE_SETUP

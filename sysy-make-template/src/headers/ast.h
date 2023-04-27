@@ -4,7 +4,7 @@
 #include <iostream>
 #include <memory>
 #include <string>
-
+#include <list>
 #include "position.h"
 /*
  * This file contains AST classes' declarations
@@ -16,10 +16,7 @@ class BaseAST {
  public:
   virtual ~BaseAST() = default;
   virtual void Dump() const = 0;
-  virtual std::string type(void) const {
-    std::unique_ptr<std::string> rst_ptr(new std::string("BaseAST"));
-    return *rst_ptr;
-  }
+  virtual std::string type(void) const =0;
   pos_t position;
 };
 
@@ -27,10 +24,13 @@ class BaseAST {
 class CompUnitAST : public BaseAST {
  public:
   // 用智能指针管理对象
-  std::unique_ptr<BaseAST> func_def;
+  std::list<BaseAST*> decl_list;
   void Dump() const override {
+    
     std::cout << "CompUnitAST { ";
-    func_def->Dump();
+    for(auto &it:decl_list){
+      it->Dump();
+    }
     std::cout << " }";
   }
   std::string type(void) const override {
@@ -38,7 +38,38 @@ class CompUnitAST : public BaseAST {
     return *rst_ptr;
   }
 };
-
+// 声明 Decl -> ConstDecl | VarDecl
+class DeclAST: public BaseAST{
+  public:
+  BaseAST* const_or_var_decl;
+  void Dump() const override{
+    std::cout << "DeclAST { ";
+    const_or_var_decl->Dump();
+    std::cout << " }";
+  }
+  std::string type(void) const override {
+    std::unique_ptr<std::string> rst_ptr(new std::string("DeclAST"));
+    return *rst_ptr;
+  }
+};
+// 常量声明 ConstDecl -> 'const' BType ConstDef {',' ConstDef}';'
+class ConstDeclAST: public BaseAST{
+  public:
+  std::unique_ptr<BaseAST> BType;
+  std::list<BaseAST*> constdef_list;
+  void Dump() const override{
+    std::cout << "DeclAST { ";
+    BType->Dump();
+    for(auto &it:constdef_list){
+      it->Dump();
+    }
+    std::cout << " }";
+  }
+  std::string type(void) const override {
+    std::unique_ptr<std::string> rst_ptr(new std::string("ConstDeclAST"));
+    return *rst_ptr;
+  }
+};
 // FuncDef 也是 BaseAST
 class FuncDefAST : public BaseAST {
  public:

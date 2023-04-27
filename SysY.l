@@ -25,8 +25,8 @@
  0[0-7]+  {;return _const_val;}
  [1-9]+[0-9]*  {;return _const_val;}
 
-"(" {return _left_parenthesis;}
-")" {return _right_parenthesis;}
+"(" {return '(';}
+")" {return ')';}
 "[" {return _left_square_bracket;}
 "]" {return _right_square_bracket;}
 "{" {return _left_curly_bracket;}
@@ -36,8 +36,8 @@
 ";" {return _semicolon;}
 \"[\s\S]*\" {return _string;}
 
-\+ {return _add;}
-\- {return _sub;}
+\+ {return '+';}
+\- {return '-';}
 \* {return _mul;}
 \/ {return _div;}
 \% {return _mod;}

@@ -11,25 +11,30 @@ int yylex(void);
 void yyerror(char *);
 %}
 
-%union
-{
-    std::string *strval;
-    int intval;
+%union {
+  std::string *str_val;
+  int int_val;
+  BaseAST *ast_val;
 }
 
-%parse-param { std::unique_ptr<std::string> &ast }
+// lexer 返回的所有 token 种类的声明
+// 注意 IDENT 和 INT_CONST 会返回 token 的值, 分别对应 str_val 和 int_val
+%token INT BOOL VOID IF ELSE WHILE BREAK MAIN CONTINUE RETURN
+%token <str_val> IDENT
+%token <int_val> INT_CONST
 
-%token _int _bool _void _const
-%token _if _else _while _break _continue _return _main
-%token _comma _semicolon _add _sub _mul _div _mod
-%token _bool _equal _nequal _greater _less _greater_equal _less_equal _logical_and _logical_not _logical_or
-%token _left_curly_bracket  _left_parenthesis _left_square_bracket _right_curly_bracket _right_parenthesis _right_square_bracket
-%token <strval> _identifier _string
-%token <intval> _const_val
-
+// 非终结符的类型定义, 
+// the type definition here means the type of the value returned 
+// when parsing of this non-terminal is over.
+%type <ast_val> CompUnit Decl ConstDecl BType ConstDef ConstInitVal VarDecl VarDef InitVal
+FuncType FuncFParams FuncFParam Block BlockItem Stmt Exp Cond LVal PrimaryExp UnaryExp UnaryOp 
+FuncRParams MulExp AddExp RelExp EqExp LAndExp LOrExp ConstExp 
+%type <int_val> Number
 %start CompUnit
 %%
-    CompUnit: CompUnit Decl
+    CompUnit: CompUnit Decl {
+        $1->
+    }
             | CompUnit FuncDef
             | Decl
             | FuncDef
@@ -75,8 +80,8 @@ Constinitval: ConstInitVal
      Initval: InitVal
             | Initval _comma InitVal
             ;   
-     FuncDef: FuncType _identifier _left_parenthesis _right_parenthesis Block
-            | FuncType _identifier _left_parenthesis FuncFParams _right_parenthesis Block
+     FuncDef: FuncType _identifier '(' ')' Block
+            | FuncType _identifier '(' FuncFParams ')' Block
             ;
     FuncType: _int | _void | _bool
             ;
@@ -101,9 +106,9 @@ Constinitval: ConstInitVal
             | Exp _semicolon
             | _semicolon
             | Block
-            | _if _left_parenthesis Cond _right_parenthesis Stmt
-            | _if _left_parenthesis Cond _right_parenthesis Stmt _else Stmt
-            | _while _left_parenthesis Cond _right_parenthesis Stmt
+            | _if '(' Cond ')' Stmt
+            | _if '(' Cond ')' Stmt _else Stmt
+            | _while '(' Cond ')' Stmt
             | _break _semicolon
             | _continue _semicolon
             | _return _semicolon
@@ -116,19 +121,19 @@ Constinitval: ConstInitVal
         LVal: _identifier
             | LVal _left_square_bracket Exp _right_square_bracket
             ;
-  PrimaryExp: _left_parenthesis Exp _right_parenthesis
+  PrimaryExp: '(' Exp ')'
             | LVal
             | Number
             ;
       Number: _const_val
             ;
     UnaryExp: PrimaryExp
-            | _identifier _left_parenthesis _right_parenthesis
-            | _identifier _left_parenthesis FuncRParams _right_parenthesis
+            | _identifier '(' ')'
+            | _identifier '(' FuncRParams ')'
             | UnaryOp UnaryExp
             ;
-     UnaryOp: _add
-            | _sub
+     UnaryOp: '+'
+            | '-'
             | _logical_not
             ;
  FuncRParams: Exp
@@ -140,8 +145,8 @@ Constinitval: ConstInitVal
             | MulExp _mod UnaryExp
             ;
       AddExp: MulExp
-            | AddExp _add MulExp
-            | AddExp _sub MulExp
+            | AddExp '+' MulExp
+            | AddExp '-' MulExp
             ;
       RelExp: AddExp
             | RelExp _less AddExp

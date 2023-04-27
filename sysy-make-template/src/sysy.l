@@ -42,7 +42,16 @@ Hexadecimal   0[xX][0-9a-fA-F]+
 {BlockComment}  { /* discard. */ }
 
 "int"           { cur_pos.line = yylineno; cur_pos.column = col_record; return INT; col_record += 3; }
-"return"        { cur_pos.line = yylineno; cur_pos.column = col_record; return RETURN; col_record += 5; }
+"bool"          {cur_pos.line = yylineno; cur_pos.column = col_record;col_record += 4; return INT; }
+"void"          {cur_pos.line = yylineno; cur_pos.column = col_record;col_record += 4; return VOID; }
+"if"          {cur_pos.line = yylineno; cur_pos.column = col_record;col_record += 2; return IF; }
+"else"          {cur_pos.line = yylineno; cur_pos.column = col_record;col_record += 4; return ELSE; } 
+"while"          {cur_pos.line = yylineno; cur_pos.column = col_record;col_record += 5; return WHILE; }
+"break"          {cur_pos.line = yylineno; cur_pos.column = col_record;col_record += 5; return BREAK; }
+"continue"          {cur_pos.line = yylineno; cur_pos.column = col_record;col_record += 7; return CONTINUE; }
+"main"          {cur_pos.line = yylineno; cur_pos.column = col_record;col_record += 4; return MAIN;  }
+"return"        { cur_pos.line = yylineno; cur_pos.column = col_record;col_record += 6;return RETURN;  }
+"const"        { cur_pos.line = yylineno; cur_pos.column = col_record; col_record += 5; return CONST; }
 
 {Identifier}    { yylval.str_val = new string(yytext); cur_pos.line = yylineno; cur_pos.column = yylineno - yyleng + 1; return IDENT; col_record += yyleng; }
 
