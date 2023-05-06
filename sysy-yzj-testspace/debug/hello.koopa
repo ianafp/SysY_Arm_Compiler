@@ -1,8 +1,4 @@
 fun @main(): i32 {
 %entry:
-  ret 3
-}
-fun @x(): i32 {
-%entry:
-  ret 6
+  ret 0
 }

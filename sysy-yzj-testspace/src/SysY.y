@@ -36,7 +36,7 @@ void yyerror(BaseAST* &ast, const char *s);
 %token <str_val> _identifier _string
 %token <int_val> _const_val
 %type <ast_val> CompUnit Compunit FuncDef FuncType Block block BlockItem Stmt FuncFParam Decl
-
+%type <ast_val> Exp UnaryExp PrimaryExp Number UnaryOp
 %start CompUnit
 %%
     CompUnit: Compunit
@@ -220,7 +220,7 @@ Constinitval: ConstInitVal
             | _break ';'
             | _continue ';'
             | _return ';'
-            | _return _const_val ';'
+            /*| _return _const_val ';'
             {
                 //temporary!!!
                 auto ast = new StmtAST();
@@ -228,10 +228,11 @@ Constinitval: ConstInitVal
                 ast->ret_number = $2;
                 ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
                 $$ = ast;
-            }
+            }*/
             | _return Exp ';'
             {
                 auto ast = new StmtAST();
+                ast->tp = "retexp";
                 ast->ret_string = "ret";
                 ast->ret_exp = $2;
                 ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
@@ -241,7 +242,10 @@ Constinitval: ConstInitVal
          Exp: /*AddExp*/
              UnaryExp
             {
-
+                auto ast = new ExpAST();
+                ast->unary_exp = $1;
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
             }
             ;
         Cond: LOrExp
@@ -250,19 +254,72 @@ Constinitval: ConstInitVal
             | LVal '[' Exp ']'
             ;
   PrimaryExp: '(' Exp ')'
+            {
+                auto ast = new PrimaryExpAST();
+                ast->tp = "exp";
+                ast->exp = $2;
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             | LVal
             | Number
+            {
+                auto ast = new PrimaryExpAST();
+                ast->tp = "number";
+                ast->number = $1;
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             ;
       Number: _const_val
+            {
+                auto ast = new NumberAST();
+                ast->num = $1;
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             ;
     UnaryExp: PrimaryExp
+            {
+                auto ast = new UnaryExpAST();
+                ast->tp = "primary";
+                ast->primary_exp = $1;
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             | _identifier '(' ')'
             | _identifier '(' FuncRParams ')'
             | UnaryOp UnaryExp
+            {
+                auto ast = new UnaryExpAST();
+                ast->tp = "op+exp";
+                ast->unary_op = $1;
+                ast->unary_exp = $2;
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             ;
      UnaryOp: '+'
+            {
+                auto ast = new UnaryOpAST();
+                ast->op = "+";
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             | '-'
+            {
+                auto ast = new UnaryOpAST();
+                ast->op = "-";
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             | '!'
+            {
+                auto ast = new UnaryOpAST();
+                ast->op = "!";
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             ;
  FuncRParams: Exp
             | FuncRParams ',' Exp

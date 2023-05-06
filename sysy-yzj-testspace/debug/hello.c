@@ -7,10 +7,5 @@
 
 int main() {
   // test line comment
-  return 3;
-}
-
-int x() {
-  // test line comment
-  return 6;
+  return +(- -!6);
 }

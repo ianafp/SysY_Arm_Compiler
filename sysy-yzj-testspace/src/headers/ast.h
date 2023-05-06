@@ -178,15 +178,108 @@ class BlockItemAST : public BaseAST {
 
 class StmtAST : public BaseAST {
  public:
+  std::string tp;
   std::string ret_string;
-  int ret_number;
+  // int ret_number;
+  BaseAST* ret_exp;
   void Dump() const override {
     std::cout << "StmtAST { ";
-    std::cout << ret_string << ", " << ret_number;
+    if(tp == "retexp")
+    {
+      std::cout << ret_string << ", ";
+      ret_exp->Dump();
+    }
     std::cout << " }";
   }
   std::string type(void) const override {
     std::unique_ptr<std::string> rst_ptr(new std::string("StmtAST"));
+    return *rst_ptr;
+  }
+};
+
+class ExpAST : public BaseAST {
+ public:
+  // std::string type;
+  // std::string ret_string;
+  BaseAST* unary_exp;
+  void Dump() const override {
+    std::cout << "ExpAST { ";
+    unary_exp->Dump();
+    std::cout << " }";
+  }
+  std::string type(void) const override {
+    std::unique_ptr<std::string> rst_ptr(new std::string("ExpAST"));
+    return *rst_ptr;
+  }
+};
+
+class UnaryExpAST : public BaseAST {
+ public:
+  std::string tp;
+  BaseAST* primary_exp;
+  BaseAST* unary_op;
+  BaseAST* unary_exp;
+  void Dump() const override {
+    std::cout << "ExpAST { ";
+    if(tp == "primary")
+      primary_exp->Dump();
+    else if(tp == "op+exp")
+    {
+      unary_op->Dump();
+      std::cout << ", ";
+      unary_exp->Dump();
+    }
+    std::cout << " }";
+  }
+  std::string type(void) const override {
+    std::unique_ptr<std::string> rst_ptr(new std::string("UnaryExpAST"));
+    return *rst_ptr;
+  }
+};
+
+class PrimaryExpAST : public BaseAST {
+ public:
+  std::string tp;
+  BaseAST* exp;
+  BaseAST* number;
+  void Dump() const override {
+    std::cout << "PrimaryExpAST { ";
+    if(tp == "exp")
+      exp->Dump();
+    else if(tp == "number")
+      number->Dump();
+    std::cout << " }";
+  }
+  std::string type(void) const override {
+    std::unique_ptr<std::string> rst_ptr(new std::string("PrimaryExpAST"));
+    return *rst_ptr;
+  }
+};
+
+class NumberAST : public BaseAST {
+ public:
+  int num;
+  void Dump() const override {
+    std::cout << "NumberAST { ";
+    std::cout << num;
+    std::cout << " }";
+  }
+  std::string type(void) const override {
+    std::unique_ptr<std::string> rst_ptr(new std::string("NumberAST"));
+    return *rst_ptr;
+  }
+};
+
+class UnaryOpAST : public BaseAST {
+ public:
+  std::string op;
+  void Dump() const override {
+    std::cout << "UnaryOpAST { ";
+    std::cout << op;
+    std::cout << " }";
+  }
+  std::string type(void) const override {
+    std::unique_ptr<std::string> rst_ptr(new std::string("UnaryOpAST"));
     return *rst_ptr;
   }
 };

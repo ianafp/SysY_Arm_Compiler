@@ -23,7 +23,12 @@ class Program {
   // the global variable hasn't been implemented.
   // here we can only parse one function, so the function list is not implemented as well.
  public:
-  std::string block_dealer(BlockItemAST* block_item)
+  void exp_dealer(std::string* rst_ptr, ExpAST* exp)
+  {
+    //scan all of the exp
+  }
+
+  void block_dealer(std::string* rst_ptr, BlockItemAST* block_item)
   {
     std::string ret_string("");
     int ret_number = 0;
@@ -33,14 +38,14 @@ class Program {
       StmtAST *stmt_available = dynamic_cast<StmtAST*>(block_item->decl_or_stmt);
       //Deal with Stmt
       if (stmt_available != nullptr) {
-        ret_number = stmt_available->ret_number;
+        // ret_number = stmt_available->ret_number; for exp_dealer
         ret_string += stmt_available->ret_string;
       }
-      ret_string = "" + ret_string + " " + std::to_string(ret_number) + "\n";
+      *rst_ptr += "" + ret_string + " " + std::to_string(ret_number) + "\n";
     }
-    return ret_string;
   }
-  std::string func_dealer(FuncDefAST* func_def)
+
+  void func_dealer(std::string * rst_ptr, FuncDefAST* func_def)
   {
     std::string result(""), ident("");
     BaseAST* func_type;
@@ -74,6 +79,18 @@ class Program {
       }
     }
 
+    std::string func_header("fun "); *rst_ptr += func_header;
+    std::string func_name("@" + ident + "(): "); *rst_ptr += func_name;
+    std::string INT_type("int");
+    std::string VOID_type("void");
+    std::string func_type_append("");
+    if (type_analysis == INT_type) {
+      func_type_append += "i32";
+    }
+    *rst_ptr += func_type_append;
+    *rst_ptr += " {\n";
+    std::string block_name("\%entry:\n  "); *rst_ptr += block_name;
+
     blockAST* block_true_available = nullptr;
     std::list<std::string> ret_stmt;
     if (block != nullptr) {
@@ -83,34 +100,18 @@ class Program {
         {
           if(it != nullptr && it->type() == "BlockItemAST")
           {
-            ret_stmt.push_back(block_dealer(dynamic_cast<BlockItemAST*>(it)));
+            block_dealer(rst_ptr, dynamic_cast<BlockItemAST*>(it));
           }
         }
       }
     }
     
     //done with the AST analysis
-    std::string func_header("fun "); result += func_header;
-    std::string func_name("@" + ident + "(): "); result += func_name;
-    std::string INT_type("int");
-    std::string VOID_type("void");
-    std::string func_type_append("");
-    if (type_analysis == INT_type) {
-      func_type_append += "i32";
-    }
-    // else if(type_analysis == VOID_type)
-    //   func_type_append += "void";
-    result += func_type_append;
-    result += " {\n";
-    std::string block_name("\%entry:\n  "); result += block_name;
+    
     // for now, we only have one basic block, just add the basic block
-    for(auto &it:ret_stmt)
-    {
-      result += it;
-    }
-    result += "}\n";
-    return result;
+    *rst_ptr += "}\n";
   }
+
   std::string* Scan(BaseAST* root) {
     // if(root->type() == "CompUnitAST")
     //   root->Dump();
@@ -134,7 +135,7 @@ class Program {
       for(auto &it:Compunit->decl_list){
         if(it != nullptr && it->type() == "FuncDefAST")
         {
-          *rst_ptr += func_dealer(dynamic_cast<FuncDefAST*>(it));
+          func_dealer(rst_ptr, dynamic_cast<FuncDefAST*>(it));
         }
       }
     }
@@ -142,7 +143,5 @@ class Program {
     return rst_ptr;
   }
 };
-
-
 
 #endif
