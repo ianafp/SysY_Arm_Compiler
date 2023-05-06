@@ -23,84 +23,125 @@ class Program {
   // the global variable hasn't been implemented.
   // here we can only parse one function, so the function list is not implemented as well.
  public:
-  std::unique_ptr<std::string> Scan(BaseAST* root) {
-    std::unique_ptr<std::string> rst_ptr(new std::string());
+  void exp_dealer(std::string* rst_ptr, ExpAST* exp)
+  {
+    //scan all of the exp
+  }
+
+  void block_dealer(std::string* rst_ptr, BlockItemAST* block_item)
+  {
+    std::string ret_string("");
+    int ret_number = 0;
+
+    if(block_item->decl_or_stmt != nullptr && block_item->decl_or_stmt->type() == "StmtAST")
+    {
+      StmtAST *stmt_available = dynamic_cast<StmtAST*>(block_item->decl_or_stmt);
+      //Deal with Stmt
+      if (stmt_available != nullptr) {
+        // ret_number = stmt_available->ret_number; for exp_dealer
+        ret_string += stmt_available->ret_string;
+      }
+      *rst_ptr += "" + ret_string + " " + std::to_string(ret_number) + "\n";
+    }
+  }
+
+  void func_dealer(std::string * rst_ptr, FuncDefAST* func_def)
+  {
+    std::string result(""), ident("");
+    BaseAST* func_type;
+    BaseAST* func_fparams;
+    BaseAST* block;
+
+    //Start with FuncDefAST, we translate it to IR
+    func_type = func_def->func_type;
+    ident += *func_def->ident;
+    func_fparams = func_def;
+    block = func_def->block;
+
+    //Deal with FuncType
+    FuncTypeAST* func_type_available = nullptr;
+    std::string type_analysis("");
+    if(func_type != nullptr)
+    {
+      func_type_available = dynamic_cast<FuncTypeAST*>(func_type);
+      if (func_type_available != nullptr) {
+        type_analysis += func_type_available->type_ret;
+      }
+    }
+
+    //Deal with Block
+    BlockAST* block_available = nullptr;
+    BaseAST* block_true = nullptr;
+    if (block != nullptr) {
+      block_available = dynamic_cast<BlockAST*>(block);
+      if (block_available != nullptr) {
+        block_true = block_available->block;
+      }
+    }
+
+    std::string func_header("fun "); *rst_ptr += func_header;
+    std::string func_name("@" + ident + "(): "); *rst_ptr += func_name;
+    std::string INT_type("int");
+    std::string VOID_type("void");
+    std::string func_type_append("");
+    if (type_analysis == INT_type) {
+      func_type_append += "i32";
+    }
+    *rst_ptr += func_type_append;
+    *rst_ptr += " {\n";
+    std::string block_name("\%entry:\n  "); *rst_ptr += block_name;
+
+    blockAST* block_true_available = nullptr;
+    std::list<std::string> ret_stmt;
+    if (block != nullptr) {
+      block_true_available = dynamic_cast<blockAST*>(block_true);
+      if (block_true_available != nullptr) {
+        for(auto &it:block_true_available->block_item)
+        {
+          if(it != nullptr && it->type() == "BlockItemAST")
+          {
+            block_dealer(rst_ptr, dynamic_cast<BlockItemAST*>(it));
+          }
+        }
+      }
+    }
+    
+    //done with the AST analysis
+    
+    // for now, we only have one basic block, just add the basic block
+    *rst_ptr += "}\n";
+  }
+
+  std::string* Scan(BaseAST* root) {
+    // if(root->type() == "CompUnitAST")
+    //   root->Dump();
+    std::string* rst_ptr = new std::string("");
     // as the consequence that we haven't implement global variable, 
     // so no variable need to be considered.
     std::string comp_const("CompUnitAST");
     CompUnitAST* comp_unit = nullptr;
     BaseAST* root_raw_ptr = root;
-    BaseAST* func_def = nullptr;
+    BaseAST* comp_unit_true = nullptr;
     if (root->type() == comp_const) {
       comp_unit = dynamic_cast<CompUnitAST*>(root_raw_ptr);
       if (comp_unit != nullptr) {
-        func_def = comp_unit->func_def.get();
+        comp_unit_true = comp_unit->comp_unit;
       }
     } // the error handling? Haven't implemented.
 
-    FuncDefAST* func_def_available = nullptr;
-    BaseAST* func_type = nullptr;
-    std::string ident("");
-    BaseAST* block = nullptr;
-    if (func_def != nullptr) {
-      func_def_available = dynamic_cast<FuncDefAST*>(func_def);
-      if (func_def_available != nullptr) {
-        func_type = func_def_available->func_type.get();
-        ident += func_def_available->ident;
-        std::cout << ident << std::endl;
-        block = func_def_available->block.get();
-      }
-    } // the error handling? Haven't implemented.  
-
-    FuncTypeAST* func_type_available = nullptr;
-    std::string type_analysis("");
-    if (func_type != nullptr) {
-      func_type_available = dynamic_cast<FuncTypeAST*>(func_type);
-      if (func_type_available != nullptr) {
-        type_analysis += func_type_available->type_ret;
-      }
-    } // the error handling? Haven't implemented.
-
-    BlockAST* block_available = nullptr;
-    BaseAST* stmt = nullptr;
-    if (block != nullptr) {
-      block_available = dynamic_cast<BlockAST*>(block);
-      if (block_available != nullptr) {
-        stmt = block_available->stmt.get();
-      }
-    } // the error handling? Haven't implemented.
-
-    std::string ret_string("");
-    int ret_number = 0;
-
-    StmtAST* stmt_availabel = nullptr;
-    if (stmt != nullptr) {
-      stmt_availabel = dynamic_cast<StmtAST*>(stmt);
-      if (stmt_availabel != nullptr) {
-        ret_number = stmt_availabel->ret_number;
-        ret_string += stmt_availabel->ret_string;
+    CompunitAST* Compunit = dynamic_cast<CompunitAST*>(comp_unit_true);
+    if(Compunit != nullptr)
+    {
+      for(auto &it:Compunit->decl_list){
+        if(it != nullptr && it->type() == "FuncDefAST")
+        {
+          func_dealer(rst_ptr, dynamic_cast<FuncDefAST*>(it));
+        }
       }
     }
-    // now the analyse of AST has been done.
-
-    std::string func_header("fun "); *rst_ptr += func_header;
-    std::string func_name("@" + ident + "(): "); *rst_ptr += func_name;
-    std::string INT_type("int"); std::string func_type_append("");
-    if (type_analysis == INT_type) {
-      func_type_append += "i32";
-      func_type_append += " {\n";
-    }
-    *rst_ptr += func_type_append;
-    std::string block_name("\%entry:\n  "); *rst_ptr += block_name;
-    // for now, we only have one basic block, just add the basic block
-    
-    std::string ret_stmt("" + ret_string + " " + std::to_string(ret_number) + "\n}");
-    *rst_ptr += ret_stmt;
 
     return rst_ptr;
   }
 };
-
-
 
 #endif

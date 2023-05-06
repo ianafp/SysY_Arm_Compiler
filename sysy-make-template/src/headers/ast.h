@@ -5,6 +5,7 @@
 #include <memory>
 #include <string>
 #include <list>
+
 #include "position.h"
 /*
  * This file contains AST classes' declarations
@@ -16,7 +17,10 @@ class BaseAST {
  public:
   virtual ~BaseAST() = default;
   virtual void Dump() const = 0;
-  virtual std::string type(void) const =0;
+  virtual std::string type(void) const {
+    std::unique_ptr<std::string> rst_ptr(new std::string("BaseAST"));
+    return *rst_ptr;
+  }
   pos_t position;
 };
 
@@ -24,13 +28,11 @@ class BaseAST {
 class CompUnitAST : public BaseAST {
  public:
   // 用智能指针管理对象
-  std::list<BaseAST*> decl_list;
+  BaseAST* comp_unit;
   void Dump() const override {
     
     std::cout << "CompUnitAST { ";
-    for(auto &it:decl_list){
-      it->Dump();
-    }
+    comp_unit->Dump();
     std::cout << " }";
   }
   std::string type(void) const override {
@@ -38,9 +40,30 @@ class CompUnitAST : public BaseAST {
     return *rst_ptr;
   }
 };
-// 声明 Decl -> ConstDecl | VarDecl
-class DeclAST: public BaseAST{
-  public:
+
+// Compunit --temporary
+class CompunitAST : public BaseAST {
+ public:
+  // 用智能指针管理对象
+  std::list<BaseAST*> decl_list;
+  void Dump() const override {
+    
+    // std::cout << "CompUnitAST { ";
+    for(auto &it:decl_list){
+      it->Dump();
+    }
+    // std::cout << " }";
+  }
+  std::string type(void) const override {
+    std::unique_ptr<std::string> rst_ptr(new std::string("CompunitAST"));
+    return *rst_ptr;
+  }
+};
+
+//Declare Part
+// Decl 也是 BaseAST
+class DeclAST : public BaseAST {
+ public:
   BaseAST* const_or_var_decl;
   void Dump() const override{
     std::cout << "DeclAST { ";
@@ -52,10 +75,10 @@ class DeclAST: public BaseAST{
     return *rst_ptr;
   }
 };
-// 常量声明 ConstDecl -> 'const' BType ConstDef {',' ConstDef}';'
-class ConstDeclAST: public BaseAST{
-  public:
-  std::unique_ptr<BaseAST> BType;
+
+class ConstDeclAST : public BaseAST {
+ public:
+  BaseAST* BType;
   std::list<BaseAST*> constdef_list;
   void Dump() const override{
     std::cout << "DeclAST { ";
@@ -70,16 +93,21 @@ class ConstDeclAST: public BaseAST{
     return *rst_ptr;
   }
 };
+
+//Function Definition Part
 // FuncDef 也是 BaseAST
 class FuncDefAST : public BaseAST {
  public:
-  std::unique_ptr<BaseAST> func_type;
-  std::string ident;
-  std::unique_ptr<BaseAST> block;
+  BaseAST* func_type;
+  std::string* ident;
+  BaseAST* func_fparams;
+  BaseAST* block;
   void Dump() const override {
     std::cout << "FuncDefAST { ";
     func_type->Dump();
-    std::cout << ", " << ident << ", ";
+    std::cout << ", " << *ident << ", ";
+    if(func_fparams)
+      func_fparams->Dump();
     block->Dump();
     std::cout << " }";
   }
@@ -105,10 +133,10 @@ class FuncTypeAST : public BaseAST {
 
 class BlockAST : public BaseAST {
  public:
-  std::unique_ptr<BaseAST> stmt;
+  BaseAST* block;
   void Dump() const override {
     std::cout << "BlockAST { ";
-    stmt->Dump();
+    block->Dump();
     std::cout << " }";
   }
   std::string type(void) const override {
@@ -117,17 +145,141 @@ class BlockAST : public BaseAST {
   }
 };
 
+class blockAST : public BaseAST {
+ public:
+  std::list<BaseAST*> block_item;
+  void Dump() const override {
+    // std::cout << "blockAST { ";
+    for(auto &it:block_item)
+    {
+      it->Dump();
+    }
+    // std::cout << " }";
+  }
+  std::string type(void) const override {
+    std::unique_ptr<std::string> rst_ptr(new std::string("blockAST"));
+    return *rst_ptr;
+  }
+};
+
+class BlockItemAST : public BaseAST {
+ public:
+  BaseAST* decl_or_stmt;
+  void Dump() const override {
+    std::cout << "BlockItemAST { ";
+    decl_or_stmt->Dump();
+    std::cout << " }";
+  }
+  std::string type(void) const override {
+    std::unique_ptr<std::string> rst_ptr(new std::string("BlockItemAST"));
+    return *rst_ptr;
+  }
+};
+
 class StmtAST : public BaseAST {
  public:
+  std::string tp;
   std::string ret_string;
-  int ret_number;
+  // int ret_number;
+  BaseAST* ret_exp;
   void Dump() const override {
     std::cout << "StmtAST { ";
-    std::cout << ret_string << ", " << ret_number;
+    if(tp == "retexp")
+    {
+      std::cout << ret_string << ", ";
+      ret_exp->Dump();
+    }
     std::cout << " }";
   }
   std::string type(void) const override {
     std::unique_ptr<std::string> rst_ptr(new std::string("StmtAST"));
+    return *rst_ptr;
+  }
+};
+
+class ExpAST : public BaseAST {
+ public:
+  // std::string type;
+  // std::string ret_string;
+  BaseAST* unary_exp;
+  void Dump() const override {
+    std::cout << "ExpAST { ";
+    unary_exp->Dump();
+    std::cout << " }";
+  }
+  std::string type(void) const override {
+    std::unique_ptr<std::string> rst_ptr(new std::string("ExpAST"));
+    return *rst_ptr;
+  }
+};
+
+class UnaryExpAST : public BaseAST {
+ public:
+  std::string tp;
+  BaseAST* primary_exp;
+  BaseAST* unary_op;
+  BaseAST* unary_exp;
+  void Dump() const override {
+    std::cout << "ExpAST { ";
+    if(tp == "primary")
+      primary_exp->Dump();
+    else if(tp == "op+exp")
+    {
+      unary_op->Dump();
+      std::cout << ", ";
+      unary_exp->Dump();
+    }
+    std::cout << " }";
+  }
+  std::string type(void) const override {
+    std::unique_ptr<std::string> rst_ptr(new std::string("UnaryExpAST"));
+    return *rst_ptr;
+  }
+};
+
+class PrimaryExpAST : public BaseAST {
+ public:
+  std::string tp;
+  BaseAST* exp;
+  BaseAST* number;
+  void Dump() const override {
+    std::cout << "PrimaryExpAST { ";
+    if(tp == "exp")
+      exp->Dump();
+    else if(tp == "number")
+      number->Dump();
+    std::cout << " }";
+  }
+  std::string type(void) const override {
+    std::unique_ptr<std::string> rst_ptr(new std::string("PrimaryExpAST"));
+    return *rst_ptr;
+  }
+};
+
+class NumberAST : public BaseAST {
+ public:
+  int num;
+  void Dump() const override {
+    std::cout << "NumberAST { ";
+    std::cout << num;
+    std::cout << " }";
+  }
+  std::string type(void) const override {
+    std::unique_ptr<std::string> rst_ptr(new std::string("NumberAST"));
+    return *rst_ptr;
+  }
+};
+
+class UnaryOpAST : public BaseAST {
+ public:
+  std::string op;
+  void Dump() const override {
+    std::cout << "UnaryOpAST { ";
+    std::cout << op;
+    std::cout << " }";
+  }
+  std::string type(void) const override {
+    std::unique_ptr<std::string> rst_ptr(new std::string("UnaryOpAST"));
     return *rst_ptr;
   }
 };

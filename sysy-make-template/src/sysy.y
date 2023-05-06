@@ -1,7 +1,9 @@
+%error-verbose
 %code requires {
   #include <memory>
   #include <string>
   #include "headers/ast.h"
+  #include "headers/position.h"
 }
 
 %{
@@ -10,217 +12,351 @@
 #include <string>
 #include "headers/ast.h"
 #include "headers/position.h"
-extern pos_t cur_pos;
 BaseAST *root;
+extern pos_t cur_pos;
 using namespace std;
-int yylex(void);
-void yyerror(char *str);
+
+// 声明 lexer 函数和错误处理函数
+int yylex();
+void yyerror(BaseAST* &ast, const char *s);
 %}
 
-
-
-%union {
-  std::string *str_val;
-  int int_val;
-  BaseAST* ast_val;
+%union
+{
+    std::string *str_val;
+    int int_val;
+    BaseAST *ast_val;
 }
 
-// lexer 返回的所有 token 种类的声明
-// 注意 IDENT 和 INT_CONST 会返回 token 的值, 分别对应 str_val 和 int_val
-%token INT BOOL VOID IF ELSE WHILE BREAK MAIN CONTINUE RETURN CONST
-%token <str_val> IDENT
-%token <int_val> INT_CONST
+%parse-param { BaseAST* &ast }
 
-// 非终结符的类型定义, 
-// the type definition here means the type of the value returned 
-// when parsing of this non-terminal is over.
-%type <ast_val> CompUnit Decl ConstDecl BType ConstDef ConstInitVal VarDecl VarDef InitVal
-FuncType FuncFParams FuncFParam Block BlockItem Stmt Exp Cond LVal PrimaryExp UnaryExp UnaryOp 
-FuncRParams MulExp AddExp RelExp EqExp LAndExp LOrExp ConstExp  Constdecl FuncDef
-%type <int_val> Number
+%token _int _void _const
+%token _if _else _while _break _continue _return
+%token _equal _nequal _greater _less _greater_equal _less_equal _logical_and _logical_or
+%token <str_val> _identifier _string
+%token <int_val> _const_val
+%type <ast_val> CompUnit Compunit FuncDef FuncType Block block BlockItem Stmt FuncFParam Decl
+%type <ast_val> Exp UnaryExp PrimaryExp Number UnaryOp
 %start CompUnit
 %%
-    CompUnit: CompUnit Decl {
-        auto ast = reinterpret_cast<CompUnitAST*>($1);
-        ast->decl_list.push_back($2);
-        root = ast;
-        $$ = ast;
-        $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
-    }
-  | CompUnit FuncDef {
-        auto ast = reinterpret_cast<CompUnitAST*>($1);
-        ast->decl_list.push_back($2);
-        root = ast;
-        $$ = ast;
-        $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
-    }
-  | Decl {
-        auto ast = new CompUnitAST();
-        ast->decl_list.push_back($1);
-        root = ast;
-        $$ = ast;
-        $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
-  }
-  | FuncDef{
-        auto ast = new CompUnitAST();
-        ast->decl_list.push_back($1);
-        root = ast;
-        $$ = ast;
-        $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
-  }
-  ;
-
-        Decl: ConstDecl {
-          auto ast = new DeclAST();
-          ast->const_or_var_decl = $1;
-          $$ = ast;
-          $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
-          }
-            | VarDecl{
-          auto ast = new DeclAST();
-          ast->const_or_var_decl = $1;
-          $$ = ast;
-          $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
+    CompUnit: Compunit
+            {
+                auto comp_unit = new CompUnitAST;
+                // this one need to be transmitted to the argument
+                // thus must generate uique_ptr version of pointer.
+                comp_unit->comp_unit = $1;
+                comp_unit->position.line = cur_pos.line; comp_unit->position.column = cur_pos.column;
+                ast = move(comp_unit);
+            }
+    Compunit: /*Compunit Decl
+            {
+                auto ast = reinterpret_cast<CompunitAST*>($1);
+                ast->decl_list.push_back($2);
+                root = ast;
+                $$ = ast;
+                $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
+            }*/
+            | Compunit FuncDef
+            {
+                auto ast = reinterpret_cast<CompunitAST*>($1);
+                ast->decl_list.push_back($2);
+                root = ast;
+                $$ = ast;
+                $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
+            }
+            /*| Decl
+            {
+                auto ast = new CompunitAST();
+                ast->decl_list.push_back($1);
+                root = ast;
+                $$ = ast;
+                $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
+            }*/
+            | FuncDef
+            {
+                auto ast = new CompunitAST();
+                ast->decl_list.push_back($1);
+                root = ast;
+                $$ = ast;
+                $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
             }
             ;
-   ConstDecl: Constdecl ';' {}
+        Decl: ConstDecl
+            {
+                /*auto ast = new DeclAST();
+                ast->const_or_var_decl = $1;
+                $$ = ast;
+                $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;*/
+            }
+            | VarDecl
+            {
+                /*auto ast = new DeclAST();
+                ast->const_or_var_decl = $1;
+                $$ = ast;
+                $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;*/
+            }
             ;
-    Constdecl: CONST BType ConstDef {}
-            | Constdecl ',' ConstDef {}
+   ConstDecl: Constdecl ';'
             ;
-       BType: INT {}
-            | BOOL {}
+    Constdecl: _const BType ConstDef
+            | Constdecl ',' ConstDef
             ;
-    ConstDef: Constdef '=' ConstInitVal  {}
+       BType: _int
             ;
-    Constdef: IDENT  {}
-            | Constdef '[' ConstExp ']' {}
+    ConstDef: Constdef '=' ConstInitVal
             ;
-ConstInitVal: ConstExp {}
-            | '{' '}' {}
-            | '{' Constinitval '}' {}
+    Constdef: _identifier 
+            | Constdef '[' ConstExp ']'
             ;
-Constinitval: ConstInitVal {}
-            | Constinitval ',' ConstInitVal {}
+ConstInitVal: ConstExp
+            | '{' '}'
+            | '{' Constinitval '}'
             ;
-     VarDecl: Vardecl ',' {}
+Constinitval: ConstInitVal
+            | Constinitval ',' ConstInitVal
             ;
-     Vardecl: BType VarDef {}
-            | Vardecl ',' VarDef {}
+     VarDecl: Vardecl ';'
             ;
-      VarDef: Vardef {}
-            | Vardef '=' InitVal {}
+     Vardecl: BType VarDef
+            | Vardecl ',' VarDef
             ;
-      Vardef: IDENT  {}
-            | Vardef '[' Exp ']' {}
+      VarDef: Vardef
+            | Vardef '=' InitVal
             ;
-     InitVal: Exp {}
-            | '{' '}' {}
-            | '{' Initval '}' {}
+      Vardef: _identifier 
+            | Vardef '[' Exp ']'
             ;
-     Initval: InitVal {}
-            | Initval ',' InitVal {}
+     InitVal: Exp
+            | '{' '}'
+            | '{' Initval '}'
+            ;
+     Initval: InitVal
+            | Initval ',' InitVal
             ;   
-     FuncDef: FuncType IDENT '(' ')' Block {}
-            | FuncType IDENT '(' FuncFParams ')' Block {}
+     FuncDef: FuncType _identifier '(' ')' Block
+            {
+                auto ast = new FuncDefAST();
+                ast->func_type = $1;
+                ast->ident = $2;
+                ast->func_fparams = nullptr;
+                ast->block = $5;
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
+            | FuncType _identifier '(' FuncFParams ')' Block
+            {
+                /*auto ast = new FuncDefAST();
+                ast->func_type = $1;
+                ast->ident = $2;
+                ast->func_fparams = $4;
+                ast->block = $6;
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;*/
+            }
             ;
-    FuncType: INT  {}
-    | VOID  {}
-    | BOOL {}
+    FuncType: _int
+            {
+                auto ast = new FuncTypeAST();
+                ast->type_ret = "int";
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
+            | _void
+            {
+                auto ast = new FuncTypeAST();
+                ast->type_ret = "void";
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             ;
- FuncFParams: FuncFParam {}
-            | FuncFParams ',' FuncFParam {}
+ FuncFParams: FuncFParam
+            | FuncFParams ',' FuncFParam
             ;
-  FuncFParam: BType IDENT {}
-            | Funcfparam {}
+  FuncFParam: BType _identifier
+            | Funcfparam
             ;
-  Funcfparam: BType IDENT '[' ']' {}
-            | Funcfparam '[' Exp ']'         {}
+  Funcfparam: BType _identifier '[' ']'
+            | Funcfparam '[' Exp ']'        
             ;
-       Block: '{' block '}' {}
+       Block: '{' block '}'
+            {
+                auto ast = new BlockAST();
+                ast->block = $2;
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             ;
-       block: BlockItem {}
-            | block BlockItem {}
+       block: BlockItem
+            {
+                auto ast = new blockAST();
+                ast->block_item.push_back($1);
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
+            | block BlockItem
+            {
+                auto ast = reinterpret_cast<blockAST*>($1);
+                ast->block_item.push_back($2);
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             ;
-   BlockItem: Decl {}
-            | Stmt {}
+   BlockItem: Decl
+            | Stmt
+            {
+                auto ast = new BlockItemAST();
+                ast->decl_or_stmt = $1;
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             ;
-        Stmt: LVal '=' Exp ';' {}
-            | Exp ';' {}
-            | Block {}
-            | IF '(' Cond ')' Stmt {}
-            | IF '(' Cond ')' Stmt ELSE Stmt {}
-            | WHILE '(' Cond ')' Stmt {}
-            | BREAK ';' {}
-            | CONTINUE ';' {}
-            | RETURN ';' {}
-            | RETURN Exp ';' {}
+        Stmt: LVal '=' Exp ';'
+            | Exp ';'
+            | ';'
+            | Block
+            | _if '(' Cond ')' Stmt
+            | _if '(' Cond ')' Stmt _else Stmt
+            | _while '(' Cond ')' Stmt
+            | _break ';'
+            | _continue ';'
+            | _return ';'
+            /*| _return _const_val ';'
+            {
+                //temporary!!!
+                auto ast = new StmtAST();
+                ast->ret_string = "ret";
+                ast->ret_number = $2;
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }*/
+            | _return Exp ';'
+            {
+                auto ast = new StmtAST();
+                ast->tp = "retexp";
+                ast->ret_string = "ret";
+                ast->ret_exp = $2;
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             ;
-         Exp: AddExp {}
+         Exp: /*AddExp*/
+             UnaryExp
+            {
+                auto ast = new ExpAST();
+                ast->unary_exp = $1;
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             ;
-        Cond: LOrExp {}
+        Cond: LOrExp
             ;
-        LVal: IDENT {}
-            | LVal '[' Exp ']' {}
+        LVal: _identifier
+            | LVal '[' Exp ']'
             ;
-  PrimaryExp: '(' Exp ')' {}
-            | LVal {}
-            | Number {}
+  PrimaryExp: '(' Exp ')'
+            {
+                auto ast = new PrimaryExpAST();
+                ast->tp = "exp";
+                ast->exp = $2;
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
+            | LVal
+            | Number
+            {
+                auto ast = new PrimaryExpAST();
+                ast->tp = "number";
+                ast->number = $1;
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             ;
-      Number: INT_CONST {}
+      Number: _const_val
+            {
+                auto ast = new NumberAST();
+                ast->num = $1;
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             ;
-    UnaryExp: PrimaryExp {}
-            | IDENT '(' ')' {}
-            | IDENT '(' FuncRParams ')' {}
-            | UnaryOp UnaryExp {}
+    UnaryExp: PrimaryExp
+            {
+                auto ast = new UnaryExpAST();
+                ast->tp = "primary";
+                ast->primary_exp = $1;
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
+            | _identifier '(' ')'
+            | _identifier '(' FuncRParams ')'
+            | UnaryOp UnaryExp
+            {
+                auto ast = new UnaryExpAST();
+                ast->tp = "op+exp";
+                ast->unary_op = $1;
+                ast->unary_exp = $2;
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             ;
-     UnaryOp: '+' {}
-            | '-' {}
-            | '!' {}
+     UnaryOp: '+'
+            {
+                auto ast = new UnaryOpAST();
+                ast->op = "+";
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
+            | '-'
+            {
+                auto ast = new UnaryOpAST();
+                ast->op = "-";
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
+            | '!'
+            {
+                auto ast = new UnaryOpAST();
+                ast->op = "!";
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             ;
- FuncRParams: Exp {}
-            | FuncRParams ',' Exp {}
+ FuncRParams: Exp
+            | FuncRParams ',' Exp
             ;
-      MulExp: UnaryExp {}
-            | MulExp '*' UnaryExp {}
-            | MulExp '/' UnaryExp {}
-            | MulExp '%' UnaryExp {}
+      MulExp: UnaryExp
+            | MulExp '*' UnaryExp
+            | MulExp '/' UnaryExp
+            | MulExp '%' UnaryExp
             ;
-      AddExp: MulExp {}
-            | AddExp '+' MulExp {}
-            | AddExp '-' MulExp {}
+      AddExp: MulExp
+            | AddExp '+' MulExp
+            | AddExp '-' MulExp
             ;
-      RelExp: AddExp {}
-            | RelExp '<' AddExp {}
-            | RelExp '>' AddExp {}
-            | RelExp '<''=' AddExp {}
-            | RelExp '>''=' AddExp {}
+      RelExp: AddExp
+            | RelExp _less AddExp
+            | RelExp _greater AddExp
+            | RelExp _less_equal AddExp
+            | RelExp _greater_equal AddExp
             ;
-       EqExp: RelExp {}
-            | EqExp '=' RelExp {}
-            | EqExp '!' '=' RelExp {}
+       EqExp: RelExp
+            | EqExp _equal RelExp
+            | EqExp _nequal RelExp
             ;
-     LAndExp: EqExp {}
-            | LAndExp '&' '&' EqExp {}
+     LAndExp: EqExp
+            | LAndExp _logical_and EqExp
             ;
-      LOrExp: LAndExp {}
-            | LOrExp '|' '|' LAndExp {}
+      LOrExp: LAndExp
+            | LOrExp _logical_or LAndExp
             ;
-    ConstExp: AddExp {}
+    ConstExp: AddExp
             ;
       
     
 
 %%
-void yyerror(char *str){
-    fprintf(stderr,"error:%s\n",str);
-}
-
-int yywrap(){
-    return 1;
-}
-int main()
-{
-    
-    yyparse();
+// 定义错误处理函数, 其中第二个参数是错误信息
+// parser 如果发生错误 (例如输入的程序出现了语法错误), 就会调用这个函数
+void yyerror(BaseAST* &ast, const char *s) {
+  cerr << "error: " << s << endl;
 }

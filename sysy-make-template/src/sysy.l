@@ -4,20 +4,15 @@
 %option yylineno
 
 %{
-
+#include "SysY.tab.hpp"
 #include <cstdlib>
 #include <string>
-
-// 因为 Flex 会用到 Bison 中关于 token 的定义
-// 所以需要 include Bison 生成的头文件
-#include "sysy.tab.hpp"
 #include "headers/position.h"
 
 pos_t cur_pos;
 int col_record = 1;
 
 using namespace std;
-
 %}
 
 /* 空白符和注释 */
@@ -41,24 +36,38 @@ Hexadecimal   0[xX][0-9a-fA-F]+
 {LineComment}   { /* 忽略, 不做任何操作 */ }
 {BlockComment}  { /* discard. */ }
 
-"int"           { cur_pos.line = yylineno; cur_pos.column = col_record; return INT; col_record += 3; }
-"bool"          {cur_pos.line = yylineno; cur_pos.column = col_record;col_record += 4; return INT; }
-"void"          {cur_pos.line = yylineno; cur_pos.column = col_record;col_record += 4; return VOID; }
-"if"          {cur_pos.line = yylineno; cur_pos.column = col_record;col_record += 2; return IF; }
-"else"          {cur_pos.line = yylineno; cur_pos.column = col_record;col_record += 4; return ELSE; } 
-"while"          {cur_pos.line = yylineno; cur_pos.column = col_record;col_record += 5; return WHILE; }
-"break"          {cur_pos.line = yylineno; cur_pos.column = col_record;col_record += 5; return BREAK; }
-"continue"          {cur_pos.line = yylineno; cur_pos.column = col_record;col_record += 7; return CONTINUE; }
-"main"          {cur_pos.line = yylineno; cur_pos.column = col_record;col_record += 4; return MAIN;  }
-"return"        { cur_pos.line = yylineno; cur_pos.column = col_record;col_record += 6;return RETURN;  }
-"const"        { cur_pos.line = yylineno; cur_pos.column = col_record; col_record += 5; return CONST; }
+"int"           {cur_pos.line = yylineno; cur_pos.column = col_record; return _int; col_record += 3;}
+"void"          {cur_pos.line = yylineno; cur_pos.column = col_record; return _void; col_record += 4;}
+"const"         {cur_pos.line = yylineno; cur_pos.column = col_record; return _const; col_record += 5;}
+"if"            {cur_pos.line = yylineno; cur_pos.column = col_record; return _if; col_record += 2;}
+"else"          {cur_pos.line = yylineno; cur_pos.column = col_record; return _else; col_record += 4;}
+"while"         {cur_pos.line = yylineno; cur_pos.column = col_record; return _while; col_record += 5;}
+"break"         {cur_pos.line = yylineno; cur_pos.column = col_record; return _break; col_record += 5;}
+"continue"      {cur_pos.line = yylineno; cur_pos.column = col_record; return _continue; col_record += 8;}
+"return"        {cur_pos.line = yylineno; cur_pos.column = col_record; return _return; col_record += 6;}
 
-{Identifier}    { yylval.str_val = new string(yytext); cur_pos.line = yylineno; cur_pos.column = yylineno - yyleng + 1; return IDENT; col_record += yyleng; }
+{Identifier}    { yylval.str_val = new string(yytext); cur_pos.line = yylineno; cur_pos.column = yylineno - yyleng + 1; return _identifier; col_record += yyleng; }
 
-{Decimal}       { yylval.int_val = strtol(yytext, nullptr, 0); cur_pos.line = yylineno; cur_pos.column = yylineno - yyleng + 1; return INT_CONST; col_record += yyleng; }
-{Octal}         { yylval.int_val = strtol(yytext, nullptr, 0); cur_pos.line = yylineno; cur_pos.column = yylineno - yyleng + 1; return INT_CONST; col_record += yyleng; }
-{Hexadecimal}   { yylval.int_val = strtol(yytext, nullptr, 0); cur_pos.line = yylineno; cur_pos.column = yylineno - yyleng + 1; return INT_CONST; col_record += yyleng; }
+{Decimal}       { yylval.int_val = strtol(yytext, nullptr, 0); cur_pos.line = yylineno; cur_pos.column = yylineno - yyleng + 1; return _const_val; col_record += yyleng; }
+{Octal}         { yylval.int_val = strtol(yytext, nullptr, 0); cur_pos.line = yylineno; cur_pos.column = yylineno - yyleng + 1; return _const_val; col_record += yyleng; }
+{Hexadecimal}   { yylval.int_val = strtol(yytext, nullptr, 0); cur_pos.line = yylineno; cur_pos.column = yylineno - yyleng + 1; return _const_val; col_record += yyleng; }
 
-.               { return yytext[0]; col_record ++; } // here we use yytext[0] to discard the '\0' at the tail of the c string.
+">"             {cur_pos.line = yylineno; cur_pos.column = col_record; return _greater; col_record += 1;}
+"<"             {cur_pos.line = yylineno; cur_pos.column = col_record; return _less; col_record += 1;}
+">="            {cur_pos.line = yylineno; cur_pos.column = col_record; return _greater_equal; col_record += 2;}
+"<="            {cur_pos.line = yylineno; cur_pos.column = col_record; return _less_equal; col_record += 2;}
+"=="            {cur_pos.line = yylineno; cur_pos.column = col_record; return _equal; col_record += 2;}
+"!="            {cur_pos.line = yylineno; cur_pos.column = col_record; return _nequal; col_record += 2;}
+
+"&&"            {cur_pos.line = yylineno; cur_pos.column = col_record; return _logical_and; col_record += 2;}
+"||"            {cur_pos.line = yylineno; cur_pos.column = col_record; return _logical_or; col_record += 2;}
+
+
+\"[\s\S]*\"     { yylval.str_val = new string(yytext); cur_pos.line = yylineno; cur_pos.column = yylineno - yyleng + 1; return _string; col_record += yyleng; }
+
+.               { return yytext[0]; col_record ++; }
+
+
 
 %%
+
