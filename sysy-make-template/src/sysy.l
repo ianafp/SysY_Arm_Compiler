@@ -4,7 +4,7 @@
 %option yylineno
 
 %{
-#include "SysY.tab.hpp"
+#include "sysy.tab.hpp"
 #include <cstdlib>
 #include <string>
 #include "headers/position.h"
