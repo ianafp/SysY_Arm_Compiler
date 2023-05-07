@@ -36,7 +36,7 @@ void yyerror(BaseAST* &ast, const char *s);
 %token <str_val> _identifier _string
 %token <int_val> _const_val
 %type <ast_val> CompUnit Compunit FuncDef FuncType Block block BlockItem Stmt FuncFParam Decl
-%type <ast_val> Exp UnaryExp PrimaryExp Number UnaryOp
+%type <ast_val> Exp UnaryExp PrimaryExp Number UnaryOp AddExp MulExp
 %start CompUnit
 %%
     CompUnit: Compunit
@@ -239,14 +239,13 @@ Constinitval: ConstInitVal
                 $$ = ast;
             }
             ;
-         Exp: /*AddExp*/
-             UnaryExp
+         Exp: AddExp
             {
                 auto ast = new ExpAST();
-                ast->unary_exp = $1;
+                ast->add_exp = $1;
                 ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
                 $$ = ast;
-            }
+            }           
             ;
         Cond: LOrExp
             ;
@@ -325,13 +324,60 @@ Constinitval: ConstInitVal
             | FuncRParams ',' Exp
             ;
       MulExp: UnaryExp
+            {
+                auto ast = new MulExpAST();
+                ast->unary_exp.push_back($1);
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             | MulExp '*' UnaryExp
+            {
+                auto ast = reinterpret_cast<MulExpAST*>($1);
+                ast->unary_exp.push_back($3);
+                ast->op.push_back("*");
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             | MulExp '/' UnaryExp
+            {
+                auto ast = reinterpret_cast<MulExpAST*>($1);
+                ast->unary_exp.push_back($3);
+                ast->op.push_back("/");
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             | MulExp '%' UnaryExp
+            {
+                auto ast = reinterpret_cast<MulExpAST*>($1);
+                ast->unary_exp.push_back($3);
+                ast->op.push_back("%");
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             ;
       AddExp: MulExp
+            {
+                auto ast = new AddExpAST();
+                ast->mul_exp.push_back($1);
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             | AddExp '+' MulExp
+            {
+                auto ast = reinterpret_cast<AddExpAST*>($1);
+                ast->mul_exp.push_back($3);
+                ast->op.push_back("+");
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             | AddExp '-' MulExp
+            {
+                auto ast = reinterpret_cast<AddExpAST*>($1);
+                ast->mul_exp.push_back($3);
+                ast->op.push_back("-");
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             ;
       RelExp: AddExp
             | RelExp _less AddExp

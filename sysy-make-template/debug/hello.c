@@ -7,5 +7,5 @@
 
 int main() {
   // test line comment
-  return 3;
+  return 3+3-1*2;
 }

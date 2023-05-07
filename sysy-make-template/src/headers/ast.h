@@ -5,6 +5,7 @@
 #include <memory>
 #include <string>
 #include <list>
+#include <vector>
 
 #include "position.h"
 /*
@@ -201,14 +202,66 @@ class ExpAST : public BaseAST {
  public:
   // std::string type;
   // std::string ret_string;
-  BaseAST* unary_exp;
+  BaseAST* add_exp;
   void Dump() const override {
     std::cout << "ExpAST { ";
-    unary_exp->Dump();
+    add_exp->Dump();
     std::cout << " }";
   }
   std::string type(void) const override {
     std::unique_ptr<std::string> rst_ptr(new std::string("ExpAST"));
+    return *rst_ptr;
+  }
+};
+
+class AddExpAST : public BaseAST {
+ public:
+  //for instance: exp1 + exp2 - exp3
+  std::vector<BaseAST*> mul_exp;
+  //mul_exp: exp1 exp2 exp3
+  std::vector<std::string> op;
+  //op: + -
+  void Dump() const override {
+    std::cout << "AddExpAST { ";
+    for(int i = 0; i < mul_exp.size(); i++)
+    {
+      if(i != 0)
+      {
+        std::cout << " " << op[i-1] << " ";
+      }
+      mul_exp[i]->Dump();
+    }
+    
+    std::cout << " }";
+  }
+  std::string type(void) const override {
+    std::unique_ptr<std::string> rst_ptr(new std::string("AddExpAST"));
+    return *rst_ptr;
+  }
+};
+
+class MulExpAST : public BaseAST {
+ public:
+  //for instance: exp1 + exp2 - exp3
+  std::vector<BaseAST*> unary_exp;
+  //mul_exp: exp1 exp2 exp3
+  std::vector<std::string> op;
+  //op: + -
+  void Dump() const override {
+    std::cout << "MulExpAST { ";
+    for(int i = 0; i < unary_exp.size(); i++)
+    {
+      if(i != 0)
+      {
+        std::cout << " " << op[i-1] << " ";
+      }
+      unary_exp[i]->Dump();
+    }
+    
+    std::cout << " }";
+  }
+  std::string type(void) const override {
+    std::unique_ptr<std::string> rst_ptr(new std::string("MulExpAST"));
     return *rst_ptr;
   }
 };
@@ -220,7 +273,7 @@ class UnaryExpAST : public BaseAST {
   BaseAST* unary_op;
   BaseAST* unary_exp;
   void Dump() const override {
-    std::cout << "ExpAST { ";
+    std::cout << "UnaryExpAST { ";
     if(tp == "primary")
       primary_exp->Dump();
     else if(tp == "op+exp")
