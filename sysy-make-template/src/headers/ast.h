@@ -32,9 +32,9 @@ class CompUnitAST : public BaseAST {
   BaseAST* comp_unit;
   void Dump() const override {
     
-    std::cout << "CompUnitAST { ";
+    std::cout << "CompUnitAST { \n\t";
     comp_unit->Dump();
-    std::cout << " }";
+    std::cout << "\n\t }";
   }
   std::string type(void) const override {
     std::unique_ptr<std::string> rst_ptr(new std::string("CompUnitAST"));

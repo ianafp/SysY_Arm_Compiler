@@ -26,6 +26,55 @@ class Program {
   void exp_dealer(std::string* rst_ptr, ExpAST* exp)
   {
     //scan all of the exp
+    int temp_cnt = 0;
+    if(exp->add_exp != nullptr)
+    {
+      AddExpAST* add_exp = dynamic_cast<AddExpAST*>(exp->add_exp);
+      for(int i = 0; i < add_exp->mul_exp.size(); i++)
+      {
+        MulExpAST* mul_exp = dynamic_cast<MulExpAST*>(add_exp->mul_exp[i]);
+        for(int j = 0; j < mul_exp->unary_exp.size(); j++)
+        {
+          *rst_ptr += "%" + to_string(temp_cnt+1) + " = ";
+          if(j < mul_exp->op.size())
+          {
+            if(mul_exp->op[j] == "!")
+            {
+              *rst_ptr += "eq ";
+            }
+            else if(mul_exp->op[j] == "-")
+            {
+              *rst_ptr += "sub ";
+            }
+          }
+          UnaryExpAST* unary_exp = dynamic_cast<UnaryExpAST*>(mul_exp->unary_exp[j]);
+          if(unary_exp->tp == "primary")
+          {
+            if(unary_exp->primary_exp != nullptr)
+            {
+              PrimaryExpAST* primary_exp = dynamic_cast<PrimaryExpAST*>(unary_exp->primary_exp);
+              if(primary_exp->tp == "number")
+              {
+                
+              }
+              else if(primary_exp->tp == "exp")
+              {
+                if(primary_exp->exp != nullptr)
+                {
+                  if(mul_exp->op[j] == "!")
+                    *rst_ptr += "%" + to_string(temp_cnt) + ", 0\n";
+                  else if(mul_exp->op[j] == "-")
+                    *rst_ptr += "0, %" + to_string(temp_cnt) + "\n";
+                  exp_dealer(rst_ptr, dynamic_cast<ExpAST*>(primary_exp->exp));
+                }
+                  
+              }
+            }
+          }
+        }
+        
+      }
+    }
   }
 
   void block_dealer(std::string* rst_ptr, BlockItemAST* block_item)
