@@ -36,7 +36,7 @@ void yyerror(BaseAST* &ast, const char *s);
 %token <str_val> _identifier _string
 %token <int_val> _const_val
 %type <ast_val> CompUnit Compunit FuncDef FuncType Block block BlockItem Stmt FuncFParam Decl
-%type <ast_val> Exp UnaryExp PrimaryExp Number UnaryOp AddExp MulExp
+%type <ast_val> Exp UnaryExp PrimaryExp Number UnaryOp AddExp MulExp RelExp EqExp LAndExp LOrExp
 %start CompUnit
 %%
     CompUnit: Compunit
@@ -239,10 +239,10 @@ Constinitval: ConstInitVal
                 $$ = ast;
             }
             ;
-         Exp: AddExp
+         Exp: LOrExp
             {
                 auto ast = new ExpAST();
-                ast->add_exp = $1;
+                ast->lor_exp = $1;
                 ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
                 $$ = ast;
             }           
@@ -380,20 +380,100 @@ Constinitval: ConstInitVal
             }
             ;
       RelExp: AddExp
+            {
+                auto ast = new RelExpAST();
+                ast->add_exp.push_back($1);
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             | RelExp _less AddExp
+            {
+                auto ast = reinterpret_cast<RelExpAST*>($1);
+                ast->add_exp.push_back($3);
+                ast->op.push_back("<");
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             | RelExp _greater AddExp
+            {
+                auto ast = reinterpret_cast<RelExpAST*>($1);
+                ast->add_exp.push_back($3);
+                ast->op.push_back(">");
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             | RelExp _less_equal AddExp
+            {
+                auto ast = reinterpret_cast<RelExpAST*>($1);
+                ast->add_exp.push_back($3);
+                ast->op.push_back("<=");
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             | RelExp _greater_equal AddExp
+            {
+                auto ast = reinterpret_cast<RelExpAST*>($1);
+                ast->add_exp.push_back($3);
+                ast->op.push_back(">=");
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             ;
        EqExp: RelExp
+            {
+                auto ast = new EqExpAST();
+                ast->rel_exp.push_back($1);
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             | EqExp _equal RelExp
+            {
+                auto ast = reinterpret_cast<EqExpAST*>($1);
+                ast->rel_exp.push_back($3);
+                ast->op.push_back("==");
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             | EqExp _nequal RelExp
+            {
+                auto ast = reinterpret_cast<EqExpAST*>($1);
+                ast->rel_exp.push_back($3);
+                ast->op.push_back("!=");
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             ;
      LAndExp: EqExp
+            {
+                auto ast = new LAndExpAST();
+                ast->eq_exp.push_back($1);
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             | LAndExp _logical_and EqExp
+            {
+                auto ast = reinterpret_cast<LAndExpAST*>($1);
+                ast->eq_exp.push_back($3);
+                ast->op.push_back("&&");
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             ;
       LOrExp: LAndExp
+            {
+                auto ast = new LOrExpAST();
+                ast->land_exp.push_back($1);
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             | LOrExp _logical_or LAndExp
+            {
+                auto ast = reinterpret_cast<LOrExpAST*>($1);
+                ast->land_exp.push_back($3);
+                ast->op.push_back("||");
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             ;
     ConstExp: AddExp
             ;

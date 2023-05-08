@@ -202,10 +202,10 @@ class ExpAST : public BaseAST {
  public:
   // std::string type;
   // std::string ret_string;
-  BaseAST* add_exp;
+  BaseAST* lor_exp;
   void Dump() const override {
     std::cout << "ExpAST { ";
-    add_exp->Dump();
+    lor_exp->Dump();
     std::cout << " }";
   }
   std::string type(void) const override {
@@ -214,6 +214,97 @@ class ExpAST : public BaseAST {
   }
 };
 
+class LOrExpAST : public BaseAST {
+ public:
+  std::vector<BaseAST*> land_exp;
+  std::vector<std::string> op;
+  void Dump() const override {
+    std::cout << "LOrExpAST { ";
+    for(int i = 0; i < land_exp.size(); i++)
+    {
+      if(i != 0)
+      {
+        std::cout << " " << op[i-1] << " ";
+      }
+      land_exp[i]->Dump();
+    }
+    
+    std::cout << " }";
+  }
+  std::string type(void) const override {
+    std::unique_ptr<std::string> rst_ptr(new std::string("LOrExpAST"));
+    return *rst_ptr;
+  }
+};
+
+class LAndExpAST : public BaseAST {
+ public:
+  std::vector<BaseAST*> eq_exp;
+  std::vector<std::string> op;
+  void Dump() const override {
+    std::cout << "LAndExpAST { ";
+    for(int i = 0; i < eq_exp.size(); i++)
+    {
+      if(i != 0)
+      {
+        std::cout << " " << op[i-1] << " ";
+      }
+      eq_exp[i]->Dump();
+    }
+    
+    std::cout << " }";
+  }
+  std::string type(void) const override {
+    std::unique_ptr<std::string> rst_ptr(new std::string("LAndExpAST"));
+    return *rst_ptr;
+  }
+};
+
+class EqExpAST : public BaseAST {
+ public:
+  std::vector<BaseAST*> rel_exp;
+  std::vector<std::string> op;
+  void Dump() const override {
+    std::cout << "EqExpAST { ";
+    for(int i = 0; i < rel_exp.size(); i++)
+    {
+      if(i != 0)
+      {
+        std::cout << " " << op[i-1] << " ";
+      }
+      rel_exp[i]->Dump();
+    }
+    
+    std::cout << " }";
+  }
+  std::string type(void) const override {
+    std::unique_ptr<std::string> rst_ptr(new std::string("EqExpAST"));
+    return *rst_ptr;
+  }
+};
+
+class RelExpAST : public BaseAST {
+ public:
+  std::vector<BaseAST*> add_exp;
+  std::vector<std::string> op;
+  void Dump() const override {
+    std::cout << "RelExpAST { ";
+    for(int i = 0; i < add_exp.size(); i++)
+    {
+      if(i != 0)
+      {
+        std::cout << " " << op[i-1] << " ";
+      }
+      add_exp[i]->Dump();
+    }
+    
+    std::cout << " }";
+  }
+  std::string type(void) const override {
+    std::unique_ptr<std::string> rst_ptr(new std::string("RelExpAST"));
+    return *rst_ptr;
+  }
+};
 class AddExpAST : public BaseAST {
  public:
   //for instance: exp1 + exp2 - exp3

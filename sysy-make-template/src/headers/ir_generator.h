@@ -25,32 +25,122 @@ class Program {
   // here we can only parse one function, so the function list is not implemented as well.
  public:
   int temp_cnt = 0;
+  std::string logic_exp_dealer(std::string* rst_ptr, BaseAST* exp)
+  {
+    std::string return_str1("");
+    std::string return_str2("");
+    
+    if(exp->type() == "LOrExpAST")
+    {
+      LOrExpAST* lor_exp = dynamic_cast<LOrExpAST*>(exp);
+      if(lor_exp->land_exp.size() == 0)
+      {
+        return "";
+      }
+      return_str1 = logic_exp_dealer(rst_ptr, lor_exp->land_exp[0]);
+      for(int i=0; i<lor_exp->op.size(); i++)
+      {
+        assert(i+1 < lor_exp->land_exp.size());
+        return_str2 = logic_exp_dealer(rst_ptr, lor_exp->land_exp[i+1]);
+        assert(lor_exp->op[i] == "||");
+        *rst_ptr += "%" + std::to_string(temp_cnt) + " = or " + return_str1 + ", " + return_str2 + "\n  ";
+        return_str1 = "%" + std::to_string(temp_cnt++);
+      }
+    }
+    else if(exp->type() == "LAndExpAST")
+    {
+      LAndExpAST* land_exp = dynamic_cast<LAndExpAST*>(exp);
+      if(land_exp->eq_exp.size() == 0)
+      {
+        return "";
+      }
+      return_str1 = logic_exp_dealer(rst_ptr, land_exp->eq_exp[0]);
+      for(int i=0; i<land_exp->op.size(); i++)
+      {
+        assert(i+1 < land_exp->eq_exp.size());
+        return_str2 =logic_exp_dealer(rst_ptr, land_exp->eq_exp[i+1]);
+        assert(land_exp->op[i] == "&&");
+        *rst_ptr += "%" + std::to_string(temp_cnt) + " = and " + return_str1 + ", " + return_str2 + "\n  ";
+        // else if(mul_exp->op[i] == "/")
+        //   *rst_ptr += "%" + std::to_string(temp_cnt) + " = div " + return_str1 + ", " + return_str2 + "\n  ";
+        // else if(mul_exp->op[i] == "%")
+        //   *rst_ptr += "%" + std::to_string(temp_cnt) + " = mod " + return_str1 + ", " + return_str2 + "\n  ";
+        return_str1 = "%" + std::to_string(temp_cnt++);
+      }
+    }
+    else if(exp->type() == "EqExpAST")
+    {
+      EqExpAST* eq_exp = dynamic_cast<EqExpAST*>(exp);
+      if(eq_exp->rel_exp.size() == 0)
+      {
+        return "";
+      }
+      return_str1 = logic_exp_dealer(rst_ptr, eq_exp->rel_exp[0]);
+      for(int i=0; i<eq_exp->op.size(); i++)
+      {
+        assert(i+1 < eq_exp->rel_exp.size());
+        return_str2 =logic_exp_dealer(rst_ptr, eq_exp->rel_exp[i+1]);
+        if(eq_exp->op[i] == "==")
+          *rst_ptr += "%" + std::to_string(temp_cnt) + " = eq " + return_str1 + ", " + return_str2 + "\n  ";
+        else if(eq_exp->op[i] == "!=")
+          *rst_ptr += "%" + std::to_string(temp_cnt) + " = ne " + return_str1 + ", " + return_str2 + "\n  ";
+        // else if(mul_exp->op[i] == "%")
+        //   *rst_ptr += "%" + std::to_string(temp_cnt) + " = mod " + return_str1 + ", " + return_str2 + "\n  ";
+        return_str1 = "%" + std::to_string(temp_cnt++);
+      }
+    }
+    else if(exp->type() == "RelExpAST")
+    {
+      RelExpAST* rel_exp = dynamic_cast<RelExpAST*>(exp);
+      if(rel_exp->add_exp.size() == 0)
+      {
+        return "";
+      }
+      return_str1 = add_exp_dealer(rst_ptr, rel_exp->add_exp[0]);
+      for(int i=0; i<rel_exp->op.size(); i++)
+      {
+        assert(i+1 < rel_exp->add_exp.size());
+        return_str2 =add_exp_dealer(rst_ptr, rel_exp->add_exp[i+1]);
+        if(rel_exp->op[i] == "<")
+          *rst_ptr += "%" + std::to_string(temp_cnt) + " = lt " + return_str1 + ", " + return_str2 + "\n  ";
+        else if(rel_exp->op[i] == ">")
+          *rst_ptr += "%" + std::to_string(temp_cnt) + " = gt " + return_str1 + ", " + return_str2 + "\n  ";
+        else if(rel_exp->op[i] == "<=")
+          *rst_ptr += "%" + std::to_string(temp_cnt) + " = le " + return_str1 + ", " + return_str2 + "\n  ";
+        else if(rel_exp->op[i] == ">=")
+          *rst_ptr += "%" + std::to_string(temp_cnt) + " = ge " + return_str1 + ", " + return_str2 + "\n  ";
+        return_str1 = "%" + std::to_string(temp_cnt++);
+      }
+    }
+    return return_str1;
+  }
+
   std::string add_exp_dealer(std::string* rst_ptr, BaseAST* exp)
   {
     std::string return_str1("");
     std::string return_str2("");
-    if(exp->type() == "ExpAST")
+    if(exp->type() == "AddExpAST")
     {
-      ExpAST* exp_available = dynamic_cast<ExpAST*>(exp);
-      if(exp_available->add_exp != nullptr)
+      // ExpAST* exp_available = dynamic_cast<ExpAST*>(exp);
+      // if(exp_available->add_exp != nullptr)
+      // {
+      AddExpAST* add_exp = dynamic_cast<AddExpAST*>(exp);
+      if(add_exp->mul_exp.size() == 0)
       {
-        AddExpAST* add_exp = dynamic_cast<AddExpAST*>(exp_available->add_exp);
-        if(add_exp->mul_exp.size() == 0)
-        {
-          return "";
-        }
-        return_str1 = add_exp_dealer(rst_ptr, add_exp->mul_exp[0]);
-        for(int i=0; i<add_exp->op.size(); i++)
-        {
-          assert(i+1 < add_exp->mul_exp.size());
-          return_str2 = add_exp_dealer(rst_ptr, add_exp->mul_exp[i+1]);
-          if(add_exp->op[i] == "+")
-            *rst_ptr += "%" + std::to_string(temp_cnt) + " = add " + return_str1 + ", " + return_str2 + "\n  ";
-          else if(add_exp->op[i] == "-")
-            *rst_ptr += "%" + std::to_string(temp_cnt) + " = sub " + return_str1 + ", " + return_str2 + "\n  ";
-          return_str1 = "%" + std::to_string(temp_cnt++);
-        }
+        return "";
       }
+      return_str1 = add_exp_dealer(rst_ptr, add_exp->mul_exp[0]);
+      for(int i=0; i<add_exp->op.size(); i++)
+      {
+        assert(i+1 < add_exp->mul_exp.size());
+        return_str2 = add_exp_dealer(rst_ptr, add_exp->mul_exp[i+1]);
+        if(add_exp->op[i] == "+")
+          *rst_ptr += "%" + std::to_string(temp_cnt) + " = add " + return_str1 + ", " + return_str2 + "\n  ";
+        else if(add_exp->op[i] == "-")
+          *rst_ptr += "%" + std::to_string(temp_cnt) + " = sub " + return_str1 + ", " + return_str2 + "\n  ";
+        return_str1 = "%" + std::to_string(temp_cnt++);
+      }
+      // }
     }
     else if(exp->type() == "MulExpAST")
     {
@@ -115,7 +205,8 @@ class Program {
           if(primary_exp->exp != nullptr)
           {
             ExpAST* exp = dynamic_cast<ExpAST*>(primary_exp->exp);
-            return_num = add_exp_dealer(rst_ptr, exp);
+            if(exp->lor_exp != nullptr)
+              return_num = logic_exp_dealer(rst_ptr, exp->lor_exp);
             return return_num;
           }
           
@@ -152,8 +243,8 @@ class Program {
     {
       StmtAST *stmt_available = dynamic_cast<StmtAST*>(block_item->decl_or_stmt);
       //Deal with Stmt
-      if (stmt_available != nullptr) {
-        ret_number = add_exp_dealer(rst_ptr, stmt_available->ret_exp);
+      if (stmt_available != nullptr && stmt_available->ret_exp != nullptr) {
+        ret_number = logic_exp_dealer(rst_ptr, dynamic_cast<ExpAST*>(stmt_available->ret_exp)->lor_exp);
         ret_string += stmt_available->ret_string;
       }
       *rst_ptr += "" + ret_string + " " + ret_number + "\n";
