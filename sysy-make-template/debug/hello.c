@@ -7,5 +7,5 @@
 
 int main() {
   // test line comment
-  return 3+3-1*2;
+  return 3+3-(-1*2+3/!5-10%3);
 }

@@ -15,6 +15,7 @@
 #include <string>
 #include <memory>
 #include <iostream>
+#include <assert.h>
 
 #include "ast.h"
 
@@ -23,74 +24,139 @@ class Program {
   // the global variable hasn't been implemented.
   // here we can only parse one function, so the function list is not implemented as well.
  public:
-  void exp_dealer(std::string* rst_ptr, ExpAST* exp)
+  int temp_cnt = 0;
+  std::string add_exp_dealer(std::string* rst_ptr, BaseAST* exp)
   {
-    //scan all of the exp
-    int temp_cnt = 0;
-    if(exp->add_exp != nullptr)
+    std::string return_str1("");
+    std::string return_str2("");
+    if(exp->type() == "ExpAST")
     {
-      AddExpAST* add_exp = dynamic_cast<AddExpAST*>(exp->add_exp);
-      for(int i = 0; i < add_exp->mul_exp.size(); i++)
+      ExpAST* exp_available = dynamic_cast<ExpAST*>(exp);
+      if(exp_available->add_exp != nullptr)
       {
-        MulExpAST* mul_exp = dynamic_cast<MulExpAST*>(add_exp->mul_exp[i]);
-        for(int j = 0; j < mul_exp->unary_exp.size(); j++)
+        AddExpAST* add_exp = dynamic_cast<AddExpAST*>(exp_available->add_exp);
+        if(add_exp->mul_exp.size() == 0)
         {
-          *rst_ptr += "%" + to_string(temp_cnt+1) + " = ";
-          if(j < mul_exp->op.size())
-          {
-            if(mul_exp->op[j] == "!")
-            {
-              *rst_ptr += "eq ";
-            }
-            else if(mul_exp->op[j] == "-")
-            {
-              *rst_ptr += "sub ";
-            }
-          }
-          UnaryExpAST* unary_exp = dynamic_cast<UnaryExpAST*>(mul_exp->unary_exp[j]);
-          if(unary_exp->tp == "primary")
-          {
-            if(unary_exp->primary_exp != nullptr)
-            {
-              PrimaryExpAST* primary_exp = dynamic_cast<PrimaryExpAST*>(unary_exp->primary_exp);
-              if(primary_exp->tp == "number")
-              {
-                
-              }
-              else if(primary_exp->tp == "exp")
-              {
-                if(primary_exp->exp != nullptr)
-                {
-                  if(mul_exp->op[j] == "!")
-                    *rst_ptr += "%" + to_string(temp_cnt) + ", 0\n";
-                  else if(mul_exp->op[j] == "-")
-                    *rst_ptr += "0, %" + to_string(temp_cnt) + "\n";
-                  exp_dealer(rst_ptr, dynamic_cast<ExpAST*>(primary_exp->exp));
-                }
-                  
-              }
-            }
-          }
+          return "";
         }
-        
+        return_str1 = add_exp_dealer(rst_ptr, add_exp->mul_exp[0]);
+        for(int i=0; i<add_exp->op.size(); i++)
+        {
+          assert(i+1 < add_exp->mul_exp.size());
+          return_str2 = add_exp_dealer(rst_ptr, add_exp->mul_exp[i+1]);
+          if(add_exp->op[i] == "+")
+            *rst_ptr += "%" + std::to_string(temp_cnt) + " = add " + return_str1 + ", " + return_str2 + "\n  ";
+          else if(add_exp->op[i] == "-")
+            *rst_ptr += "%" + std::to_string(temp_cnt) + " = sub " + return_str1 + ", " + return_str2 + "\n  ";
+          return_str1 = "%" + std::to_string(temp_cnt++);
+        }
       }
     }
+    else if(exp->type() == "MulExpAST")
+    {
+      MulExpAST* mul_exp = dynamic_cast<MulExpAST*>(exp);
+      if(mul_exp->unary_exp.size() == 0)
+      {
+        return "";
+      }
+      return_str1 = unary_exp_dealer(rst_ptr, mul_exp->unary_exp[0]);
+      for(int i=0; i<mul_exp->op.size(); i++)
+      {
+        assert(i+1 < mul_exp->unary_exp.size());
+        return_str2 =unary_exp_dealer(rst_ptr, mul_exp->unary_exp[i+1]);
+        if(mul_exp->op[i] == "*")
+          *rst_ptr += "%" + std::to_string(temp_cnt) + " = mul " + return_str1 + ", " + return_str2 + "\n  ";
+        else if(mul_exp->op[i] == "/")
+          *rst_ptr += "%" + std::to_string(temp_cnt) + " = div " + return_str1 + ", " + return_str2 + "\n  ";
+        else if(mul_exp->op[i] == "%")
+          *rst_ptr += "%" + std::to_string(temp_cnt) + " = mod " + return_str1 + ", " + return_str2 + "\n  ";
+        return_str1 = "%" + std::to_string(temp_cnt++);
+      }
+    }
+    return return_str1;
+  }
+
+  std::string unary_exp_dealer(std::string* rst_ptr, BaseAST* exp)
+  {
+    //scan all of the exp
+    std::string return_num("");
+    UnaryExpAST* unary_exp = nullptr;
+    //identify the type
+    // if(exp->type() == "MulExpAST")
+    // {
+    //   MulExpAST* exp_available = dynamic_cast<MulExpAST*>(exp);
+    //   if(exp_available->unary_exp != nullptr)
+    //   {
+    //     unary_exp = dynamic_cast<UnaryExpAST*>(exp_available->unary_exp);
+    //   }
+    // }
+    if(exp->type() == "UnaryExpAST")
+    {
+      unary_exp = dynamic_cast<UnaryExpAST*>(exp);
+    }
+    //deal with the ast
+    if(unary_exp->tp == "primary")
+    {
+      if(unary_exp->primary_exp != nullptr)
+      {
+        PrimaryExpAST* primary_exp = dynamic_cast<PrimaryExpAST*>(unary_exp->primary_exp);
+        if(primary_exp->tp == "number")
+        {
+          NumberAST* number = nullptr;
+          if(primary_exp->number != nullptr)
+          {
+            number = dynamic_cast<NumberAST*>(primary_exp->number);
+            return_num = std::to_string(number->num);
+          }
+          return return_num;
+        }
+        else if(primary_exp->tp == "exp")
+        {
+          if(primary_exp->exp != nullptr)
+          {
+            ExpAST* exp = dynamic_cast<ExpAST*>(primary_exp->exp);
+            return_num = add_exp_dealer(rst_ptr, exp);
+            return return_num;
+          }
+          
+        }
+      }
+    }
+    else if(unary_exp->tp == "op+exp")
+    {
+      if(unary_exp->unary_exp != nullptr && unary_exp->unary_op != nullptr)
+      {
+        return_num = unary_exp_dealer(rst_ptr, unary_exp->unary_exp);
+        if(unary_exp->unary_op != nullptr)
+        {
+          UnaryOpAST* op = dynamic_cast<UnaryOpAST*>(unary_exp->unary_op);
+          if(op->op == "!")
+            *rst_ptr += "%" + std::to_string(temp_cnt) + " = eq " + return_num + ", 0\n  ";
+          else if(op->op == "-")
+            *rst_ptr += "%" + std::to_string(temp_cnt) + " = sub 0, " + return_num + "\n  ";
+          else if(op->op == "+")
+            return return_num;
+        }
+        return "%" + std::to_string(temp_cnt++); 
+      }
+    }
+    return "";
   }
 
   void block_dealer(std::string* rst_ptr, BlockItemAST* block_item)
   {
     std::string ret_string("");
-    int ret_number = 0;
+    std::string ret_number("");
 
     if(block_item->decl_or_stmt != nullptr && block_item->decl_or_stmt->type() == "StmtAST")
     {
       StmtAST *stmt_available = dynamic_cast<StmtAST*>(block_item->decl_or_stmt);
       //Deal with Stmt
       if (stmt_available != nullptr) {
-        // ret_number = stmt_available->ret_number; for exp_dealer
+        ret_number = add_exp_dealer(rst_ptr, stmt_available->ret_exp);
         ret_string += stmt_available->ret_string;
       }
-      *rst_ptr += "" + ret_string + " " + std::to_string(ret_number) + "\n";
+      *rst_ptr += "" + ret_string + " " + ret_number + "\n";
     }
   }
 
