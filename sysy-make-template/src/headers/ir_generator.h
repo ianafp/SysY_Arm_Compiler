@@ -43,7 +43,12 @@ class Program {
         assert(i+1 < lor_exp->land_exp.size());
         return_str2 = logic_exp_dealer(rst_ptr, lor_exp->land_exp[i+1]);
         assert(lor_exp->op[i] == "||");
-        *rst_ptr += "%" + std::to_string(temp_cnt) + " = or " + return_str1 + ", " + return_str2 + "\n  ";
+        // *rst_ptr += "%" + std::to_string(temp_cnt) + " = or " + return_str1 + ", " + return_str2 + "\n  ";
+        *rst_ptr += "%" + std::to_string(temp_cnt++) + " = eq " + return_str1 + ", 0\n";
+        *rst_ptr += "%" + std::to_string(temp_cnt++) + " = eq " + return_str2 + ", 0\n";
+        *rst_ptr += "%" + std::to_string(temp_cnt) + " = and %" + std::to_string(temp_cnt-1) + ", %" + std::to_string(temp_cnt-2) + "\n  ";
+        temp_cnt++;
+        *rst_ptr += "%" + std::to_string(temp_cnt) + " = eq %" + std::to_string(temp_cnt-1) + ", 0\n";
         return_str1 = "%" + std::to_string(temp_cnt++);
       }
     }
@@ -60,11 +65,12 @@ class Program {
         assert(i+1 < land_exp->eq_exp.size());
         return_str2 =logic_exp_dealer(rst_ptr, land_exp->eq_exp[i+1]);
         assert(land_exp->op[i] == "&&");
-        *rst_ptr += "%" + std::to_string(temp_cnt) + " = and " + return_str1 + ", " + return_str2 + "\n  ";
-        // else if(mul_exp->op[i] == "/")
-        //   *rst_ptr += "%" + std::to_string(temp_cnt) + " = div " + return_str1 + ", " + return_str2 + "\n  ";
-        // else if(mul_exp->op[i] == "%")
-        //   *rst_ptr += "%" + std::to_string(temp_cnt) + " = mod " + return_str1 + ", " + return_str2 + "\n  ";
+        // *rst_ptr += "%" + std::to_string(temp_cnt) + " = and " + return_str1 + ", " + return_str2 + "\n  ";
+        *rst_ptr += "%" + std::to_string(temp_cnt++) + " = eq " + return_str1 + ", 0\n";
+        *rst_ptr += "%" + std::to_string(temp_cnt++) + " = eq " + return_str2 + ", 0\n";
+        *rst_ptr += "%" + std::to_string(temp_cnt) + " = or %" + std::to_string(temp_cnt-1) + ", %" + std::to_string(temp_cnt-2) + "\n  ";
+        temp_cnt++;
+        *rst_ptr += "%" + std::to_string(temp_cnt) + " = eq %" + std::to_string(temp_cnt-1) + ", 0\n";
         return_str1 = "%" + std::to_string(temp_cnt++);
       }
     }
