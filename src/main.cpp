@@ -3,7 +3,6 @@
 #include <iostream>
 #include <memory>
 #include <string>
-
 #include "headers/ast.h"
 #include "headers/ir_generator.h"
 #include "koopa.h"
