@@ -47,12 +47,13 @@ int main(int argc, const char *argv[]) {
   // fputs((*ir_str).c_str(), IRout);
   // cout << *ir_str;
   // cout << endl;
-  ConstIRT c1(11),c2(1100);
-  ExpIRT c1Exp(ExpKind::Const,&c1),c2Exp(ExpKind::Const,&c2);
-  BinOpIRT StoreAddr(BinOpKind::plus,&c1Exp,&c2Exp);
-  ExpIRT StoreAddrExp(ExpKind::BinOp,&StoreAddr);
-  MemIRT StoreAddrMem(&StoreAddrExp);
-  MoveIRT TestMove(&StoreAddrMem,new ExpIRT(new ConstIRT(3333)));
-  TestMove.Dump();
+  // ConstIRT c1(11),c2(1100);
+  // ExpIRT c1Exp(ExpKind::Const,&c1),c2Exp(ExpKind::Const,&c2);
+  // BinOpIRT StoreAddr(BinOpKind::plus,&c1Exp,&c2Exp);
+  // ExpIRT StoreAddrExp(ExpKind::BinOp,&StoreAddr);
+  // MemIRT StoreAddrMem(&StoreAddrExp);
+  // MoveIRT TestMove(&StoreAddrMem,new ExpIRT(new ConstIRT(3333)));
+  // // ExpIRT *empty = new ExpIRT() ;
+  // TestMove.Dump();
   return 0;
 }

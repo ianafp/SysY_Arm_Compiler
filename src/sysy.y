@@ -26,6 +26,8 @@ void yyerror(BaseAST* &ast, const char *s);
     std::string *str_val;
     int int_val;
     BaseAST *ast_val;
+    std::vector<int> *int_vec_val;
+    std::vector<BaseAST*> *ast_vec_val;
 }
 
 %parse-param { BaseAST* &ast }
@@ -33,10 +35,12 @@ void yyerror(BaseAST* &ast, const char *s);
 %token _int _void _const
 %token _if _else _while _break _continue _return
 %token _equal _nequal _greater _less _greater_equal _less_equal _logical_and _logical_or
-%token <str_val> _identifier _string
+%token <str_val> _identifier _string 
 %token <int_val> _const_val
+%type<str_val> BType
 %type <ast_val> CompUnit Compunit FuncDef FuncType Block block BlockItem Stmt FuncFParam Decl ConstDecl VarDecl
-Constdecl 
+Constdecl Constdef ConstDef ConstExp
+%type <ast_vec_val> ConstInitVal
 %type <ast_val> Exp UnaryExp PrimaryExp Number UnaryOp AddExp MulExp RelExp EqExp LAndExp LOrExp
 %start CompUnit
 %%
@@ -102,15 +106,43 @@ Constdecl
                 $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
             }
             ;
-    Constdecl: _const BType ConstDef
-            | Constdecl ',' ConstDef
+    Constdecl: _const BType ConstDef{
+                auto ast = new ConstDeclAST();
+                ast->BType = $2;
+                ast->ConstDefVec.push_back($3);
+                $$ = ast;
+                $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
+    }
+            | Constdecl ',' ConstDef{
+                reinterpret_cast<ConstDeclAST*>($1)->ConstDefVec.push_back($3);
+                $$ = $1;
+                $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
+            }
             ;
-       BType: _int
+       BType: _int {
+        $$ = new string("int");
+       }
             ;
-    ConstDef: Constdef '=' ConstInitVal
+    ConstDef: Constdef '=' ConstInitVal{
+        auto ast = reinterpret_cast<VarDefAst*>($1);
+        ast->InitValueVec = $3;
+        $$ = ast;
+        $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
+    }
             ;
-    Constdef: _identifier 
-            | Constdef '[' ConstExp ']'
+    Constdef: _identifier {
+        auto ast = new VarDefAst();
+        ast->VarIdent = $1;
+        ast->DimSizeVec = new std::vector<BaseAST*>();
+        $$ = ast;
+        $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
+    }
+            | Constdef '[' ConstExp ']'{
+        auto ast = reinterpret_cast<VarDefAst*>($1);
+        ast->DimSizeVec->push_back($3);
+        $$ = ast;
+        $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
+    }
             ;
 ConstInitVal: ConstExp
             | '{' '}'

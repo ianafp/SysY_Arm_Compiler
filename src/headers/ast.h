@@ -91,18 +91,19 @@ public:
 };
 class VarDefAst:public BaseAST{
   public:
-    std::string VarIdent;
-    std::vector<int> DimSizeVec;
+    std::string *VarIdent;
+    std::vector<BaseAST*> *DimSizeVec;
     bool IsInited;
-    std::vector<int> InitValueVec;
+    std::vector<BaseAST*> *InitValueVec;
     void Dump() const override{
-      std::cout << VarIdent;
-      for(auto& it:DimSizeVec){
+      std::cout << *VarIdent;
+      for(auto& it:*DimSizeVec){
         std::cout<<"["<<it<<"]";
       }
       std::cout << " = "<<"{ ";
-      for(auto& it:this->InitValueVec){
-        std::cout<<it<<" ";
+      for(auto& it:*InitValueVec){
+        it->Dump();
+        std::cout<<" ";
         
       }
       std::cout<<"}";
@@ -111,12 +112,11 @@ class VarDefAst:public BaseAST{
 };
 class ConstDeclAST : public BaseAST {
  public:
-  BaseAST* BType;
-  std::list<BaseAST*> constdef_list;
+  std::string *BType;
+  std::vector<BaseAST*>  ConstDefVec;
   void Dump() const override{
-    std::cout << "DeclAST { ";
-    BType->Dump();
-    for(auto &it:constdef_list){
+    std::cout << "DeclAST { "<<*BType;
+    for(auto &it:ConstDefVec){
       it->Dump();
     }
     std::cout << " }";
@@ -124,6 +124,9 @@ class ConstDeclAST : public BaseAST {
   std::string type(void) const override {
     std::unique_ptr<std::string> rst_ptr(new std::string("ConstDeclAST"));
     return *rst_ptr;
+  }
+  ~ConstDeclAST(){
+    delete BType;
   }
 };
 
