@@ -6,10 +6,12 @@
 #include <ctype.h>
 typedef enum
 {
+    Func,
     Sequence,
     Lable,
     Jump,
     Cjump,
+    Ret,
     Move,
     Exp
 } StmKind;
@@ -54,6 +56,7 @@ private:
 
 public:
     static int GetId() { return counter++; }
+    static void Rewind(){ counter=0;}
 };
 int TempIdAllocater::counter = 0;
 class ExpIRT;
@@ -70,6 +73,8 @@ class JumpIRT;
 class CjumpIRT;
 class MoveIRT;
 class LableIRT;
+class FuncIRT;
+class RetIRT;
 class BaseIRT
 {
 public:
@@ -294,8 +299,27 @@ public:
     {
     }
     std::string ExpDump() const;
-};
 
+
+};
+class FuncIRT:public BaseIRT{
+public:
+    ValueType RetValType;
+    LableIRT *FuncLable, *RetLable, *ExceptionLable;
+    int ArgsCount;
+    StatementIRT* FuncStm;
+    FuncIRT(){}
+    FuncIRT(ValueType type, LableIRT *call, LableIRT *ret, LableIRT *exclable,int count,StatementIRT* stm) : RetValType(type), FuncLable(call), RetLable(ret), ExceptionLable(exclable), ArgsCount(count),FuncStm(stm) {}
+    void Dump() const override;
+};
+class RetIRT:public BaseIRT{
+public:
+    ValueType RetValType;
+    ExpIRT* RetExp;
+    RetIRT(){}
+    RetIRT(ValueType value,ExpIRT* exp):RetValType(value),RetExp(exp){}
+    void Dump() const override;
+};
 void CjumpIRT::Dump() const
 {
     BinOpIRT CondExp(RelationOp, LeftExp, RightExp);
@@ -470,5 +494,34 @@ std::string AllocateIRT::ExpDump() const{
     }
     ResString += "\n";
     return ResString;
+}
+void FuncIRT::Dump() const{
+    std::cout <<"define "<<this->RetValType<<" @"<<this->FuncLable->LableName<<"(";
+    TempIdAllocater::Rewind();
+    int TempId;
+    for(int i=0;i<this->ArgsCount;++i){
+        std::cout<<"i32 ";
+        TempId = TempIdAllocater::GetId();
+        std::cout<<"%"<<TempId;
+        if(i<this->ArgsCount-1){
+            std::cout<<", ";
+        }
+        else {
+            std::cout<<" )";
+        }
+    }
+    std::cout << "{\n";
+    this->FuncStm->Dump();
+    std::cout<<"}\n";
+}
+void RetIRT::Dump() const{
+    std::string ValStr = this->RetExp->ExpDump();
+    std::cout<<"ret ";
+    if(this->RetValType==ValueType::VOID){
+        std::cout<<"void";
+    }else{
+        std::cout<<" i32 "<<ValStr;
+    }
+    std::cout<<"\n";
 }
 #endif
