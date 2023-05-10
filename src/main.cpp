@@ -41,16 +41,15 @@ int main(int argc, const char *argv[]) {
 
   // generate koopa IR
   Program p;
-  BaseIRT *ir;
+  BaseIRT *ir = new ExpIRT();
   p.Scan(ast, ir);
   FILE *IRout;
   IRout = fopen(output, "w");
   // fputs((*ir_str).c_str(), IRout);
   // cout << *ir_str;
-<<<<<<< HEAD
   // ExpIRT* e = new ExpIRT();
   if(ir == nullptr) cout << "error";
-  ir->Dump();
+  cout << dynamic_cast<ExpIRT*>(ir)->ExpDump();
   cout << endl;
   // ConstIRT c1(11),c2(1100), c3(1000);
   // ExpIRT c1Exp(ExpKind::Const,&c1),c2Exp(ExpKind::Const,&c2),c3Exp(ExpKind::Const,&c3);
@@ -60,16 +59,6 @@ int main(int argc, const char *argv[]) {
   // ExpIRT StoreAddrExp(ExpKind::BinOp,&StoreAddr);
   // MemIRT StoreAddrMem(&StoreAddrExp);
   // MoveIRT TestMove(&StoreAddrMem,new ExpIRT(new ConstIRT(3333)));
-=======
-  // cout << endl;
-  // ConstIRT c1(11),c2(1100);
-  // ExpIRT c1Exp(ExpKind::Const,&c1),c2Exp(ExpKind::Const,&c2);
-  // BinOpIRT StoreAddr(BinOpKind::plus,&c1Exp,&c2Exp);
-  // ExpIRT StoreAddrExp(ExpKind::BinOp,&StoreAddr);
-  // MemIRT StoreAddrMem(&StoreAddrExp);
-  // MoveIRT TestMove(&StoreAddrMem,new ExpIRT(new ConstIRT(3333)));
-  // // ExpIRT *empty = new ExpIRT() ;
->>>>>>> 6b3ba4f738da4c4f78c98db4497fee9ae8e9417c
   // TestMove.Dump();
   return 0;
 }

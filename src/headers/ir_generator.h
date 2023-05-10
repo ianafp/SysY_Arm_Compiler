@@ -15,8 +15,8 @@
 #include <string>
 #include <memory>
 #include <iostream>
+#include <cstring>
 #include <assert.h>
-
 #include "ast.h"
 #include "ir_tree.h"
 
@@ -26,11 +26,11 @@ class Program {
   // here we can only parse one function, so the function list is not implemented as well.
  public:
   int temp_cnt = 0;
-  void logic_exp_dealer(std::string* rst_ptr, BaseAST* exp, BaseIRT* ir)
+  void logic_exp_dealer(std::string* rst_ptr, BaseAST* exp, BaseIRT* &ir)
   {
     // std::string return_str1("");
     // std::string return_str2("");
-    ExpIRT *ir1, *ir2;
+    BaseIRT *ir1 = new ExpIRT(), *ir2 = new ExpIRT();
 
     if(exp->type() == "LOrExpAST")
     {
@@ -43,17 +43,10 @@ class Program {
         assert(i+1 < lor_exp->land_exp.size());
         logic_exp_dealer(rst_ptr, lor_exp->land_exp[i+1], ir2);
         assert(lor_exp->op[i] == "||");
-        // *rst_ptr += "%" + std::to_string(temp_cnt) + " = or " + return_str1 + ", " + return_str2 + "\n  ";
-        // *rst_ptr += "%" + std::to_string(temp_cnt++) + " = eq " + return_str1 + ", 0\n  ";
-        // *rst_ptr += "%" + std::to_string(temp_cnt++) + " = eq " + return_str2 + ", 0\n  ";
-        // *rst_ptr += "%" + std::to_string(temp_cnt) + " = and %" + std::to_string(temp_cnt-1) + ", %" + std::to_string(temp_cnt-2) + "\n  ";
-        // temp_cnt++;
-        // *rst_ptr += "%" + std::to_string(temp_cnt) + " = eq %" + std::to_string(temp_cnt-1) + ", 0\n  ";
-        // return_str1 = "%" + std::to_string(temp_cnt++);
-        BinOpIRT* or_exp = new BinOpIRT(BinOpKind::LogicOr, ir1, ir2);
+        BinOpIRT* or_exp = new BinOpIRT(BinOpKind::LogicOr, reinterpret_cast<ExpIRT*>(ir1), reinterpret_cast<ExpIRT*>(ir2));
         ir1 = new ExpIRT(ExpKind::BinOp, or_exp);
       }
-      *ir = *ir1;
+      ir = ir1;
     }
     else if(exp->type() == "LAndExpAST")
     {
@@ -66,17 +59,10 @@ class Program {
         assert(i+1 < land_exp->eq_exp.size());
         logic_exp_dealer(rst_ptr, land_exp->eq_exp[i+1], ir2);
         assert(land_exp->op[i] == "&&");
-        // *rst_ptr += "%" + std::to_string(temp_cnt) + " = and " + return_str1 + ", " + return_str2 + "\n  ";
-        // *rst_ptr += "%" + std::to_string(temp_cnt++) + " = eq " + return_str1 + ", 0\n  ";
-        // *rst_ptr += "%" + std::to_string(temp_cnt++) + " = eq " + return_str2 + ", 0\n  ";
-        // *rst_ptr += "%" + std::to_string(temp_cnt) + " = or %" + std::to_string(temp_cnt-1) + ", %" + std::to_string(temp_cnt-2) + "\n  ";
-        // temp_cnt++;
-        // *rst_ptr += "%" + std::to_string(temp_cnt) + " = eq %" + std::to_string(temp_cnt-1) + ", 0\n  ";
-        // return_str1 = "%" + std::to_string(temp_cnt++);
-        BinOpIRT* and_exp = new BinOpIRT(BinOpKind::LogicAnd, ir1, ir2);
+        BinOpIRT* and_exp = new BinOpIRT(BinOpKind::LogicAnd, reinterpret_cast<ExpIRT*>(ir1), reinterpret_cast<ExpIRT*>(ir2));
         ir1 = new ExpIRT(ExpKind::BinOp, and_exp);
       }
-      *ir = *ir1;
+      ir = ir1;
     }
     else if(exp->type() == "EqExpAST")
     {
@@ -90,12 +76,12 @@ class Program {
         logic_exp_dealer(rst_ptr, eq_exp->rel_exp[i+1], ir2);
         BinOpIRT *eq = nullptr;
         if(eq_exp->op[i] == "==")
-          eq = new BinOpIRT(BinOpKind::IsEqual, ir1, ir2);
+          eq = new BinOpIRT(BinOpKind::IsEqual, reinterpret_cast<ExpIRT*>(ir1), reinterpret_cast<ExpIRT*>(ir2));
         else if(eq_exp->op[i] == "!=")
-          eq = new BinOpIRT(BinOpKind::IsNe, ir1, ir2);
+          eq = new BinOpIRT(BinOpKind::IsNe, reinterpret_cast<ExpIRT*>(ir1), reinterpret_cast<ExpIRT*>(ir2));
         ir1 = new ExpIRT(ExpKind::BinOp, eq);
       }
-      *ir = *ir1;
+      ir = ir1;
     }
     else if(exp->type() == "RelExpAST")
     {
@@ -109,29 +95,27 @@ class Program {
         add_exp_dealer(rst_ptr, rel_exp->add_exp[i+1], ir2);
         BinOpIRT *add = nullptr;
         if(rel_exp->op[i] == "<")
-          add = new BinOpIRT(BinOpKind::IsLt, ir1, ir2);
+          add = new BinOpIRT(BinOpKind::IsLt, reinterpret_cast<ExpIRT*>(ir1), reinterpret_cast<ExpIRT*>(ir2));
         else if(rel_exp->op[i] == ">")
-          add = new BinOpIRT(BinOpKind::IsGt, ir1, ir2);
+          add = new BinOpIRT(BinOpKind::IsGt, reinterpret_cast<ExpIRT*>(ir1), reinterpret_cast<ExpIRT*>(ir2));
         else if(rel_exp->op[i] == "<=")
-          add = new BinOpIRT(BinOpKind::IsLe, ir1, ir2);
+          add = new BinOpIRT(BinOpKind::IsLe, reinterpret_cast<ExpIRT*>(ir1), reinterpret_cast<ExpIRT*>(ir2));
         else if(rel_exp->op[i] == ">=")
-          add = new BinOpIRT(BinOpKind::IsGe, ir1, ir2);
+          add = new BinOpIRT(BinOpKind::IsGe, reinterpret_cast<ExpIRT*>(ir1), reinterpret_cast<ExpIRT*>(ir2));
         ir1 = new ExpIRT(ExpKind::BinOp, add);
       }
+      ir = ir1;
     }
-    *ir = *ir1;
+    // delete ir1, ir2;
   }
 
-  void add_exp_dealer(std::string* rst_ptr, BaseAST* exp, BaseIRT *ir)
+  void add_exp_dealer(std::string* rst_ptr, BaseAST* exp, BaseIRT* &ir)
   {
     // std::string return_str1("");
     // std::string return_str2("");
-    ExpIRT *ir1, *ir2;
+    BaseIRT *ir1 = new ExpIRT(), *ir2 = new ExpIRT();
     if(exp->type() == "AddExpAST")
     {
-      // ExpAST* exp_available = dynamic_cast<ExpAST*>(exp);
-      // if(exp_available->add_exp != nullptr)
-      // {
       AddExpAST* add_exp = dynamic_cast<AddExpAST*>(exp);
       if(add_exp->mul_exp.size() == 0) return;
       BinOpIRT *add = nullptr;
@@ -140,17 +124,18 @@ class Program {
       {
         assert(i+1 < add_exp->mul_exp.size());
         add_exp_dealer(rst_ptr, add_exp->mul_exp[i+1], ir2);
+        // std::cout << "ir1: " << std::to_string(i) << ir1->ExpDump() << std::endl;
+        // std::cout << "ir2: " << std::to_string(i) << ir2->ExpDump() << std::endl;
         if(add_exp->op[i] == "+")
-          add = new BinOpIRT(BinOpKind::plus, ir1, ir2);
-          // *rst_ptr += "%" + std::to_string(temp_cnt) + " = add " + return_str1 + ", " + return_str2 + "\n  ";
+          add = new BinOpIRT(BinOpKind::plus, reinterpret_cast<ExpIRT*>(ir1), reinterpret_cast<ExpIRT*>(ir2));
         else if(add_exp->op[i] == "-")
-          add = new BinOpIRT(BinOpKind::minus, ir1, ir2);
-          // *rst_ptr += "%" + std::to_string(temp_cnt) + " = sub " + return_str1 + ", " + return_str2 + "\n  ";
-        // return_str1 = "%" + std::to_string(temp_cnt++);
+          add = new BinOpIRT(BinOpKind::minus, reinterpret_cast<ExpIRT*>(ir1), reinterpret_cast<ExpIRT*>(ir2));
+        // std::cout << "1+" << add->ExpDump();
         ir1 = new ExpIRT(ExpKind::BinOp, add);
+        // std::cout << std::to_string(i) << ir1->ExpDump();
       }
-      *ir = *ir1;
-      // }
+      
+      ir = ir1;
     }
     else if(exp->type() == "MulExpAST")
     {
@@ -163,36 +148,29 @@ class Program {
         assert(i+1 < mul_exp->unary_exp.size());
         unary_exp_dealer(rst_ptr, mul_exp->unary_exp[i+1], ir2);
         if(mul_exp->op[i] == "*")
-          mul = new BinOpIRT(BinOpKind::mul, ir1, ir2);
+          mul = new BinOpIRT(BinOpKind::mul, reinterpret_cast<ExpIRT*>(ir1), reinterpret_cast<ExpIRT*>(ir2));
           // *rst_ptr += "%" + std::to_string(temp_cnt) + " = mul " + return_str1 + ", " + return_str2 + "\n  ";
         else if(mul_exp->op[i] == "/")
-          mul = new BinOpIRT(BinOpKind::_div, ir1, ir2);
+          mul = new BinOpIRT(BinOpKind::_div, reinterpret_cast<ExpIRT*>(ir1), reinterpret_cast<ExpIRT*>(ir2));
           // *rst_ptr += "%" + std::to_string(temp_cnt) + " = div " + return_str1 + ", " + return_str2 + "\n  ";
         else if(mul_exp->op[i] == "%")
-          mul = new BinOpIRT(BinOpKind::rem, ir1, ir2);
+          mul = new BinOpIRT(BinOpKind::rem, reinterpret_cast<ExpIRT*>(ir1), reinterpret_cast<ExpIRT*>(ir2));
           // *rst_ptr += "%" + std::to_string(temp_cnt) + " = mod " + return_str1 + ", " + return_str2 + "\n  ";
         // return_str1 = "%" + std::to_string(temp_cnt++);
         ir1 = new ExpIRT(ExpKind::BinOp, mul);
       }
+      ir = ir1;
     }
+    // delete ir1, ir2;
     // return return_str1;
-    *ir = *ir1;
   }
 
-  void unary_exp_dealer(std::string* rst_ptr, BaseAST* exp, BaseIRT* ir)
+  void unary_exp_dealer(std::string* rst_ptr, BaseAST* exp, BaseIRT* &ir)
   {
     //scan all of the exp
     // ExpIRT* return_num;
     UnaryExpAST* unary_exp = nullptr;
     //identify the type
-    // if(exp->type() == "MulExpAST")
-    // {
-    //   MulExpAST* exp_available = dynamic_cast<MulExpAST*>(exp);
-    //   if(exp_available->unary_exp != nullptr)
-    //   {
-    //     unary_exp = dynamic_cast<UnaryExpAST*>(exp_available->unary_exp);
-    //   }
-    // }
     if(exp->type() == "UnaryExpAST")
     {
       unary_exp = dynamic_cast<UnaryExpAST*>(exp);
@@ -209,9 +187,9 @@ class Program {
           if(primary_exp->number != nullptr)
           {
             number = dynamic_cast<NumberAST*>(primary_exp->number);
-            ConstIRT c(number->num);
-            *ir = *new ExpIRT(ExpKind::Const, &c);
-            if(ir == nullptr) std::cout << "1error";
+            ConstIRT*c = new ConstIRT(number->num);
+            ExpIRT* exp_ir = new ExpIRT(ExpKind::Const, c);
+            ir = exp_ir;
           }
         }
         else if(primary_exp->tp == "exp")
@@ -233,25 +211,17 @@ class Program {
         unary_exp_dealer(rst_ptr, unary_exp->unary_exp, ir);
         if(unary_exp->unary_op != nullptr)
         {
-          ConstIRT zero(0);
-          ExpIRT zeroexp(ExpKind::Const, &zero);
           UnaryOpAST* op = dynamic_cast<UnaryOpAST*>(unary_exp->unary_op);
           if(op->op == "!")
-            *ir = *new BinOpIRT(BinOpKind::IsEqual, dynamic_cast<ExpIRT*>(ir), &zeroexp);
-            // *rst_ptr += "%" + std::to_string(temp_cnt) + " = eq " + return_num + ", 0\n  ";
+            ir = new BinOpIRT(BinOpKind::IsEqual, dynamic_cast<ExpIRT*>(ir), new ExpIRT(new ConstIRT(0)));
           else if(op->op == "-")
-            *ir = *new BinOpIRT(BinOpKind::minus, &zeroexp, dynamic_cast<ExpIRT*>(ir));
-            // *rst_ptr += "%" + std::to_string(temp_cnt) + " = sub 0, " + return_num + "\n  ";
-          // else if(op->op == "+")
-          //   return return_num;
+            ir = new BinOpIRT(BinOpKind::minus, dynamic_cast<ExpIRT*>(ir), new ExpIRT(new ConstIRT(0)));
         }
-        // return "%" + std::to_string(temp_cnt++); 
       }
     }
-    // return "";
   }
 
-  void block_dealer(std::string* rst_ptr, BlockItemAST* block_item, BaseIRT *ir)
+  void block_dealer(std::string* rst_ptr, BlockItemAST* block_item, BaseIRT* &ir)
   {
     std::string ret_string("");
     std::string ret_number("");
@@ -268,7 +238,7 @@ class Program {
     }
   }
 
-  void func_dealer(std::string * rst_ptr, FuncDefAST* func_def, BaseIRT* ir)
+  void func_dealer(std::string * rst_ptr, FuncDefAST* func_def, BaseIRT* &ir)
   {
     std::string result(""), ident("");
     BaseAST* func_type;
@@ -337,7 +307,7 @@ class Program {
     *rst_ptr += "}\n";
   }
 
-  void Scan(BaseAST* root, BaseIRT* IR) {
+  void Scan(BaseAST* root, BaseIRT* &IR) {
     // if(root->type() == "CompUnitAST")
     //   root->Dump();
     std::string* rst_ptr = new std::string("");
