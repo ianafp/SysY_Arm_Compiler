@@ -1,3 +1,5 @@
+#ifndef _IR_TREE_H_
+#define _IR_TREE_H_
 #include <string>
 #include <vector>
 #include <iostream>
@@ -63,6 +65,11 @@ class CallIRT;
 class NameIRT;
 class ESeqIRT;
 class AllocateIRT;
+class SequenceIRT;
+class JumpIRT;
+class CjumpIRT;
+class MoveIRT;
+class LableIRT;
 class BaseIRT
 {
 public:
@@ -93,6 +100,15 @@ public:
     StmKind ContentKind;
     BaseIRT *StmContent;
     StatementIRT(StmKind kind, BaseIRT *content) : ContentKind(kind), StmContent(content) {}
+    StatementIRT(SequenceIRT* seq):ContentKind(StmKind::Sequence),StmContent(reinterpret_cast<BaseIRT*>(seq)) {}
+    StatementIRT(LableIRT* lable):ContentKind(StmKind::Lable),StmContent(reinterpret_cast<BaseIRT*>(lable)) {}
+    StatementIRT(JumpIRT* jump):ContentKind(StmKind::Jump),StmContent(reinterpret_cast<BaseIRT*>(jump)) {}
+    StatementIRT(CjumpIRT* cjump):ContentKind(StmKind::Cjump),StmContent(reinterpret_cast<BaseIRT*>(cjump)) {}
+    StatementIRT(MoveIRT* move):ContentKind(StmKind::Move),StmContent(reinterpret_cast<BaseIRT*>(move)) {}
+    StatementIRT(ExpIRT* exp):ContentKind(StmKind::Exp),StmContent(reinterpret_cast<BaseIRT*>(exp)) {}
+    void Dump() const override{
+        StmContent->Dump();
+    }
 };
 class SequenceIRT : public BaseIRT
 {
@@ -427,3 +443,4 @@ std::string AllocateIRT::ExpDump() const{
     ResString += "\n";
     return ResString;
 }
+#endif
