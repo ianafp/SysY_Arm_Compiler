@@ -100,6 +100,7 @@ class StatementIRT : public BaseIRT
 public:
     StmKind ContentKind;
     BaseIRT *StmContent;
+    StatementIRT(){}
     StatementIRT(StmKind kind, BaseIRT *content) : ContentKind(kind), StmContent(content) {}
     StatementIRT(SequenceIRT* seq):ContentKind(StmKind::Sequence),StmContent(reinterpret_cast<BaseIRT*>(seq)) {}
     StatementIRT(LableIRT* lable):ContentKind(StmKind::Lable),StmContent(reinterpret_cast<BaseIRT*>(lable)) {}
@@ -115,6 +116,7 @@ class SequenceIRT : public BaseIRT
 {
 public:
     BaseIRT *LeftChild, *RightChild;
+    SequenceIRT(){}
     SequenceIRT(StatementIRT *LeftStm, StatementIRT *RightStm)
         : LeftChild(LeftStm), RightChild(RightStm)
     {
@@ -129,6 +131,7 @@ class LableIRT : public BaseIRT
 {
 public:
     std::string LableName;
+    
     LableIRT(std::string LableNameStr) { LableName = LableNameStr; }
     LableIRT():LableName(std::string("temp_lable_"+std::to_string(TempIdAllocater::GetId()))){}
     void Dump() const override
@@ -143,6 +146,7 @@ public:
     // BaseIRT* lable;
     // BaseIRT* AddressExp;
     // std::vector<BaseIRT*> LableList;
+    JumpIRT(){}
     JumpIRT(LableIRT *ArgLableIRT) : JumpLable(ArgLableIRT) {}
     void Dump() const override
     {
@@ -155,6 +159,7 @@ public:
     BinOpKind RelationOp;
     ExpIRT *LeftExp, *RightExp;
     LableIRT *LabelTrue, *LableFalse;
+    CjumpIRT(){}
     CjumpIRT(BinOpKind kind, ExpIRT *left, ExpIRT *right, LableIRT *TrueLable, LableIRT *FalseLable)
         : RelationOp(kind), LeftExp(left), RightExp(right), LabelTrue(TrueLable), LableFalse(FalseLable)
     {
@@ -173,6 +178,7 @@ public:
     TempIRT* DstTemp;
     MemIRT* DstMem;
     ExpIRT* SrcExp;
+    MoveIRT(){}
     MoveIRT(TempIRT *temp, ExpIRT *exp) : MoveKind(ToTemp),DstTemp(temp),DstMem(nullptr),SrcExp(exp) {}
     MoveIRT(MemIRT *mem, ExpIRT *exp) : MoveKind(ToMem), DstTemp(nullptr),DstMem(mem),SrcExp(exp) {}
     void Dump() const override;
@@ -183,6 +189,7 @@ public:
 
     ExpKind ContentKind;
     BaseIRT *ExpContent;
+    ExpIRT(){}
     ExpIRT(ExpKind kind, BaseIRT *content) : ContentKind(kind), ExpContent(reinterpret_cast<BaseIRT*>(content)) {}
     ExpIRT(ConstIRT* constant):ContentKind(ExpKind::Const),ExpContent(reinterpret_cast<BaseIRT*>(constant)){}
     ExpIRT(CallIRT* call):ContentKind(ExpKind::Call),ExpContent(reinterpret_cast<BaseIRT*>(call)){}
@@ -212,6 +219,7 @@ class MemIRT : public BaseIRT
 {
 public:
     ExpIRT *AddressExp;
+    MemIRT(){}
     MemIRT(ExpIRT *addr) : AddressExp(addr) {}
     void Dump() const override
     {
@@ -236,6 +244,7 @@ class ESeqIRT : public BaseIRT
 public:
     StatementIRT *SideEffectStm;
     ExpIRT *EstimatedExp;
+    ESeqIRT(){}
     ESeqIRT(StatementIRT *stm, ExpIRT *exp) : SideEffectStm(stm), EstimatedExp(exp) {}
     void Dump() const override
     {
@@ -246,6 +255,7 @@ class NameIRT : public BaseIRT
 {
 public:
     std::string AsmLableName;
+    NameIRT(){}
     NameIRT(std::string name) : AsmLableName(name) {}
     void Dump() const override
     {
@@ -256,6 +266,7 @@ class ConstIRT : public BaseIRT
 {
 public:
     int ConstVal;
+    ConstIRT(){}
     ConstIRT(int val):ConstVal(val){}
     void Dump() const override
     {
@@ -266,6 +277,7 @@ class AllocateIRT: public BaseAST{
 public:
     int NumOfInt;
     int AlignSize;
+    AllocateIRT(){}
     AllocateIRT(int num=1,int align=1):NumOfInt(num),AlignSize(align){}
     void Dump() const override{}
     std::string ExpDump() const;
@@ -276,6 +288,7 @@ public:
     ValueType RetValType;
     LableIRT *FuncLable, *RetLable, *ExceptionLable;
     std::vector<ExpIRT *> ArgsExpList;
+    CallIRT(){}
     CallIRT(ValueType type, LableIRT *call, LableIRT *ret, LableIRT *exclable, std::vector<ExpIRT *> args) : RetValType(type), FuncLable(call), RetLable(ret), ExceptionLable(exclable), ArgsExpList(args) {}
     void Dump() const override
     {
