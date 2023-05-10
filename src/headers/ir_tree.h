@@ -76,6 +76,7 @@ public:
     virtual ~BaseIRT() = default;
     virtual void Dump() const = 0;
 };
+
 bool isDigit(const std::string &str){
     for(int i =0;i<str.length();++i){
         if(str[i]>'9' || str[i]<0){
@@ -345,6 +346,7 @@ std::string ExpIRT::ExpDump() const
 }
 std::string BinOpIRT::ExpDump() const
 {
+    int temp1,temp2;
     std::string ResString("");
     std::string LeftTempString = LeftExp->ExpDump(), RightTempString = RightExp->ExpDump();
     CheckAndConvertExpToTemp(LeftTempString);
@@ -384,6 +386,19 @@ std::string BinOpIRT::ExpDump() const
     case BinOpKind::rem:
         ResString += "srem i32 " + LeftTempString + ", " + RightTempString + "\n";
         break;
+    case BinOpKind::LogicAnd:
+        temp1 = TempIdAllocater::GetId();
+        temp2 = TempIdAllocater::GetId();
+        
+        std::cout<<"%"<<temp1<<" = "<<"icmp ne i32 0, "<<LeftTempString<<"\n";
+        std::cout<<"%"<<temp2<<" = "<<"icmp ne i32 0, "<<RightTempString<<"\n";
+        ResString += "and i32 %"+std::to_string(temp1)+", %"+std::to_string(temp2)+"\n";
+    case BinOpKind::LogicOr:
+        temp1 = TempIdAllocater::GetId();
+        temp2 = TempIdAllocater::GetId();
+        std::cout<<"%"<<temp1<<" = "<<"icmp ne i32 0, "<<LeftTempString<<"\n";
+        std::cout<<"%"<<temp2<<" = "<<"icmp ne i32 0, "<<RightTempString<<"\n";
+        ResString += "or i32 %"+std::to_string(temp1)+", %"+std::to_string(temp2)+"\n";
     default:
         break;
     }
