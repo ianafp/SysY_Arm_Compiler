@@ -76,7 +76,39 @@ class DeclAST : public BaseAST {
     return *rst_ptr;
   }
 };
+class VarDeclAST:public BaseAST{
+public:
+  BaseAST* BType;
+  std::vector<BaseAST*> VarDefVec;
+  void Dump() const override{
+    std::cout << "VarDeclAst{ ";
+    BType->Dump();
+    for(auto&it :VarDefVec){
+      it->Dump();
+    }
+    std::cout << " }";
+  }
+};
+class VarDefAst:public BaseAST{
+  public:
+    std::string VarIdent;
+    std::vector<int> DimSizeVec;
+    bool IsInited;
+    std::vector<int> InitValueVec;
+    void Dump() const override{
+      std::cout << VarIdent;
+      for(auto& it:DimSizeVec){
+        std::cout<<"["<<it<<"]";
+      }
+      std::cout << " = "<<"{ ";
+      for(auto& it:this->InitValueVec){
+        std::cout<<it<<" ";
+        
+      }
+      std::cout<<"}";
+    }
 
+};
 class ConstDeclAST : public BaseAST {
  public:
   BaseAST* BType;
@@ -189,6 +221,7 @@ class StmtAST : public BaseAST {
     {
       std::cout << ret_string << ", ";
       ret_exp->Dump();
+      
     }
     std::cout << " }";
   }

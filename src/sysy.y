@@ -1,4 +1,4 @@
-%error-verbose
+%define parse.error verbose
 %code requires {
   #include <memory>
   #include <string>
@@ -35,7 +35,8 @@ void yyerror(BaseAST* &ast, const char *s);
 %token _equal _nequal _greater _less _greater_equal _less_equal _logical_and _logical_or
 %token <str_val> _identifier _string
 %token <int_val> _const_val
-%type <ast_val> CompUnit Compunit FuncDef FuncType Block block BlockItem Stmt FuncFParam Decl
+%type <ast_val> CompUnit Compunit FuncDef FuncType Block block BlockItem Stmt FuncFParam Decl ConstDecl VarDecl
+Constdecl 
 %type <ast_val> Exp UnaryExp PrimaryExp Number UnaryOp AddExp MulExp RelExp EqExp LAndExp LOrExp
 %start CompUnit
 %%
@@ -83,20 +84,23 @@ void yyerror(BaseAST* &ast, const char *s);
             ;
         Decl: ConstDecl
             {
-                /*auto ast = new DeclAST();
+                auto ast = new DeclAST();
                 ast->const_or_var_decl = $1;
                 $$ = ast;
-                $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;*/
+                $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
             }
             | VarDecl
             {
-                /*auto ast = new DeclAST();
+                auto ast = new DeclAST();
                 ast->const_or_var_decl = $1;
                 $$ = ast;
-                $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;*/
+                $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
             }
             ;
-   ConstDecl: Constdecl ';'
+   ConstDecl: Constdecl ';'{
+                $$ = $1;
+                $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
+            }
             ;
     Constdecl: _const BType ConstDef
             | Constdecl ',' ConstDef
@@ -160,8 +164,7 @@ Constinitval: ConstInitVal
                 ast->type_ret = "int";
                 ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
                 $$ = ast;
-            }
-            | _void
+            }| _void
             {
                 auto ast = new FuncTypeAST();
                 ast->type_ret = "void";
