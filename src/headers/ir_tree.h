@@ -6,6 +6,7 @@
 #include <ctype.h>
 typedef enum
 {
+    Func,
     Sequence,
     Lable,
     Jump,
@@ -54,6 +55,7 @@ private:
 
 public:
     static int GetId() { return counter++; }
+    static void Rewind(){ counter=0;}
 };
 int TempIdAllocater::counter = 0;
 class ExpIRT;
@@ -70,6 +72,7 @@ class JumpIRT;
 class CjumpIRT;
 class MoveIRT;
 class LableIRT;
+class FuncIRT;
 class BaseIRT
 {
 public:
@@ -294,8 +297,19 @@ public:
     {
     }
     std::string ExpDump() const;
-};
 
+
+};
+class FuncIRT:public BaseIRT{
+public:
+    ValueType RetValType;
+    LableIRT *FuncLable, *RetLable, *ExceptionLable;
+    int ArgsCount;
+    StatementIRT* FuncStm;
+    FuncIRT(){}
+    FuncIRT(ValueType type, LableIRT *call, LableIRT *ret, LableIRT *exclable,int count,StatementIRT* stm) : RetValType(type), FuncLable(call), RetLable(ret), ExceptionLable(exclable), ArgsCount(count),FuncStm(stm) {}
+    void Dump() const override;
+};
 void CjumpIRT::Dump() const
 {
     BinOpIRT CondExp(RelationOp, LeftExp, RightExp);
@@ -470,5 +484,24 @@ std::string AllocateIRT::ExpDump() const{
     }
     ResString += "\n";
     return ResString;
+}
+void FuncIRT::Dump() const{
+    std::cout <<"define "<<this->RetValType<<" @"<<this->FuncLable->LableName<<"(";
+    TempIdAllocater::Rewind();
+    int TempId;
+    for(int i=0;i<this->ArgsCount;++i){
+        std::cout<<"i32 ";
+        TempId = TempIdAllocater::GetId();
+        std::cout<<"%"<<TempId;
+        if(i<this->ArgsCount-1){
+            std::cout<<", ";
+        }
+        else {
+            std::cout<<" )";
+        }
+    }
+    std::cout << "{\n";
+    this->FuncStm->Dump();
+    std::cout<<"}\n";
 }
 #endif
