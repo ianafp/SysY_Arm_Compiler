@@ -96,9 +96,10 @@ $(BUILD_DIR)/%.tab$(FB_EXT): $(SRC_DIR)/%.y
 	$(BISON) $(BFLAGS) -o $@ $<
 
 
-.PHONY: clean
+.PHONY: clean run
 
 clean:
 	-rm -rf $(BUILD_DIR)
-
+run: 
+	$(BUILD_DIR)/compiler
 -include $(DEPS)
