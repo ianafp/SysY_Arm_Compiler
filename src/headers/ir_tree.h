@@ -11,6 +11,7 @@ typedef enum
     Lable,
     Jump,
     Cjump,
+    Ret,
     Move,
     Exp
 } StmKind;
@@ -73,6 +74,7 @@ class CjumpIRT;
 class MoveIRT;
 class LableIRT;
 class FuncIRT;
+class RetIRT;
 class BaseIRT
 {
 public:
@@ -310,6 +312,14 @@ public:
     FuncIRT(ValueType type, LableIRT *call, LableIRT *ret, LableIRT *exclable,int count,StatementIRT* stm) : RetValType(type), FuncLable(call), RetLable(ret), ExceptionLable(exclable), ArgsCount(count),FuncStm(stm) {}
     void Dump() const override;
 };
+class RetIRT:public BaseIRT{
+public:
+    ValueType RetValType;
+    ExpIRT* RetExp;
+    RetIRT(){}
+    RetIRT(ValueType value,ExpIRT* exp):RetValType(value),RetExp(exp){}
+    void Dump() const override;
+};
 void CjumpIRT::Dump() const
 {
     BinOpIRT CondExp(RelationOp, LeftExp, RightExp);
@@ -503,5 +513,15 @@ void FuncIRT::Dump() const{
     std::cout << "{\n";
     this->FuncStm->Dump();
     std::cout<<"}\n";
+}
+void RetIRT::Dump() const{
+    std::string ValStr = this->RetExp->ExpDump();
+    std::cout<<"ret ";
+    if(this->RetValType==ValueType::VOID){
+        std::cout<<"void";
+    }else{
+        std::cout<<" i32 "<<ValStr;
+    }
+    std::cout<<"\n";
 }
 #endif
