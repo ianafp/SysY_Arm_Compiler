@@ -10,7 +10,7 @@ else()
   set(FB_EXT ".c")
 endif()
 message(STATUS "Flex/Bison generated source file extension: ${FB_EXT}")
-
+add_compile_options(-g)
 # enable all warnings
 if(MSVC)
   add_compile_options(/W3)
