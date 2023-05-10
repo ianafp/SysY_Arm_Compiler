@@ -42,7 +42,8 @@ typedef enum
     ESeq,
     Name,
     Const,
-    Call
+    Call,
+    Allocate 
 } ExpKind;
 class TempIdAllocater
 {
@@ -61,7 +62,7 @@ class ConstIRT;
 class CallIRT;
 class NameIRT;
 class ESeqIRT;
-
+class AllocateIRT;
 class BaseIRT
 {
 public:
@@ -112,6 +113,7 @@ class LableIRT : public BaseIRT
 public:
     std::string LableName;
     LableIRT(std::string LableNameStr) { LableName = LableNameStr; }
+    LableIRT():LableName(std::string("temp_lable_"+std::to_string(TempIdAllocater::GetId()))){}
     void Dump() const override
     {
         std::cout << LableName << ":\n";
@@ -172,6 +174,7 @@ public:
     ExpIRT(TempIRT* temp):ContentKind(ExpKind::Temp),ExpContent(reinterpret_cast<BaseIRT*>(temp)){}
     ExpIRT(MemIRT* mem):ContentKind(ExpKind::Mem),ExpContent(reinterpret_cast<BaseIRT*>(mem)){}
     ExpIRT(BinOpIRT* binop ):ContentKind(ExpKind::BinOp),ExpContent(reinterpret_cast<BaseIRT*>(binop)){} 
+    ExpIRT(AllocateIRT* alloc):ContentKind(ExpKind::Allocate),ExpContent(reinterpret_cast<BaseIRT*>(alloc)) {}
     void Dump() const override
     {
     }
@@ -242,6 +245,14 @@ public:
     }
     std::string ExpDump() const;
 };
+class AllocateIRT: public BaseAST{
+public:
+    int NumOfInt;
+    int AlignSize;
+    AllocateIRT(int num=1,int align=1):NumOfInt(num),AlignSize(align){}
+    void Dump() const override{}
+    std::string ExpDump() const;
+};
 class CallIRT : public BaseIRT
 {
 public:
@@ -288,6 +299,7 @@ std::string ExpIRT::ExpDump() const
     NameIRT *NameContent = reinterpret_cast<NameIRT *>(ExpContent);
     ConstIRT *ConstContent = reinterpret_cast<ConstIRT *>(ExpContent);
     CallIRT *CallContent = reinterpret_cast<CallIRT *>(ExpContent);
+    AllocateIRT* AllocateContent = reinterpret_cast<AllocateIRT *>(ExpContent);
     switch (ContentKind)
     {
     case ExpKind::BinOp:
@@ -311,6 +323,8 @@ std::string ExpIRT::ExpDump() const
     case ExpKind::Call:
         
         return CallContent->ExpDump();
+    case ExpKind::Allocate:
+        return AllocateContent->ExpDump();
     }
 }
 std::string BinOpIRT::ExpDump() const
@@ -359,6 +373,7 @@ std::string BinOpIRT::ExpDump() const
     }
     return ResString;
 }
+
 std::string MemIRT::ExpDump() const
 {
     return AddressExp->ExpDump();
@@ -398,5 +413,17 @@ std::string CallIRT::ExpDump() const
         }
     }
     ResString += ") to lable %" + RetLable->LableName + " unwind lable " + ExceptionLable->LableName + "\n";
+    return ResString;
+}
+std::string AllocateIRT::ExpDump() const{
+    std::string ResString("");
+    ResString += "alloca i32 ";
+    if(NumOfInt>1){
+        ResString += ", i32 " + std::to_string(NumOfInt);
+    }
+    if(AlignSize>1){
+        ResString += ", align " + std::to_string(AlignSize);
+    }
+    ResString += "\n";
     return ResString;
 }
