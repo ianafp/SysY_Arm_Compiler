@@ -24,6 +24,8 @@ typedef enum
     rem,
     LeftShift,
     RightShift,
+    Neg,
+    LogicNot,
     LogicAnd,
     LogicOr,
     IsEqual,
@@ -214,7 +216,8 @@ class BinOpIRT : public BaseIRT
 public:
     BinOpKind OpKind;
     ExpIRT *LeftExp, *RightExp;
-    BinOpIRT(BinOpKind kind, ExpIRT *left, ExpIRT *right) : OpKind(kind), LeftExp(left), RightExp(right) {}
+    BinOpIRT(BinOpKind kind, ExpIRT *left, ExpIRT *right = NULL) : OpKind(kind), LeftExp(left), RightExp(right) {}
+    
     void Dump() const override
     {
     }
@@ -391,37 +394,37 @@ std::string BinOpIRT::ExpDump() const
     switch (OpKind)
     {
     case BinOpKind::plus:
-        ResString += "add i32 " + LeftTempString + ", " + RightTempString + "\n";
+        ResString += "add i32 " + LeftTempString + ", " + RightTempString ;
         break;
     case BinOpKind::minus:
-        ResString += "sub i32 " + LeftTempString + ", " + RightTempString + "\n";
+        ResString += "sub i32 " + LeftTempString + ", " + RightTempString ;
         break;
     case BinOpKind::mul:
-        ResString += "mul i32 " + LeftTempString + ", " + RightTempString + "\n";
+        ResString += "mul i32 " + LeftTempString + ", " + RightTempString ;
         break;
     case BinOpKind::_div:
-        ResString += "sdiv i32 " + LeftTempString + ", " + RightTempString + "\n";
+        ResString += "sdiv i32 " + LeftTempString + ", " + RightTempString ;
         break;
     case BinOpKind::IsEqual:
-        ResString += "icmp eq i32 " + LeftTempString + ", " + RightTempString + "\n";
+        ResString += "icmp eq i32 " + LeftTempString + ", " + RightTempString ;
         break;
     case BinOpKind::IsNe:
-        ResString += "icmp ne i32 " + LeftTempString + ", " + RightTempString + "\n";
+        ResString += "icmp ne i32 " + LeftTempString + ", " + RightTempString ;
         break;
     case BinOpKind::IsLt:
-        ResString += "icmp slt i32 " + LeftTempString + ", " + RightTempString + "\n";
+        ResString += "icmp slt i32 " + LeftTempString + ", " + RightTempString ;
         break;
     case BinOpKind::IsLe:
-        ResString += "icmp sle i32 " + LeftTempString + ", " + RightTempString + "\n";
+        ResString += "icmp sle i32 " + LeftTempString + ", " + RightTempString ;
         break;
     case BinOpKind::IsGt:
-        ResString += "icmp sgt i32 " + LeftTempString + ", " + RightTempString + "\n";
+        ResString += "icmp sgt i32 " + LeftTempString + ", " + RightTempString ;
         break;
     case BinOpKind::IsGe:
-        ResString += "icmp sge i32 " + LeftTempString + ", " + RightTempString + "\n";
+        ResString += "icmp sge i32 " + LeftTempString + ", " + RightTempString ;
         break;
     case BinOpKind::rem:
-        ResString += "srem i32 " + LeftTempString + ", " + RightTempString + "\n";
+        ResString += "srem i32 " + LeftTempString + ", " + RightTempString ;
         break;
     case BinOpKind::LogicAnd:
         temp1 = TempIdAllocater::GetId();
@@ -429,13 +432,21 @@ std::string BinOpIRT::ExpDump() const
         
         std::cout<<"%"<<temp1<<" = "<<"icmp ne i32 0, "<<LeftTempString<<"\n";
         std::cout<<"%"<<temp2<<" = "<<"icmp ne i32 0, "<<RightTempString<<"\n";
-        ResString += "and i32 %"+std::to_string(temp1)+", %"+std::to_string(temp2)+"\n";
+        ResString += "and i32 %"+std::to_string(temp1)+", %"+std::to_string(temp2);
+        break;
     case BinOpKind::LogicOr:
         temp1 = TempIdAllocater::GetId();
         temp2 = TempIdAllocater::GetId();
         std::cout<<"%"<<temp1<<" = "<<"icmp ne i32 0, "<<LeftTempString<<"\n";
         std::cout<<"%"<<temp2<<" = "<<"icmp ne i32 0, "<<RightTempString<<"\n";
-        ResString += "or i32 %"+std::to_string(temp1)+", %"+std::to_string(temp2)+"\n";
+        ResString += "or i32 %"+std::to_string(temp1)+", %"+std::to_string(temp2);
+        break;
+    case BinOpKind::LogicNot:
+        ResString += "icmp eq i32 0, " + LeftTempString;
+        break;
+    case BinOpKind::Neg:
+        ResString += "sub i32, 0, "+LeftTempString;
+        break;
     default:
         break;
     }
