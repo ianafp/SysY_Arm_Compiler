@@ -49,6 +49,7 @@ int main(int argc, const char *argv[]) {
   // cout << *ir_str;
   // ExpIRT* e = new ExpIRT();
   if(ir == nullptr) cout << "error";
+  
   cout << ir->ExpDump();
   cout << endl;
   // ConstIRT c1(11),c2(1100), c3(1000);

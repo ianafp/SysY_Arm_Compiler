@@ -119,6 +119,7 @@ public:
     void Dump() const override{
         StmContent->Dump();
     }
+    std::string ExpDump() const override{return "";}
 
 };
 class SequenceIRT : public BaseIRT
@@ -135,7 +136,8 @@ public:
         LeftChild->Dump();
         RightChild->Dump();
     }
-
+    std::string ExpDump() const override {return "";}
+    
 };
 class LableIRT : public BaseIRT
 {
@@ -148,7 +150,7 @@ public:
     {
         std::cout << LableName << ":\n";
     }
-
+    std::string ExpDump() const override {return "";}
 };
 class JumpIRT : public BaseIRT
 {
@@ -163,7 +165,7 @@ public:
     {
         std::cout << "br lable %" << JumpLable->LableName << "\n";
     }
-
+    std::string ExpDump() const override {return "";}
 };
 class CjumpIRT : public BaseIRT
 {
@@ -177,7 +179,7 @@ public:
     {
     }
     void Dump() const override;
-
+    std::string ExpDump() const override {return "";}
 };
 
 class MoveIRT : public BaseIRT
@@ -195,7 +197,7 @@ public:
     MoveIRT(TempIRT *temp, ExpIRT *exp) : MoveKind(ToTemp),DstTemp(temp),DstMem(nullptr),SrcExp(exp) {}
     MoveIRT(MemIRT *mem, ExpIRT *exp) : MoveKind(ToMem), DstTemp(nullptr),DstMem(mem),SrcExp(exp) {}
     void Dump() const override;
- 
+    std::string ExpDump() const override { return "";}
 };
 class ExpIRT : public BaseIRT
 {
@@ -319,16 +321,29 @@ public:
     int ArgsCount;
     StatementIRT* FuncStm;
     FuncIRT(){}
-    FuncIRT(ValueType type, LableIRT *call, LableIRT *ret, LableIRT *exclable,int count,StatementIRT* stm) : RetValType(type), FuncLable(call), RetLable(ret), ExceptionLable(exclable), ArgsCount(count),FuncStm(stm) {}
+    FuncIRT(ValueType type, LableIRT *call, LableIRT *ret, LableIRT *exclable,int count,StatementIRT* stm,ExpIRT* RetExp=NULL) : RetValType(type), FuncLable(call), RetLable(ret), ExceptionLable(exclable), ArgsCount(count),FuncStm(stm) {}
     void Dump() const override;
+    std::string ExpDump() const override {return "";};
 };
 class RetIRT:public BaseIRT{
 public:
     ValueType RetValType;
     ExpIRT* RetExp;
     RetIRT(){}
-    RetIRT(ValueType value,ExpIRT* exp):RetValType(value),RetExp(exp){}
+    RetIRT(ValueType type):RetValType(type){
+        if(type==ValueType::VOID){
+            RetExp = NULL;
+        }else{
+            RetExp = new ExpIRT(new ConstIRT(0));
+        }
+    }
+    RetIRT(ValueType value,ExpIRT* exp):RetValType(value),RetExp(exp){
+        if(exp==NULL){
+            assert(value == ValueType::VOID);
+        }
+    }
     void Dump() const override;
+    std::string ExpDump() const override {return "";};
 };
 void CjumpIRT::Dump() const
 {
@@ -337,6 +352,7 @@ void CjumpIRT::Dump() const
     CheckAndConvertExpToTemp(ConString);
     std::cout << "\n";
     std::cout << "br i1 " << ConString << ", lable %" << LabelTrue->LableName << ", lable %" << LableFalse->LableName << "\n";
+    
 }
 void MoveIRT::Dump() const
 {
@@ -530,6 +546,7 @@ void FuncIRT::Dump() const{
     }
     std::cout << "{\n";
     this->FuncStm->Dump();
+
     std::cout<<"}\n";
 }
 void RetIRT::Dump() const{
