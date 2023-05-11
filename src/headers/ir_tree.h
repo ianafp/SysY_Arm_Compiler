@@ -82,6 +82,7 @@ class BaseIRT
 public:
     virtual ~BaseIRT() = default;
     virtual void Dump() const = 0;
+    virtual std::string  ExpDump() const = 0;
 };
 
 bool isDigit(const std::string &str){
@@ -118,6 +119,7 @@ public:
     void Dump() const override{
         StmContent->Dump();
     }
+
 };
 class SequenceIRT : public BaseIRT
 {
@@ -133,6 +135,7 @@ public:
         LeftChild->Dump();
         RightChild->Dump();
     }
+
 };
 class LableIRT : public BaseIRT
 {
@@ -145,6 +148,7 @@ public:
     {
         std::cout << LableName << ":\n";
     }
+
 };
 class JumpIRT : public BaseIRT
 {
@@ -159,6 +163,7 @@ public:
     {
         std::cout << "br lable %" << JumpLable->LableName << "\n";
     }
+
 };
 class CjumpIRT : public BaseIRT
 {
@@ -172,6 +177,7 @@ public:
     {
     }
     void Dump() const override;
+
 };
 
 class MoveIRT : public BaseIRT
@@ -189,6 +195,7 @@ public:
     MoveIRT(TempIRT *temp, ExpIRT *exp) : MoveKind(ToTemp),DstTemp(temp),DstMem(nullptr),SrcExp(exp) {}
     MoveIRT(MemIRT *mem, ExpIRT *exp) : MoveKind(ToMem), DstTemp(nullptr),DstMem(mem),SrcExp(exp) {}
     void Dump() const override;
+ 
 };
 class ExpIRT : public BaseIRT
 {
@@ -209,7 +216,7 @@ public:
     void Dump() const override
     {
     }
-    std::string ExpDump() const;
+    std::string ExpDump() const override ;
 };
 class BinOpIRT : public BaseIRT
 {
@@ -221,7 +228,7 @@ public:
     void Dump() const override
     {
     }
-    std::string ExpDump() const;
+    std::string ExpDump() const override;
 };
 class MemIRT : public BaseIRT
 {
@@ -232,7 +239,7 @@ public:
     void Dump() const override
     {
     }
-    std::string ExpDump() const;
+    std::string ExpDump() const override;
 };
 class TempIRT : public BaseIRT
 {
@@ -245,7 +252,7 @@ public:
     void Dump() const override
     {
     }
-    std::string ExpDump() const;
+    std::string ExpDump() const override;
 };
 class ESeqIRT : public BaseIRT
 {
@@ -257,7 +264,7 @@ public:
     void Dump() const override
     {
     }
-    std::string ExpDump() const;
+    std::string ExpDump() const override;
 };
 class NameIRT : public BaseIRT
 {
@@ -268,7 +275,7 @@ public:
     void Dump() const override
     {
     }
-    std::string ExpDump() const;
+    std::string ExpDump() const override;
 };
 class ConstIRT : public BaseIRT
 {
@@ -279,7 +286,7 @@ public:
     void Dump() const override
     {
     }
-    std::string ExpDump() const;
+    std::string ExpDump() const override;
 };
 class AllocateIRT: public BaseAST{
 public:
@@ -288,7 +295,7 @@ public:
     AllocateIRT(){}
     AllocateIRT(int num=1,int align=1):NumOfInt(num),AlignSize(align){}
     void Dump() const override{}
-    std::string ExpDump() const;
+    std::string ExpDump() const ;
 };
 class CallIRT : public BaseIRT
 {
@@ -301,7 +308,7 @@ public:
     void Dump() const override
     {
     }
-    std::string ExpDump() const;
+    std::string ExpDump() const override;
 
 
 };
@@ -347,7 +354,7 @@ void MoveIRT::Dump() const
         std::cout << "store i32 " << SrcString << ", ptr " << DstAddrString << "\n";
     }
 }
-std::string ExpIRT::ExpDump() const
+std::string ExpIRT::ExpDump() const 
 {
     BinOpIRT *BinOpContent = reinterpret_cast<BinOpIRT *>(ExpContent);
     MemIRT *MemContent = reinterpret_cast<MemIRT *>(ExpContent);

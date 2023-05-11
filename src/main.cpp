@@ -41,7 +41,7 @@ int main(int argc, const char *argv[]) {
 
   // generate koopa IR
   Program p;
-  BaseIRT *ir = new ExpIRT();
+  BaseIRT *ir = NULL;
   p.Scan(ast, ir);
   FILE *IRout;
   IRout = fopen(output, "w");
@@ -49,7 +49,7 @@ int main(int argc, const char *argv[]) {
   // cout << *ir_str;
   // ExpIRT* e = new ExpIRT();
   if(ir == nullptr) cout << "error";
-  cout << dynamic_cast<ExpIRT*>(ir)->ExpDump();
+  cout << ir->ExpDump();
   cout << endl;
   // ConstIRT c1(11),c2(1100), c3(1000);
   // ExpIRT c1Exp(ExpKind::Const,&c1),c2Exp(ExpKind::Const,&c2),c3Exp(ExpKind::Const,&c3);

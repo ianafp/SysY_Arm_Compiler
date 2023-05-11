@@ -30,6 +30,7 @@ endif
 # Compilers
 CC := clang
 CXX := clang++
+DB := gdb
 FLEX := flex
 BISON := bison
 
@@ -96,10 +97,12 @@ $(BUILD_DIR)/%.tab$(FB_EXT): $(SRC_DIR)/%.y
 	$(BISON) $(BFLAGS) -o $@ $<
 
 
-.PHONY: clean run
+.PHONY: clean run debug
 
 clean:
 	-rm -rf $(BUILD_DIR)
 run: 
-	$(BUILD_DIR)/compiler
+	$(BUILD_DIR)/compiler test ${TOP_DIR}/debug/hello.c -o hello.ll
+debug:
+	$(DB) --args $(BUILD_DIR)/compiler test ${TOP_DIR}/debug/hello.c -o hello.ll
 -include $(DEPS)
