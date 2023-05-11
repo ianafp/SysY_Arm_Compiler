@@ -540,10 +540,8 @@ void FuncIRT::Dump() const{
         if(i<this->ArgsCount-1){
             std::cout<<", ";
         }
-        else {
-            std::cout<<" )";
-        }
     }
+    std::cout<<")";
     std::cout << "{\n";
     this->FuncStm->Dump();
 
@@ -551,6 +549,7 @@ void FuncIRT::Dump() const{
 }
 void RetIRT::Dump() const{
     std::string ValStr = this->RetExp->ExpDump();
+    CheckAndConvertExpToTemp(ValStr);
     std::cout<<"ret ";
     if(this->RetValType==ValueType::VOID){
         std::cout<<"void";
