@@ -551,6 +551,7 @@ void FuncIRT::Dump() const{
 }
 void RetIRT::Dump() const{
     std::string ValStr = this->RetExp->ExpDump();
+    CheckAndConvertExpToTemp(ValStr);
     std::cout<<"ret ";
     if(this->RetValType==ValueType::VOID){
         std::cout<<"void";
