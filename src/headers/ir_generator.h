@@ -215,7 +215,7 @@ class Program {
           if(op->op == "!")
             ir = new BinOpIRT(BinOpKind::IsEqual, dynamic_cast<ExpIRT*>(ir), new ExpIRT(new ConstIRT(0)));
           else if(op->op == "-")
-            ir = new BinOpIRT(BinOpKind::minus, dynamic_cast<ExpIRT*>(ir), new ExpIRT(new ConstIRT(0)));
+            ir = new BinOpIRT(BinOpKind::minus,new ExpIRT(new ConstIRT(0)),dynamic_cast<ExpIRT*>(ir));
         }
       }
     }
