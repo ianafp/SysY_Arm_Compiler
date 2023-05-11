@@ -65,6 +65,7 @@ class CompunitAST : public BaseAST {
 // Decl 也是 BaseAST
 class DeclAST : public BaseAST {
  public:
+  std::string tp;
   BaseAST* const_or_var_decl;
   void Dump() const override{
     std::cout << "DeclAST { ";
@@ -78,11 +79,11 @@ class DeclAST : public BaseAST {
 };
 class VarDeclAST:public BaseAST{
 public:
-  BaseAST* BType;
+  std::string* BType;
   std::vector<BaseAST*> VarDefVec;
   void Dump() const override{
     std::cout << "VarDeclAst{ ";
-    BType->Dump();
+    std::cout<<*BType;
     for(auto&it :VarDefVec){
       it->Dump();
     }
@@ -92,12 +93,12 @@ public:
 class VarDefAst:public BaseAST{
   public:
     std::string *VarIdent;
-    std::vector<BaseAST*> *DimSizeVec;
+    std::vector<BaseAST*> DimSizeVec;
     bool IsInited;
     std::vector<BaseAST*> *InitValueVec;
     void Dump() const override{
       std::cout << *VarIdent;
-      for(auto& it:*DimSizeVec){
+      for(auto& it:DimSizeVec){
         std::cout<<"["<<it<<"]";
       }
       std::cout << " = "<<"{ ";
@@ -200,6 +201,7 @@ class blockAST : public BaseAST {
 
 class BlockItemAST : public BaseAST {
  public:
+  std::string tp;
   BaseAST* decl_or_stmt;
   void Dump() const override {
     std::cout << "BlockItemAST { ";
@@ -211,18 +213,52 @@ class BlockItemAST : public BaseAST {
     return *rst_ptr;
   }
 };
-
+class AssignAST:public BaseAST{
+public:
+  BaseAST* LVal;
+  BaseAST* ValueExp;
+  void Dump() const override{
+    std:: cout<<"Assign {";
+    LVal->Dump();
+    std::cout<<", ";
+    ValueExp->Dump();
+    std::cout<<"}";
+  }
+  std::string type(void) const override{
+    std::unique_ptr<std::string> rst_ptr(new std::string("AssignAST"));
+    return *rst_ptr;
+  }
+};
+class LValAST:public BaseAST{
+public:
+  std::string* VarIdent;
+  std::vector<BaseAST*> IndexVec;
+  void Dump() const override{
+    std::cout << "LValAST{ ";
+    std::cout <<*VarIdent;
+    for(auto &it:IndexVec){
+      std::cout<<"[";
+      it->Dump();
+      std::cout<<"]";
+    }
+    std::cout<<"}";
+  }
+  std::string type(void) const override {
+    std::unique_ptr<std::string> rst_ptr(new std::string("LValAST"));
+    return *rst_ptr;
+  }
+};
 class StmtAST : public BaseAST {
  public:
   std::string tp;
-  std::string ret_string;
+  // std::string ret_string;
   // int ret_number;
   BaseAST* ret_exp;
   void Dump() const override {
     std::cout << "StmtAST { ";
     if(tp == "retexp")
     {
-      std::cout << ret_string << ", ";
+      // std::cout << ret_string << ", ";
       ret_exp->Dump();
       
     }

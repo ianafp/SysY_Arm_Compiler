@@ -38,9 +38,9 @@ void yyerror(BaseAST* &ast, const char *s);
 %token <str_val> _identifier _string 
 %token <int_val> _const_val
 %type<str_val> BType
-%type <ast_val> CompUnit Compunit FuncDef FuncType Block block BlockItem Stmt FuncFParam Decl ConstDecl VarDecl
+%type <ast_val> CompUnit Compunit FuncDef FuncType Block block BlockItem Stmt FuncFParam Decl ConstDecl VarDecl Vardecl Vardef VarDef LVal 
 Constdecl Constdef ConstDef ConstExp
-%type <ast_vec_val> ConstInitVal Constinitval
+%type <ast_vec_val> ConstInitVal Constinitval InitVal Initval
 %type <ast_val> Exp UnaryExp PrimaryExp Number UnaryOp AddExp MulExp RelExp EqExp LAndExp LOrExp
 %start CompUnit
 %%
@@ -89,6 +89,7 @@ Constdecl Constdef ConstDef ConstExp
         Decl: ConstDecl
             {
                 auto ast = new DeclAST();
+                ast->tp = "ConstDecl";
                 ast->const_or_var_decl = $1;
                 $$ = ast;
                 $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
@@ -96,6 +97,7 @@ Constdecl Constdef ConstDef ConstExp
             | VarDecl
             {
                 auto ast = new DeclAST();
+                ast->tp = "VarDecl";
                 ast->const_or_var_decl = $1;
                 $$ = ast;
                 $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
@@ -133,50 +135,135 @@ Constdecl Constdef ConstDef ConstExp
     Constdef: _identifier {
         auto ast = new VarDefAst();
         ast->VarIdent = $1;
-        ast->DimSizeVec = new std::vector<BaseAST*>();
+        // ast->DimSizeVec = new std::vector<BaseAST*>();
         ast->InitValueVec = NULL;
         $$ = ast;
         $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
     }
             | Constdef '[' ConstExp ']'{
         auto ast = reinterpret_cast<VarDefAst*>($1);
-        ast->DimSizeVec->push_back($3);
+        ast->DimSizeVec.push_back($3);
         $$ = ast;
         $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
     }
             ;
 ConstInitVal: ConstExp{
-   /* $$ = new std::vector<BaseAST*>($1); */
+    $$ = new std::vector<BaseAST*>();
+    $$->push_back($1); 
     
 }
             | '{' '}'
             {
-              /*  $$ = NULL; */
+                $$ = NULL; 
             }
             | '{' Constinitval '}'{
-                /*   $$->push_back($2); */
+                $$ = $2;
             }
             ;
-Constinitval: ConstInitVal
-            | Constinitval ',' ConstInitVal
+Constinitval: ConstInitVal {
+        $$ = $1;
+}
+            | Constinitval ',' ConstInitVal {
+                if($1 == NULL){
+                    $$ = $3;
+                }
+                else if($3 == NULL){
+                    $$ = $1;
+                }else{
+                    for(auto &it:*$3){
+                        $1->push_back(it);
+                    }
+                    delete $3;
+                    $$ = $1;
+                }
+            }
             ;
-     VarDecl: Vardecl ';'
+     VarDecl: Vardecl ';' 
+     {
+        $$ = $1;
+        $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
+     }
             ;
-     Vardecl: BType VarDef
+     Vardecl: BType VarDef 
+     {
+        auto ast = new VarDeclAST();
+        ast->BType = $1;
+        ast->VarDefVec.push_back($2);
+        $$ = ast;
+        $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
+     }
             | Vardecl ',' VarDef
+            {
+                auto ast = reinterpret_cast<VarDeclAST*>($1);
+                ast->VarDefVec.push_back($3);
+                $$ = ast;
+                $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
+            }
             ;
       VarDef: Vardef
+            {
+                $$ = $1;
+                $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
+            }
             | Vardef '=' InitVal
+            {
+                reinterpret_cast<VarDefAst*>($1)->InitValueVec = $3;
+                $$ = $1;
+                $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
+            }
             ;
-      Vardef: _identifier 
-            | Vardef '[' Exp ']'
+      Vardef: _identifier
+            {
+                auto ast = new VarDefAst();
+                ast->VarIdent = $1;
+                ast->InitValueVec = NULL;
+                $$ = ast;
+                $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
+            }
+            | Vardef '[' ConstExp ']'
+            {
+                reinterpret_cast<VarDefAst*>($1)->DimSizeVec.push_back($3);
+                $$ = $1;
+                $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
+            }
             ;
-     InitVal: Exp
+     InitVal: Exp 
+            {
+                $$ = new std::vector<BaseAST*>();
+                $$->push_back($1);
+                
+            }
             | '{' '}'
+            {
+                $$ = NULL;
+                
+            }
             | '{' Initval '}'
+            {
+                $$ = $2;
+
+            }
             ;
      Initval: InitVal
+            {
+                $$ = $1;
+            }
             | Initval ',' InitVal
+            {
+                if($1==NULL){
+                    $$ =$3;
+                }
+                else if($3==NULL){
+                    $$ = $1;
+                }
+                else{
+                    for(auto &it:*$3){
+                        $1->push_back(it);
+                    }
+                    delete $3;
+                    $$ = $1;
+                }
+            }
             ;   
      FuncDef: FuncType _identifier '(' ')' Block
             {
@@ -248,6 +335,7 @@ Constinitval: ConstInitVal
    BlockItem: Decl
             {
                 auto ast = new BlockItemAST();
+                ast->tp="Decl";
                 ast->decl_or_stmt = $1;
                 ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
                 $$ = ast;
@@ -255,12 +343,23 @@ Constinitval: ConstInitVal
             | Stmt
             {
                 auto ast = new BlockItemAST();
+                ast->tp = "Stmt";
                 ast->decl_or_stmt = $1;
                 ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
                 $$ = ast;
             }
             ;
         Stmt: LVal '=' Exp ';'
+            {
+                auto ast = new StmtAST();
+                ast->tp = "Assign";
+                auto assign = new AssignAST();
+                assign->LVal = $1;
+                assign->ValueExp = $3;
+                ast->ret_exp = assign;
+                $$ = ast;
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+            }
             | Exp ';'
             | ';'
             | Block
@@ -274,7 +373,7 @@ Constinitval: ConstInitVal
             {
                 //temporary!!!
                 auto ast = new StmtAST();
-                ast->ret_string = "ret";
+                //ast->ret_string = "ret";
                 ast->ret_number = $2;
                 ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
                 $$ = ast;
@@ -283,7 +382,7 @@ Constinitval: ConstInitVal
             {
                 auto ast = new StmtAST();
                 ast->tp = "retexp";
-                ast->ret_string = "ret";
+                // ast->ret_string = "ret";
                 ast->ret_exp = $2;
                 ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
                 $$ = ast;
@@ -300,7 +399,18 @@ Constinitval: ConstInitVal
         Cond: LOrExp
             ;
         LVal: _identifier
+            {
+                auto ast = new LValAST();
+                ast->VarIdent = $1;
+                $$ = ast;
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+            }
             | LVal '[' Exp ']'
+            {
+                reinterpret_cast<LValAST*>($1)->IndexVec.push_back($3);
+                $$ = $1;
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+            }
             ;
   PrimaryExp: '(' Exp ')'
             {
