@@ -276,12 +276,16 @@ class Program {
     BaseAST* func_type;
     BaseAST* func_fparams;
     BaseAST* block;
+    int para_cnt = 0;
 
     //Start with FuncDefAST, we translate it to IR
     func_type = func_def->func_type;
     ident += *func_def->ident;
-    func_fparams = func_def;
+    func_fparams = func_def->func_fparams;
     block = func_def->block;
+    //get the count of parameters
+    if(func_fparams != nullptr)
+      para_cnt = dynamic_cast<FuncFParamsAST*>(func_fparams)->func_fparam.size();
 
     //Deal with FuncType
     FuncTypeAST* func_type_available = nullptr;
@@ -309,7 +313,8 @@ class Program {
 
     blockAST* block_true_available = nullptr;
     std::list<std::string> ret_stmt;
-    if (block != nullptr) {
+     if (block_true != nullptr) 
+     {
       block_true_available = dynamic_cast<blockAST*>(block_true);
       if (block_true_available != nullptr) {
         for(auto &it:block_true_available->block_item)
@@ -317,23 +322,28 @@ class Program {
           if(it != nullptr && it->type() == "BlockItemAST")
           {
             block_dealer(dynamic_cast<BlockItemAST*>(it), ir);
-            if(type_analysis == INT_type)
-              ir = new FuncIRT(ValueType::INT32, new LableIRT(ident), 0, reinterpret_cast<StatementIRT*>(ir));
-            if(type_analysis == VOID_type)
-              ir = new FuncIRT(ValueType::VOID, new LableIRT(ident), 0, reinterpret_cast<StatementIRT*>(ir));
           }
         }
       }
     }
+    else
+    {
+      ir = new StatementIRT(StmKind::Ret, new RetIRT(ValueType::VOID, NULL));
+    }
+    
+    if(type_analysis == INT_type)
+      ir = new StatementIRT(StmKind::Func, new FuncIRT(ValueType::INT32, new LableIRT(ident), para_cnt, reinterpret_cast<StatementIRT*>(ir)));
+    if(type_analysis == VOID_type)
+      ir = new StatementIRT(StmKind::Func, new FuncIRT(ValueType::VOID, new LableIRT(ident), para_cnt, reinterpret_cast<StatementIRT*>(ir)));
   }
 
  /***************************************************************************************
   *  @brief     From root ast, we analysis AST in this fuction, and construct the IR in mem
-  *  @param     root:the ast root; IR:the IR tree we wanna construct   
+  *  @param     root:the ast root; ir:the IR tree we wanna construct   
   *  @note      IR is a reference
   *  @Sample usage:     for each program class p, call p.scan(ast, ir)
  *****************************************************************************************/
-  void Scan(BaseAST* root, BaseIRT* &IR) {
+  void Scan(BaseAST* root, BaseIRT* &ir) {
     std::string comp_const("CompUnitAST");
     CompUnitAST* comp_unit = nullptr;
     BaseAST* root_raw_ptr = root;
@@ -345,16 +355,27 @@ class Program {
       }
     } // the error handling? Haven't implemented.
 
+    BaseIRT* ir1 = nullptr, *ir2 = nullptr;
     CompunitAST* Compunit = dynamic_cast<CompunitAST*>(comp_unit_true);
     if(Compunit != nullptr)
     {
-      for(auto &it:Compunit->decl_list){
+      if(Compunit->decl_list[0] != nullptr && Compunit->decl_list[0]->type() == "FuncDefAST")
+      {
+        func_dealer(dynamic_cast<FuncDefAST*>(Compunit->decl_list[0]), ir1);
+      }
+      else if(Compunit->decl_list[0] != nullptr && Compunit->decl_list[0]->type() == "DeclAST")
+      {
+        //for lv4
+      }
+      for(int i=1; i < Compunit->decl_list.size(); i++){
         //By order, we deal with different functions and declarations
-        if(it != nullptr && it->type() == "FuncDefAST")
+        if(Compunit->decl_list[i] != nullptr && Compunit->decl_list[i]->type() == "FuncDefAST")
         {
-          func_dealer(dynamic_cast<FuncDefAST*>(it), IR);
+          func_dealer(dynamic_cast<FuncDefAST*>(Compunit->decl_list[i]), ir2);
+          ir1 = new StatementIRT(StmKind::Sequence, new SequenceIRT(reinterpret_cast<StatementIRT*>(ir1), reinterpret_cast<StatementIRT*>(ir2)));
         }
       }
+      ir = ir1;
     }
   }
 };
