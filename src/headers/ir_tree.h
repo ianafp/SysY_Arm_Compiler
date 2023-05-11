@@ -551,13 +551,16 @@ void FuncIRT::Dump() const{
     std::cout<<"}\n";
 }
 void RetIRT::Dump() const{
-    std::string ValStr = this->RetExp->ExpDump();
-    CheckAndConvertExpToTemp(ValStr);
+    std::string ValueStr("");
+    if(this->RetExp!=NULL){
+        ValueStr = this->RetExp->ExpDump();
+        CheckAndConvertExpToTemp(ValueStr);
+    }
     std::cout<<"ret ";
     if(this->RetValType==ValueType::VOID){
-        std::cout<<"void";
+        std::cout<<"";
     }else{
-        std::cout<<" i32 "<<ValStr;
+        std::cout<<" i32 "<<ValueStr;
     }
     std::cout<<"\n";
 }

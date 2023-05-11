@@ -40,7 +40,7 @@ void yyerror(BaseAST* &ast, const char *s);
 %type<str_val> BType
 %type <ast_val> CompUnit Compunit FuncDef FuncType Block block BlockItem Stmt FuncFParam Decl ConstDecl VarDecl
 Constdecl Constdef ConstDef ConstExp
-%type <ast_vec_val> ConstInitVal
+%type <ast_vec_val> ConstInitVal Constinitval
 %type <ast_val> Exp UnaryExp PrimaryExp Number UnaryOp AddExp MulExp RelExp EqExp LAndExp LOrExp
 %start CompUnit
 %%
@@ -134,6 +134,7 @@ Constdecl Constdef ConstDef ConstExp
         auto ast = new VarDefAst();
         ast->VarIdent = $1;
         ast->DimSizeVec = new std::vector<BaseAST*>();
+        ast->InitValueVec = NULL;
         $$ = ast;
         $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
     }
@@ -144,9 +145,17 @@ Constdecl Constdef ConstDef ConstExp
         $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
     }
             ;
-ConstInitVal: ConstExp
+ConstInitVal: ConstExp{
+   /* $$ = new std::vector<BaseAST*>($1); */
+    
+}
             | '{' '}'
-            | '{' Constinitval '}'
+            {
+              /*  $$ = NULL; */
+            }
+            | '{' Constinitval '}'{
+                /*   $$->push_back($2); */
+            }
             ;
 Constinitval: ConstInitVal
             | Constinitval ',' ConstInitVal
