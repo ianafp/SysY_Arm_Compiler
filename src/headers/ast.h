@@ -210,6 +210,24 @@ class FuncFParamAST : public BaseAST {
   }
 };
 
+//AST for Funcfparams list(i.e. in the fundef part)
+class FuncRParamsAST : public BaseAST {
+ public:
+  std::vector<BaseAST*> exp;
+  void Dump() const override {
+    std::cout << "FuncRParamsAST { ";
+    for(auto &it:exp)
+    {
+      it->Dump();
+    }
+    std::cout << " }";
+  }
+  std::string type(void) const override {
+    std::unique_ptr<std::string> rst_ptr(new std::string("FuncRParamsAST"));
+    return *rst_ptr;
+  }
+};
+
 class BlockAST : public BaseAST {
  public:
   BaseAST* block;
@@ -443,6 +461,8 @@ class UnaryExpAST : public BaseAST {
   BaseAST* primary_exp;
   BaseAST* unary_op;
   BaseAST* unary_exp;
+  std::string* ident;
+  BaseAST* func_rparam;
   void Dump() const override {
     std::cout << "UnaryExpAST { ";
     if(tp == "primary")
@@ -452,6 +472,11 @@ class UnaryExpAST : public BaseAST {
       unary_op->Dump();
       std::cout << ", ";
       unary_exp->Dump();
+    }
+    else if(tp == "call")
+    {
+      std::cout << *ident << ", ";
+      func_rparam->Dump();
     }
     std::cout << " }";
   }

@@ -191,9 +191,7 @@ class Program {
           if(primary_exp->number != nullptr)
           {
             number = dynamic_cast<NumberAST*>(primary_exp->number);
-            ConstIRT*c = new ConstIRT(number->num);
-            ExpIRT* exp_ir = new ExpIRT(ExpKind::Const, c);
-            ir = exp_ir;
+            ir = new ExpIRT(ExpKind::Const, new ConstIRT(number->num));
           }
         }
         else if(primary_exp->tp == "exp")
@@ -217,11 +215,22 @@ class Program {
         {
           UnaryOpAST* op = dynamic_cast<UnaryOpAST*>(unary_exp->unary_op);
           if(op->op == "!")
-            ir = new BinOpIRT(BinOpKind::IsEqual, dynamic_cast<ExpIRT*>(ir), new ExpIRT(new ConstIRT(0)));
+            ir = new ExpIRT(ExpKind::BinOp, new BinOpIRT(BinOpKind::IsEqual, dynamic_cast<ExpIRT*>(ir), new ExpIRT(new ConstIRT(0))));
           else if(op->op == "-")
-            ir = new BinOpIRT(BinOpKind::minus,new ExpIRT(new ConstIRT(0)),dynamic_cast<ExpIRT*>(ir));
+            ir = new ExpIRT(ExpKind::BinOp, new BinOpIRT(BinOpKind::minus,new ExpIRT(new ConstIRT(0)),dynamic_cast<ExpIRT*>(ir)));
         }
       }
+    }
+    else if(unary_exp->tp == "call")
+    {
+      //need symbol table!
+      // if(unary_exp->func_rparam == nullptr)
+      // {
+      //   std::vector<ExpIRT*> args;
+      //   BaseIRT* label = new LableIRT();
+      //   //need look up symbol table
+      //   ir = new ExpIRT(ExpKind::Call, new CallIRT(ValueType::INT32, new LableIRT(*unary_exp->ident), reinterpret_cast<LableIRT*>(label)));
+      // }
     }
   }
 

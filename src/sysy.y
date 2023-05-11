@@ -42,7 +42,7 @@ void yyerror(BaseAST* &ast, const char *s);
 Constdecl Constdef ConstDef ConstExp
 %type <ast_vec_val> ConstInitVal Constinitval
 %type <ast_val> Exp UnaryExp PrimaryExp Number UnaryOp AddExp MulExp RelExp EqExp LAndExp LOrExp
-%type <ast_val> FuncFParams FuncFParam Funcfparam
+%type <ast_val> FuncFParams FuncFParam Funcfparam FuncRParams
 %start CompUnit
 %%
     CompUnit: Compunit
@@ -380,7 +380,23 @@ Constinitval: ConstInitVal
                 $$ = ast;
             }
             | _identifier '(' ')'
+            {
+                auto ast = new UnaryExpAST();
+                ast->tp = "call";
+                ast->ident = $1;
+                ast->func_rparam = nullptr;
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             | _identifier '(' FuncRParams ')'
+            {
+                auto ast = new UnaryExpAST();
+                ast->tp = "call";
+                ast->ident = $1;
+                ast->func_rparam = $3;
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             | UnaryOp UnaryExp
             {
                 auto ast = new UnaryExpAST();
@@ -414,7 +430,19 @@ Constinitval: ConstInitVal
             }
             ;
  FuncRParams: Exp
+            {
+                auto ast = new FuncRParamsAST();
+                ast->exp.push_back($1);
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             | FuncRParams ',' Exp
+            {
+                auto ast = reinterpret_cast<FuncRParamsAST*>($1);
+                ast->exp.push_back($3);
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             ;
       MulExp: UnaryExp
             {
