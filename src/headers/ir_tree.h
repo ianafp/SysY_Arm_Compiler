@@ -321,7 +321,7 @@ public:
     int ArgsCount;
     StatementIRT* FuncStm;
     FuncIRT(){}
-    FuncIRT(ValueType type, LableIRT *call, int count,StatementIRT* stm,ExpIRT* RetExp=NULL) : RetValType(type), FuncLable(call), ArgsCount(count),FuncStm(stm) {}
+    FuncIRT(ValueType type, LableIRT *call, int count,StatementIRT* stm= NULL) : RetValType(type), FuncLable(call), ArgsCount(count),FuncStm(stm) {}
     void Dump() const override;
     std::string ExpDump() const override {return "";};
 };
@@ -546,6 +546,7 @@ void FuncIRT::Dump() const{
     }
     std::cout<<")";
     std::cout << "{\n";
+    if(this->FuncStm!=NULL)
     this->FuncStm->Dump();
 
     std::cout<<"}\n";
