@@ -530,7 +530,10 @@ std::string AllocateIRT::ExpDump() const{
     return ResString;
 }
 void FuncIRT::Dump() const{
-    std::cout <<"define "<<this->RetValType<<" @"<<this->FuncLable->LableName<<"(";
+    std::string FuncTypeStr("");
+    if(RetValType==ValueType::INT32){ FuncTypeStr = "i32";}
+    else if(RetValType==ValueType::VOID){ FuncTypeStr = "void";}
+    std::cout <<"define "<<FuncTypeStr<<" @"<<this->FuncLable->LableName<<"(";
     TempIdAllocater::Rewind();
     int TempId;
     for(int i=0;i<this->ArgsCount;++i){

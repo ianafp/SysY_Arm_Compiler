@@ -253,23 +253,28 @@ Constinitval: ConstInitVal
             ;
         Stmt: LVal '=' Exp ';'
             | Exp ';'
+            {
+
+            }
             | ';'
             | Block
+            {
+
+            }
             | _if '(' Cond ')' Stmt
             | _if '(' Cond ')' Stmt _else Stmt
             | _while '(' Cond ')' Stmt
             | _break ';'
             | _continue ';'
             | _return ';'
-            /*| _return _const_val ';'
             {
-                //temporary!!!
                 auto ast = new StmtAST();
+                ast->tp = "retnull";
                 ast->ret_string = "ret";
-                ast->ret_number = $2;
+                ast->ret_exp = nullptr;
                 ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
                 $$ = ast;
-            }*/
+            }
             | _return Exp ';'
             {
                 auto ast = new StmtAST();

@@ -238,11 +238,25 @@ class Program {
     {
       StmtAST *stmt_available = dynamic_cast<StmtAST*>(block_item->decl_or_stmt);
       //Deal with Stmt
-      if (stmt_available != nullptr && stmt_available->ret_exp != nullptr) {
-        logic_exp_dealer(dynamic_cast<ExpAST*>(stmt_available->ret_exp)->lor_exp, ir);
-        ir =new StatementIRT(StmKind::Ret, new RetIRT(ValueType::INT32, reinterpret_cast<ExpIRT*>(ir)));
+      if(stmt_available != nullptr)
+      {
+        // return Exp ;
+        if (stmt_available->tp == "retexp") {
+          assert(stmt_available->ret_exp != nullptr);
+          logic_exp_dealer(dynamic_cast<ExpAST*>(stmt_available->ret_exp)->lor_exp, ir);
+          ir =new StatementIRT(StmKind::Ret, new RetIRT(ValueType::INT32, reinterpret_cast<ExpIRT*>(ir)));
+        }
+        // return ;
+        else if(stmt_available->tp == "retnull")
+        {
+          assert(stmt_available->ret_exp == nullptr);
+          ir =new StatementIRT(StmKind::Ret, new RetIRT(ValueType::VOID, NULL));
+        }
+        //more to continue...
       }
+      
     }
+    //deal with decl
     else if(block_item->decl_or_stmt != nullptr && block_item->decl_or_stmt->type() == "DeclAST")
     {
       //for zx to finish
