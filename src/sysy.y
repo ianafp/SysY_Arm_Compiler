@@ -237,6 +237,12 @@ Constinitval: ConstInitVal
             }
             ;
    BlockItem: Decl
+            {
+                auto ast = new BlockItemAST();
+                ast->decl_or_stmt = $1;
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             | Stmt
             {
                 auto ast = new BlockItemAST();

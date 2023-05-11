@@ -233,8 +233,6 @@ class Program {
  *****************************************************************************************/
   void block_dealer(BlockItemAST* block_item, BaseIRT* &ir)
   {
-    std::string ret_string("");
-    std::string ret_number("");
     // std::cout << "in block" << std::endl;/
     if(block_item->decl_or_stmt != nullptr && block_item->decl_or_stmt->type() == "StmtAST")
     {
@@ -244,6 +242,11 @@ class Program {
         logic_exp_dealer(dynamic_cast<ExpAST*>(stmt_available->ret_exp)->lor_exp, ir);
         ir =new StatementIRT(StmKind::Ret, new RetIRT(ValueType::INT32, reinterpret_cast<ExpIRT*>(ir)));
       }
+    }
+    else if(block_item->decl_or_stmt != nullptr && block_item->decl_or_stmt->type() == "DeclAST")
+    {
+      //for zx to finish
+    
     }
   }
 
