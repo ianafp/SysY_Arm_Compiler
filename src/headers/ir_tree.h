@@ -317,11 +317,11 @@ public:
 class FuncIRT:public BaseIRT{
 public:
     ValueType RetValType;
-    LableIRT *FuncLable, *RetLable, *ExceptionLable;
+    LableIRT *FuncLable;
     int ArgsCount;
     StatementIRT* FuncStm;
     FuncIRT(){}
-    FuncIRT(ValueType type, LableIRT *call, LableIRT *ret, LableIRT *exclable,int count,StatementIRT* stm,ExpIRT* RetExp=NULL) : RetValType(type), FuncLable(call), RetLable(ret), ExceptionLable(exclable), ArgsCount(count),FuncStm(stm) {}
+    FuncIRT(ValueType type, LableIRT *call, int count,StatementIRT* stm,ExpIRT* RetExp=NULL) : RetValType(type), FuncLable(call), ArgsCount(count),FuncStm(stm) {}
     void Dump() const override;
     std::string ExpDump() const override {return "";};
 };
