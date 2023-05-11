@@ -25,7 +25,13 @@ class Program {
   // the global variable hasn't been implemented.
   // here we can only parse one function, so the function list is not implemented as well.
  public:
-  
+
+ /***************************************************************************************
+  *  @brief     Deal with logic expression recursively
+  *  @param     exp:the ast node of logic exp; ir:the IR tree we wanna construct   
+  *  @note      ir is a reference
+  *  @Sample usage:     called in block_exp_dealer() only recursively, no need for outer call
+ *****************************************************************************************/
   void logic_exp_dealer(BaseAST* exp, BaseIRT* &ir)
   {
     // std::string return_str1("");
@@ -106,13 +112,16 @@ class Program {
       }
       ir = ir1;
     }
-    // delete ir1, ir2;
   }
 
+/***************************************************************************************
+  *  @brief     Deal with add expression recursively
+  *  @param     exp:the ast node of add exp; ir:the IR tree we wanna construct   
+  *  @note      ir is a reference
+  *  @Sample usage:     called in logic_exp_dealer() only recursively, no need for outer call
+ *****************************************************************************************/
   void add_exp_dealer(BaseAST* exp, BaseIRT* &ir)
   {
-    // std::string return_str1("");
-    // std::string return_str2("");
     BaseIRT *ir1 = new ExpIRT(), *ir2 = new ExpIRT();
     if(exp->type() == "AddExpAST")
     {
@@ -124,15 +133,11 @@ class Program {
       {
         assert(i+1 < add_exp->mul_exp.size());
         add_exp_dealer(add_exp->mul_exp[i+1], ir2);
-        // std::cout << "ir1: " << std::to_string(i) << ir1->ExpDump() << std::endl;
-        // std::cout << "ir2: " << std::to_string(i) << ir2->ExpDump() << std::endl;
         if(add_exp->op[i] == "+")
           add = new BinOpIRT(BinOpKind::plus, reinterpret_cast<ExpIRT*>(ir1), reinterpret_cast<ExpIRT*>(ir2));
         else if(add_exp->op[i] == "-")
           add = new BinOpIRT(BinOpKind::minus, reinterpret_cast<ExpIRT*>(ir1), reinterpret_cast<ExpIRT*>(ir2));
-        // std::cout << "1+" << add->ExpDump();
         ir1 = new ExpIRT(ExpKind::BinOp, add);
-        // std::cout << std::to_string(i) << ir1->ExpDump();
       }
       
       ir = ir1;
@@ -149,14 +154,10 @@ class Program {
         unary_exp_dealer(mul_exp->unary_exp[i+1], ir2);
         if(mul_exp->op[i] == "*")
           mul = new BinOpIRT(BinOpKind::mul, reinterpret_cast<ExpIRT*>(ir1), reinterpret_cast<ExpIRT*>(ir2));
-          // *rst_ptr += "%" + std::to_string(temp_cnt) + " = mul " + return_str1 + ", " + return_str2 + "\n  ";
         else if(mul_exp->op[i] == "/")
           mul = new BinOpIRT(BinOpKind::_div, reinterpret_cast<ExpIRT*>(ir1), reinterpret_cast<ExpIRT*>(ir2));
-          // *rst_ptr += "%" + std::to_string(temp_cnt) + " = div " + return_str1 + ", " + return_str2 + "\n  ";
         else if(mul_exp->op[i] == "%")
           mul = new BinOpIRT(BinOpKind::rem, reinterpret_cast<ExpIRT*>(ir1), reinterpret_cast<ExpIRT*>(ir2));
-          // *rst_ptr += "%" + std::to_string(temp_cnt) + " = mod " + return_str1 + ", " + return_str2 + "\n  ";
-        // return_str1 = "%" + std::to_string(temp_cnt++);
         ir1 = new ExpIRT(ExpKind::BinOp, mul);
       }
       ir = ir1;
@@ -164,15 +165,14 @@ class Program {
   }
 
  /***************************************************************************************
-  *  @brief     from root ast, we analysis AST in this fuction, and construct the IR in mem
-  *  @param     root:the ast root; IR:the IR tree we wanna construct   
-  *  @note      IR is a reference
-  *  @Sample usage:     for each program class p, call p.scan(ast, ir)
+  *  @brief     Deal with unary expression recursively
+  *  @param     exp:the ast node of unary exp; ir:the IR tree we wanna construct   
+  *  @note      ir is a reference
+  *  @Sample usage:     called in add_exp_dealer() only recursively, no need for outer call
  *****************************************************************************************/
   void unary_exp_dealer(BaseAST* exp, BaseIRT* &ir)
   {
     //scan all of the exp
-    // ExpIRT* return_num;
     UnaryExpAST* unary_exp = nullptr;
     //identify the type
     if(exp->type() == "UnaryExpAST")
@@ -225,6 +225,12 @@ class Program {
     }
   }
 
+/***************************************************************************************
+  *  @brief     Deal with blocks of a function recursively
+  *  @param     block_item:the ast node of block of func; ir:the IR tree we wanna construct   
+  *  @note      ir is a reference
+  *  @Sample usage:     called in func_dealer() only recursively, no need for outer call
+ *****************************************************************************************/
   void block_dealer(BlockItemAST* block_item, BaseIRT* &ir)
   {
     std::string ret_string("");
@@ -236,13 +242,13 @@ class Program {
       //Deal with Stmt
       if (stmt_available != nullptr && stmt_available->ret_exp != nullptr) {
         logic_exp_dealer(dynamic_cast<ExpAST*>(stmt_available->ret_exp)->lor_exp, ir);
-        ir = new RetIRT(ValueType::INT32, reinterpret_cast<ExpIRT*>(ir));
+        ir =new StatementIRT(StmKind::Ret, new RetIRT(ValueType::INT32, reinterpret_cast<ExpIRT*>(ir)));
       }
     }
   }
 
 /***************************************************************************************
-  *  @brief     deal with the function definition of the IR construct process recursively
+  *  @brief     Deal with the function definition of the IR construct process recursively
   *  @param     func_def:the ast node of func_def type; ir:the IR tree template we wanna construct   
   *  @note      ir is a reference
   *  @Sample usage:     called in Scan() recursively, no need for outer call
@@ -253,8 +259,6 @@ class Program {
     BaseAST* func_type;
     BaseAST* func_fparams;
     BaseAST* block;
-
-    // std::cout << "in func" << std::endl;
 
     //Start with FuncDefAST, we translate it to IR
     func_type = func_def->func_type;
@@ -297,7 +301,9 @@ class Program {
           {
             block_dealer(dynamic_cast<BlockItemAST*>(it), ir);
             if(type_analysis == INT_type)
-              ir = new FuncIRT();
+              ir = new FuncIRT(ValueType::INT32, new LableIRT(ident), 0, reinterpret_cast<StatementIRT*>(ir));
+            if(type_analysis == VOID_type)
+              ir = new FuncIRT(ValueType::VOID, new LableIRT(ident), 0, reinterpret_cast<StatementIRT*>(ir));
           }
         }
       }
@@ -305,7 +311,7 @@ class Program {
   }
 
  /***************************************************************************************
-  *  @brief     from root ast, we analysis AST in this fuction, and construct the IR in mem
+  *  @brief     From root ast, we analysis AST in this fuction, and construct the IR in mem
   *  @param     root:the ast root; IR:the IR tree we wanna construct   
   *  @note      IR is a reference
   *  @Sample usage:     for each program class p, call p.scan(ast, ir)
@@ -326,6 +332,7 @@ class Program {
     if(Compunit != nullptr)
     {
       for(auto &it:Compunit->decl_list){
+        //By order, we deal with different functions and declarations
         if(it != nullptr && it->type() == "FuncDefAST")
         {
           func_dealer(dynamic_cast<FuncDefAST*>(it), IR);

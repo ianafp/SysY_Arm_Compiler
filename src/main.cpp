@@ -50,7 +50,7 @@ int main(int argc, const char *argv[]) {
   // ExpIRT* e = new ExpIRT();
   if(ir == nullptr) cout << "error";
   
-  cout << ir->ExpDump();
+  ir->Dump();
   cout << endl;
   // ConstIRT c1(11),c2(1100), c3(1000);
   // ExpIRT c1Exp(ExpKind::Const,&c1),c2Exp(ExpKind::Const,&c2),c3Exp(ExpKind::Const,&c3);
