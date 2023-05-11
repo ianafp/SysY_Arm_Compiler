@@ -530,6 +530,9 @@ std::string AllocateIRT::ExpDump() const{
     return ResString;
 }
 void FuncIRT::Dump() const{
+    std::string FuncTypeStr("");
+    if(RetValType==ValueType::INT32){FuncTypeStr="i32";}
+    else if(RetValType==ValueType::VOID){FuncTypeStr="void";}
     std::cout <<"define "<<this->RetValType<<" @"<<this->FuncLable->LableName<<"(";
     TempIdAllocater::Rewind();
     int TempId;
@@ -548,13 +551,16 @@ void FuncIRT::Dump() const{
     std::cout<<"}\n";
 }
 void RetIRT::Dump() const{
-    std::string ValStr = this->RetExp->ExpDump();
-    CheckAndConvertExpToTemp(ValStr);
+    std::string ValueStr("");
+    if(this->RetExp!=NULL){
+        ValueStr = this->RetExp->ExpDump();
+        CheckAndConvertExpToTemp(ValueStr);
+    }
     std::cout<<"ret ";
     if(this->RetValType==ValueType::VOID){
-        std::cout<<"void";
+        std::cout<<"";
     }else{
-        std::cout<<" i32 "<<ValStr;
+        std::cout<<" i32 "<<ValueStr;
     }
     std::cout<<"\n";
 }
