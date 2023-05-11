@@ -232,9 +232,10 @@ class Program {
       //Deal with Stmt
       if (stmt_available != nullptr && stmt_available->ret_exp != nullptr) {
         logic_exp_dealer(rst_ptr, dynamic_cast<ExpAST*>(stmt_available->ret_exp)->lor_exp, ir);
-        ret_string += stmt_available->ret_string;
+        // ret_string += stmt_available->ret_string;
+        ir = new RetIRT(ValueType::INT32, reinterpret_cast<ExpIRT*>(ir));
       }
-      *rst_ptr += "" + ret_string + " " + ret_number + "\n";
+      // *rst_ptr += "" + ret_string + " " + ret_number + "\n";
     }
   }
 
@@ -274,17 +275,8 @@ class Program {
       }
     }
 
-    std::string func_header("define "); *rst_ptr += func_header;
     std::string INT_type("int");
     std::string VOID_type("void");
-    std::string func_type_append("");
-    if (type_analysis == INT_type) {
-      func_type_append += "i32";
-    }
-    *rst_ptr += func_type_append;
-    std::string func_name(" @" + ident + "(): "); *rst_ptr += func_name;
-    *rst_ptr += " {\n";
-    std::string block_name("entry:\n  "); *rst_ptr += block_name;
 
     blockAST* block_true_available = nullptr;
     std::list<std::string> ret_stmt;
@@ -296,15 +288,12 @@ class Program {
           if(it != nullptr && it->type() == "BlockItemAST")
           {
             block_dealer(rst_ptr, dynamic_cast<BlockItemAST*>(it), ir);
+            if(type_analysis == INT_type)
+              ir = new FuncIRT(ValueType::INT32, new LableIRT(ident), new LableIRT(), new LableIRT(), 0,  new StatementIRT());
           }
         }
       }
     }
-    
-    //done with the AST analysis
-    
-    // for now, we only have one basic block, just add the basic block
-    *rst_ptr += "}\n";
   }
 
   void Scan(BaseAST* root, BaseIRT* &IR) {
@@ -334,8 +323,6 @@ class Program {
         }
       }
     }
-
-    // return rst_ptr;
   }
 };
 
