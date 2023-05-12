@@ -63,8 +63,10 @@ add_executable(compiler ${SOURCES})
 # add command
 add_custom_target(
   run 
-   ${CMAKE_BINARY_DIR}/${PROJECT_NAME} test ${CMAKE_SOURCE_DIR}/debug/hello.c -o hello.ll
-  depends ${CMAKE_BINARY_DIR}/${PROJECT_NAME} 
+  # message(status "test")
+  # message(STATUS "${CMAKE_BINARY_DIR}/${PROJECT_NAME} test ${CMAKE_SOURCE_DIR}/debug/hello.c -o hello.ll" )
+  ${CMAKE_BINARY_DIR}/${PROJECT_NAME} test ${CMAKE_SOURCE_DIR}/debug/hello.c -o hello.ll
+  # depends ${CMAKE_BINARY_DIR}/${PROJECT_NAME} 
 )
 # add_dependencies(run ${PROJECT_NAME})
 

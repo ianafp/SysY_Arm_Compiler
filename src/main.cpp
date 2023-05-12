@@ -18,6 +18,8 @@ extern int yyparse(BaseAST* &ast);
 int main(int argc, const char *argv[]) {
   // 解析命令行参数. 测试脚本/评测平台要求你的编译器能接收如下参数:
   // compiler 模式 输入文件 -o 输出文件
+
+
   assert(argc == 5);
   auto mode = argv[1];
   auto input = argv[2];
@@ -43,8 +45,8 @@ int main(int argc, const char *argv[]) {
   Program p;
   BaseIRT *ir = NULL;
   p.Scan(ast, ir);
-  FILE *IRout;
-  IRout = fopen(output, "w");
+  // FILE *IRout;
+  // IRout = fopen(output, "w");
   // fputs((*ir_str).c_str(), IRout);
   // cout << *ir_str;
   // ExpIRT* e = new ExpIRT();

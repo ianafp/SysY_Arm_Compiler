@@ -38,12 +38,11 @@ void yyerror(BaseAST* &ast, const char *s);
 %token <str_val> _identifier _string 
 %token <int_val> _const_val
 %type<str_val> BType
-%type <ast_val> CompUnit Compunit FuncDef FuncType Block block BlockItem Stmt FuncFParam Decl ConstDecl VarDecl Vardecl Vardef VarDef LVal 
+%type <ast_val> CompUnit Compunit FuncDef FuncType Block block BlockItem Stmt FuncFParam Decl ConstDecl VarDecl Vardecl Vardef VarDef LVal Exp UnaryExp PrimaryExp Number UnaryOp AddExp MulExp RelExp EqExp LAndExp LOrExp FuncFParams  Funcfparam FuncRParams
 Constdecl Constdef ConstDef ConstExp
 %type <ast_vec_val> ConstInitVal Constinitval InitVal Initval
-%type <ast_val> Exp UnaryExp PrimaryExp Number UnaryOp AddExp MulExp RelExp EqExp LAndExp LOrExp
+
 %start CompUnit
-%type <ast_val> FuncFParams FuncFParam Funcfparam FuncRParams
 %%
     CompUnit: Compunit
             {
@@ -410,7 +409,7 @@ Constinitval: ConstInitVal {
             {
                 auto ast = new StmtAST();
                 ast->tp = "retnull";
-                ast->ret_string = "ret";
+                // ast->ret_string = "ret";
                 ast->ret_exp = nullptr;
                 ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
                 $$ = ast;

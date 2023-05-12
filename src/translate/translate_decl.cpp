@@ -3,5 +3,5 @@
 
 // }
 int atest(){
-
+    return 0;
 }
