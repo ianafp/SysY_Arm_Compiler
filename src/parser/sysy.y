@@ -2,16 +2,16 @@
 %code requires {
   #include <memory>
   #include <string>
-  #include "headers/ast.h"
-  #include "headers/position.h"
+  #include "ast/ast.h"
+  #include "ast/position.h"
 }
 
 %{
 #include <iostream>
 #include <memory>
 #include <string>
-#include "headers/ast.h"
-#include "headers/position.h"
+#include "ast/ast.h"
+#include "ast/position.h"
 BaseAST *root;
 extern pos_t cur_pos;
 using namespace std;

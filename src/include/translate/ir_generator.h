@@ -1,3 +1,4 @@
+
 #ifndef __IR_GENERATOR_H__
 #define __IR_GENERATOR_H__
 
@@ -17,22 +18,26 @@
 #include <iostream>
 #include <cstring>
 #include <assert.h>
-#include "ast.h"
-#include "ir_tree.h"
+#include "ast/ast.h"
+#include "ir/ir_tree.h"
 
 class Program {
  private:
   // the global variable hasn't been implemented.
   // here we can only parse one function, so the function list is not implemented as well.
  public:
-
+  /**
+   * @brief translate DeclAST to ir tree
+   * @param decl: pointer to the DeclAST
+   * @param ir: reference of ir tree pointer, return with a statement type ir tree
+  */
+  void DeclTranslater(BaseAST* decl,BaseIRT* &ir);
  /***************************************************************************************
   *  @brief     Deal with logic expression recursively
   *  @param     exp:the ast node of logic exp; ir:the IR tree we wanna construct   
   *  @note      ir is a reference
   *  @Sample usage:     called in block_exp_dealer() only recursively, no need for outer call
  *****************************************************************************************/
-
   void logic_exp_dealer(BaseAST* exp, BaseIRT* &ir)
   {
     // std::string return_str1("");

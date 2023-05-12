@@ -30,8 +30,8 @@ find_package(FLEX REQUIRED)
 find_package(BISON REQUIRED)
 
 # generate lexer/parser
-file(GLOB_RECURSE L_SOURCES "src/*.l")
-file(GLOB_RECURSE Y_SOURCES "src/*.y")
+file(GLOB_RECURSE L_SOURCES "src/parser/*.l")
+file(GLOB_RECURSE Y_SOURCES "src/parser/*.y")
 if(NOT (L_SOURCES STREQUAL "" AND Y_SOURCES STREQUAL ""))
   string(REGEX REPLACE ".*/(.*)\\.l" "${CMAKE_CURRENT_BINARY_DIR}/\\1.lex${FB_EXT}" L_OUTPUTS "${L_SOURCES}")
   string(REGEX REPLACE ".*/(.*)\\.y" "${CMAKE_CURRENT_BINARY_DIR}/\\1.tab${FB_EXT}" Y_OUTPUTS "${Y_SOURCES}")
@@ -47,15 +47,26 @@ link_directories(${LIB_DIR})
 include_directories(src)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(${INC_DIR})
-
+set(COMPILER_SRC_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/src/include)
+include_directories(${COMPILER_SRC_INCLUDE_DIR})
 # all of C/C++ source files
-file(GLOB_RECURSE C_SOURCES "src/*.c")
-file(GLOB_RECURSE CXX_SOURCES "src/*.cpp")
-file(GLOB_RECURSE CC_SOURCES "src/*.cc")
+file(GLOB_RECURSE C_SOURCES "src/*.c","src/*/*.c","src/*/*/*.c")
+file(GLOB_RECURSE CXX_SOURCES "src/*.cpp","src/*/*.cpp","src/*/*/*.cpp")
+file(GLOB_RECURSE CC_SOURCES "src/*.cc,src/*/*.cc,src/*/*/*.cc")
 set(SOURCES ${C_SOURCES} ${CXX_SOURCES} ${CC_SOURCES}
             ${FLEX_Lexer_OUTPUTS} ${BISON_Parser_OUTPUT_SOURCE})
 
 # executable
+add_library(compiler_shared STATIC ${SOURCES})
+target_link_libraries(compiler_shared)
 add_executable(compiler ${SOURCES})
+# add command
+add_custom_target(
+  run 
+   ${CMAKE_BINARY_DIR}/${PROJECT_NAME} test ${CMAKE_SOURCE_DIR}/debug/hello.c -o hello.ll
+  depends ${CMAKE_BINARY_DIR}/${PROJECT_NAME} 
+)
+# add_dependencies(run ${PROJECT_NAME})
+
 set_target_properties(compiler PROPERTIES C_STANDARD 11 CXX_STANDARD 17)
 target_link_libraries(compiler pthread dl)

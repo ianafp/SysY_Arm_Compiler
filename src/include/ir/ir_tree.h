@@ -1,9 +1,11 @@
+
 #ifndef _IR_TREE_H_
 #define _IR_TREE_H_
 #include <string>
 #include <vector>
 #include <iostream>
 #include <ctype.h>
+#include <assert.h>
 typedef enum
 {
     Func,
@@ -290,7 +292,7 @@ public:
     }
     std::string ExpDump() const override;
 };
-class AllocateIRT: public BaseAST{
+class AllocateIRT: public BaseIRT{
 public:
     int NumOfInt;
     int AlignSize;

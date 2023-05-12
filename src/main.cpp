@@ -3,8 +3,8 @@
 #include <iostream>
 #include <memory>
 #include <string>
-#include "headers/ast.h"
-#include "headers/ir_generator.h"
+#include "ast/ast.h"
+#include "translate/ir_generator.h"
 // #include "koopa.h"
 // #include "headers/ir_tree.h"
 // the header file can be found at https://github.com/pku-minic/koopa/blob/master/crates/libkoopa/include/koopa.h
