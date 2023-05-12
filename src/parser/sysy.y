@@ -43,6 +43,7 @@ Constdecl Constdef ConstDef ConstExp
 %type <ast_vec_val> ConstInitVal Constinitval InitVal Initval
 %type <ast_val> Exp UnaryExp PrimaryExp Number UnaryOp AddExp MulExp RelExp EqExp LAndExp LOrExp
 %start CompUnit
+%type <ast_val> FuncFParams FuncFParam Funcfparam FuncRParams
 %%
     CompUnit: Compunit
             {
@@ -277,13 +278,13 @@ Constinitval: ConstInitVal {
             }
             | FuncType _identifier '(' FuncFParams ')' Block
             {
-                /*auto ast = new FuncDefAST();
+                auto ast = new FuncDefAST();
                 ast->func_type = $1;
                 ast->ident = $2;
                 ast->func_fparams = $4;
                 ast->block = $6;
                 ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
-                $$ = ast;*/
+                $$ = ast;
             }
             ;
     FuncType: _int
@@ -301,10 +302,40 @@ Constinitval: ConstInitVal {
             }
             ;
  FuncFParams: FuncFParam
+            {
+                auto ast = new FuncFParamsAST();
+                ast->func_fparam.push_back($1);
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             | FuncFParams ',' FuncFParam
+            {
+                auto ast = reinterpret_cast<FuncFParamsAST*>($1);
+                ast->func_fparam.push_back($3);
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             ;
   FuncFParam: BType _identifier
+            {
+                auto ast = new FuncFParamAST();
+                ast->tp = "single";
+                ast->Btype = $1;
+                ast->ident = $2;
+                ast->func_fparam = nullptr;
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             | Funcfparam
+            {
+                auto ast = new FuncFParamAST();
+                ast->tp = "array";
+                ast->Btype = nullptr;
+                ast->ident = nullptr;
+                ast->func_fparam = $1;
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             ;
   Funcfparam: BType _identifier '[' ']'
             | Funcfparam '[' Exp ']'        
@@ -313,6 +344,13 @@ Constinitval: ConstInitVal {
             {
                 auto ast = new BlockAST();
                 ast->block = $2;
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
+            | '{' '}'
+            {
+                auto ast = new BlockAST();
+                ast->block = nullptr;
                 ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
                 $$ = ast;
             }
@@ -369,15 +407,14 @@ Constinitval: ConstInitVal {
             | _break ';'
             | _continue ';'
             | _return ';'
-            /*| _return _const_val ';'
             {
-                //temporary!!!
                 auto ast = new StmtAST();
-                //ast->ret_string = "ret";
-                ast->ret_number = $2;
+                ast->tp = "retnull";
+                ast->ret_string = "ret";
+                ast->ret_exp = nullptr;
                 ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
                 $$ = ast;
-            }*/
+            }
             | _return Exp ';'
             {
                 auto ast = new StmtAST();
@@ -447,7 +484,23 @@ Constinitval: ConstInitVal {
                 $$ = ast;
             }
             | _identifier '(' ')'
+            {
+                auto ast = new UnaryExpAST();
+                ast->tp = "call";
+                ast->ident = $1;
+                ast->func_rparam = nullptr;
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             | _identifier '(' FuncRParams ')'
+            {
+                auto ast = new UnaryExpAST();
+                ast->tp = "call";
+                ast->ident = $1;
+                ast->func_rparam = $3;
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             | UnaryOp UnaryExp
             {
                 auto ast = new UnaryExpAST();
@@ -481,7 +534,19 @@ Constinitval: ConstInitVal {
             }
             ;
  FuncRParams: Exp
+            {
+                auto ast = new FuncRParamsAST();
+                ast->exp.push_back($1);
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             | FuncRParams ',' Exp
+            {
+                auto ast = reinterpret_cast<FuncRParamsAST*>($1);
+                ast->exp.push_back($3);
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             ;
       MulExp: UnaryExp
             {

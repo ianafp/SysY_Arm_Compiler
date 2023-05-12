@@ -46,7 +46,7 @@ class CompUnitAST : public BaseAST {
 class CompunitAST : public BaseAST {
  public:
   // 用智能指针管理对象
-  std::list<BaseAST*> decl_list;
+  std::vector<BaseAST*> decl_list;
   void Dump() const override {
     
     // std::cout << "CompUnitAST { ";
@@ -143,7 +143,7 @@ class FuncDefAST : public BaseAST {
     std::cout << "FuncDefAST { ";
     func_type->Dump();
     std::cout << ", " << *ident << ", ";
-    if(func_fparams)
+    if(func_fparams!= nullptr)
       func_fparams->Dump();
     block->Dump();
     std::cout << " }";
@@ -167,13 +167,74 @@ class FuncTypeAST : public BaseAST {
     return *rst_ptr;
   }
 };
+//AST for Funcfparams list(i.e. in the fundef part)
+class FuncFParamsAST : public BaseAST {
+ public:
+  std::vector<BaseAST*> func_fparam;
+  void Dump() const override {
+    std::cout << "FuncFParamsAST { ";
+    for(auto &it:func_fparam)
+    {
+      it->Dump();
+    }
+    std::cout << " }";
+  }
+  std::string type(void) const override {
+    std::unique_ptr<std::string> rst_ptr(new std::string("FuncFParamsAST"));
+    return *rst_ptr;
+  }
+};
+
+//AST for Funcfparam (i.e. in the fundef part)
+class FuncFParamAST : public BaseAST {
+ public:
+  std::string tp;
+  std::string* Btype;
+  std::string* ident;
+  BaseAST* func_fparam;
+  void Dump() const override {
+    std::cout << "FuncFParamAST { ";
+    if(tp == "single")
+    {
+      std::cout << *Btype << ", " << *ident;
+    }
+    else if(tp == "array")
+    {
+      func_fparam->Dump();
+    }
+    std::cout << " }";
+  }
+  std::string type(void) const override {
+    std::unique_ptr<std::string> rst_ptr(new std::string("FuncFParamAST"));
+    return *rst_ptr;
+  }
+};
+
+//AST for Funcfparams list(i.e. in the fundef part)
+class FuncRParamsAST : public BaseAST {
+ public:
+  std::vector<BaseAST*> exp;
+  void Dump() const override {
+    std::cout << "FuncRParamsAST { ";
+    for(auto &it:exp)
+    {
+      it->Dump();
+    }
+    std::cout << " }";
+  }
+  std::string type(void) const override {
+    std::unique_ptr<std::string> rst_ptr(new std::string("FuncRParamsAST"));
+    return *rst_ptr;
+  }
+};
 
 class BlockAST : public BaseAST {
  public:
   BaseAST* block;
   void Dump() const override {
     std::cout << "BlockAST { ";
-    block->Dump();
+    if(block != nullptr)
+      block->Dump();
     std::cout << " }";
   }
   std::string type(void) const override {
@@ -435,6 +496,8 @@ class UnaryExpAST : public BaseAST {
   BaseAST* primary_exp;
   BaseAST* unary_op;
   BaseAST* unary_exp;
+  std::string* ident;
+  BaseAST* func_rparam;
   void Dump() const override {
     std::cout << "UnaryExpAST { ";
     if(tp == "primary")
@@ -444,6 +507,11 @@ class UnaryExpAST : public BaseAST {
       unary_op->Dump();
       std::cout << ", ";
       unary_exp->Dump();
+    }
+    else if(tp == "call")
+    {
+      std::cout << *ident << ", ";
+      func_rparam->Dump();
     }
     std::cout << " }";
   }

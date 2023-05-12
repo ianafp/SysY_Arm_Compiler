@@ -309,6 +309,8 @@ public:
     std::vector<ExpIRT *> ArgsExpList;
     CallIRT(){}
     CallIRT(ValueType type, LableIRT *call, LableIRT *ret, LableIRT *exclable, std::vector<ExpIRT *> args) : RetValType(type), FuncLable(call), RetLable(ret), ExceptionLable(exclable), ArgsExpList(args) {}
+    CallIRT(ValueType type, LableIRT *call, LableIRT *ret, LableIRT *exclable = NULL) : RetValType(type), FuncLable(call), RetLable(ret), ExceptionLable(exclable) {}
+    CallIRT(ValueType type, LableIRT *call, LableIRT *ret, std::vector<ExpIRT *> args) : RetValType(type), FuncLable(call), RetLable(ret), ArgsExpList(args) {}
     void Dump() const override
     {
     }
@@ -323,7 +325,7 @@ public:
     int ArgsCount;
     StatementIRT* FuncStm;
     FuncIRT(){}
-    FuncIRT(ValueType type, LableIRT *call, int count,StatementIRT* stm= NULL) : RetValType(type), FuncLable(call), ArgsCount(count),FuncStm(stm) {}
+    FuncIRT(ValueType type, LableIRT *call, int count,StatementIRT* stm,ExpIRT* RetExp=NULL) : RetValType(type), FuncLable(call), ArgsCount(count),FuncStm(stm) {}
     void Dump() const override;
     std::string ExpDump() const override {return "";};
 };
