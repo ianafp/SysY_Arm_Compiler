@@ -5,7 +5,7 @@
 #include <string>
 #include "ast/ast.h"
 #include "translate/ir_generator.h"
-#include"glog/logging.h"
+#include "glog/logging.h"
 // #include "koopa.h"
 // #include "headers/ir_tree.h"
 // the header file can be found at https://github.com/pku-minic/koopa/blob/master/crates/libkoopa/include/koopa.h
@@ -32,7 +32,7 @@ int main(int argc, const char *argv[]) {
   auto input = argv[2];
   auto output = argv[4];
   InitGoogleLog(argv[0]);
-  LOG(WARNING) <<"test";
+  DLOG(WARNING) <<"test";
   cout << "mode: " << mode << endl;
   cout << "output file: " << output << endl;
 

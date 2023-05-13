@@ -24,6 +24,9 @@ set(LIB_DIR "$ENV{CDE_LIBRARY_PATH}/native" CACHE STRING "directory of libraries
 set(INC_DIR "$ENV{CDE_INCLUDE_PATH}" CACHE STRING "directory of includes")
 set(THIRD_PARTY_DIR ${PROJECT_SOURCE_DIR}/thirdparty)
 set(GLOG_DIR ${THIRD_PARTY_DIR}/glog-master)
+set(GLOG_SOURCE_DIR ${THIRD_PARTY_DIR}/glog-master/src)
+set(THIRD_PARTY_BINIRY_DIR ${PROJECT_BINARY_DIR}/thirdparty)
+set(GLOG_BINIRY_DIR ${THIRD_PARTY_BINIRY_DIR}/glog-master)
 message(STATUS "Library directory: ${LIB_DIR}")
 message(STATUS "Include directory: ${INC_DIR}")
 
@@ -61,10 +64,13 @@ set(SOURCES ${C_SOURCES} ${CXX_SOURCES} ${CC_SOURCES}
 
 
 # add glog
-include_directories(${GLOG_DIR}/build ${GLOG_DIR}/src)
+add_subdirectory(${GLOG_DIR})
+include_directories(${GLOG_BINIRY_DIR})
+include_directories(${GLOG_SOURCE_DIR})
+# include_directories(${GLOG_DIR}/build ${GLOG_DIR}/src)
 # executable
 add_executable(compiler ${SOURCES})
-target_link_libraries(compiler ${GLOG_DIR}/build/libglog.so)
+target_link_libraries(compiler glog)
 # add command
 add_custom_target(
   run 

@@ -299,7 +299,7 @@ public:
     LableIRT *FuncLable;
     std::vector<ExpIRT *> ArgsExpList;
     CallIRT(){}
-    CallIRT(ValueType type, LableIRT *call, LableIRT *ret, LableIRT *exclable, std::vector<ExpIRT *> args) : RetValType(type), FuncLable(call), ArgsExpList(args) {}
+    CallIRT(ValueType type, LableIRT *call, std::vector<ExpIRT *> args) : RetValType(type), FuncLable(call), ArgsExpList(args) {}
     void Dump() const override
     {
     }

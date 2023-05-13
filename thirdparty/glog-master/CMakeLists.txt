@@ -37,13 +37,13 @@ include (GNUInstallDirs)
 option (BUILD_SHARED_LIBS "Build shared libraries" ON)
 option (PRINT_UNSYMBOLIZED_STACK_TRACES
   "Print file offsets in traces instead of symbolizing" OFF)
-option (WITH_GFLAGS "Use gflags" ON)
+option (WITH_GFLAGS "Use gflags" OFF)
 option (WITH_GTEST "Use Google Test" ON)
 option (WITH_PKGCONFIG "Enable pkg-config support" ON)
 option (WITH_SYMBOLIZE "Enable symbolize module" ON)
 option (WITH_THREADS "Enable multithreading support" ON)
 option (WITH_TLS "Enable Thread Local Storage (TLS) support" ON)
-option (WITH_UNWIND "Enable libunwind support" ON)
+option (WITH_UNWIND "Enable libunwind support" OFF)
 
 cmake_dependent_option (WITH_GMOCK "Use Google Mock" ON WITH_GTEST OFF)
 
