@@ -19,7 +19,7 @@
 #include <assert.h>
 #include "ast/ast.h"
 #include "ir/ir_tree.h"
-
+#include "symtable/symbol_table.h"
 class Program {
  private:
   // the global variable hasn't been implemented.
@@ -87,10 +87,11 @@ class Program {
   /**
    * @brief this method handle the var declarition ast translationg to ir
    * @author: zhang
+   * @param type : the symbol type, define in symbol_table.h
    * @param decl: porinter to VarDefAST to be handled
    * @param ir: referrence of ir porinters which will point to the result ir tree  
   */
-  void VarDefTranslater(VarDefAST* decl,BaseIRT* &ir);
+  void VarDefTranslater(SymType type,VarDefAST* decl,BaseIRT* &ir);
   /**
    * @brief this method handle the constdecl ast translationg to ir
    * @author: zhang

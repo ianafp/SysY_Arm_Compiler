@@ -8,6 +8,7 @@ enum class SymType
     FuncName,
     INT32
 };
+// Note: the SymbolName is not equal to the key of table, SymbolName contains "%" or "@"
 class Symbol{
 public:
     SymType SymbolType;
@@ -27,9 +28,10 @@ public:
      * @brief add a new symbol
      * @author zhang xin
      * @param sym a symbol ptr
+     * @return return  symbol name string, which contains "%" or "@" to imply global or local
      * @example: AddSymbol(new Symbol(SymType::INT32,"result"))
     */
-    void AddSymbol(Symbol* sym);
+    std::string AddSymbol(SymType type,std::string name);
     /**
      * @brief get a symbol by name
      * @param name: symbol name string
