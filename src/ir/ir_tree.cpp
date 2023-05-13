@@ -1,22 +1,4 @@
 #include"ir/ir_tree.h"
-int TempIdAllocater::counter = 0;
-bool isDigit(const std::string &str){
-    for(int i =0;i<str.length();++i){
-        if(str[i]>'9' || str[i]<0){
-            return false;
-        }
-    }
-    return true;
-}
-void CheckAndConvertExpToTemp(std::string &str)
-{
-    if (str[0] != '%' && str[0] != '@' && !isDigit(str))
-    {
-        int TempId = TempIdAllocater::GetId();
-        std::cout << "%" << TempId << " = " << str << "\n";
-        str = "%" + std::to_string(TempId);
-    }
-}
 
 void CjumpIRT::Dump() const
 {
@@ -174,20 +156,30 @@ std::string CallIRT::ExpDump() const
 {
     std::string ResString("");
     std::string RetTypeString;
+    std::vector<std::string> ArgsStr;
+    for(auto &it:this->ArgsExpList){
+        std::string TempStr = it->ExpDump();
+        CheckAndConvertExpToTemp(TempStr);
+        ArgsStr.push_back(TempStr);
+    }
+    int TempId = TempIdAllocater::GetId();
     if (RetValType == ValueType::INT32)
         RetTypeString = "i32";
     else
         RetTypeString = "void";
+    std::cout<<"%"<<TempId<<" = "<<"invoke signext " << RetTypeString << " @" << FuncLable->LableName + "(";
     ResString += "invoke signext " + RetTypeString + " @" + FuncLable->LableName + "(";
-    for (int i = 0; i < ArgsExpList.size(); ++i)
+    for (int i = 0; i < ArgsStr.size(); ++i)
     {
-        ResString += "i32 %" + ArgsExpList[i]->ExpDump();
-        if (i != ArgsExpList.size() - 1)
+        std::cout << "i32 %" << ArgsStr[i];
+        if (i != ArgsStr.size() - 1)
         {
-            ResString += ", ";
+            std::cout<<", ";
         }
     }
-    ResString += ") to lable %" + RetLable->LableName + " unwind lable " + ExceptionLable->LableName + "\n";
+    std::string RetLable = "%func_ret_"+std::to_string(TempIdAllocater::GetId());
+    std::cout<<") to lable %"<<RetLable<<" unwind lable "<<RetLable<<"\n";
+    ResString = "%" + std::to_string(TempId);
     return ResString;
 }
 std::string AllocateIRT::ExpDump() const{

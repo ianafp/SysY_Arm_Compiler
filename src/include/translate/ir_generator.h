@@ -70,6 +70,34 @@ class Program {
   *  @Sample usage:     for each program class p, call p.scan(ast, ir)
  *****************************************************************************************/
   void Scan(BaseAST* root, BaseIRT* &ir) ;
+  /**
+   * @brief this method handle the decl ast translationg to ir
+   * @author: zhang
+   * @param decl: porinter to DeclAST to be handled
+   * @param ir: referrence of ir porinters which will point to the result ir tree  
+  */
+  void DeclTranslater(DeclAST* decl,BaseIRT* &ir);
+  /**
+   * @brief this method handle the vardecl ast translationg to ir
+   * @author: zhang
+   * @param decl: porinter to VarDeclAST to be handled
+   * @param ir: referrence of ir porinters which will point to the result ir tree  
+  */
+  void VarDeclTranslater(VarDeclAST* decl,BaseIRT* &ir);
+  /**
+   * @brief this method handle the var declarition ast translationg to ir
+   * @author: zhang
+   * @param decl: porinter to VarDefAST to be handled
+   * @param ir: referrence of ir porinters which will point to the result ir tree  
+  */
+  void VarDefTranslater(VarDefAST* decl,BaseIRT* &ir);
+  /**
+   * @brief this method handle the constdecl ast translationg to ir
+   * @author: zhang
+   * @param decl: porinter to ConstDeclAST to be handled
+   * @param ir: referrence of ir porinters which will point to the result ir tree  
+  */
+  void ConstDeclTranslater(ConstDeclAST* decl,BaseIRT* &ir);
 };
 
 #endif

@@ -22,6 +22,8 @@ endif()
 # options about libraries and includes
 set(LIB_DIR "$ENV{CDE_LIBRARY_PATH}/native" CACHE STRING "directory of libraries")
 set(INC_DIR "$ENV{CDE_INCLUDE_PATH}" CACHE STRING "directory of includes")
+set(THIRD_PARTY_DIR ${PROJECT_SOURCE_DIR}/thirdparty)
+set(GLOG_DIR ${THIRD_PARTY_DIR}/glog-master)
 message(STATUS "Library directory: ${LIB_DIR}")
 message(STATUS "Include directory: ${INC_DIR}")
 
@@ -50,23 +52,25 @@ include_directories(${INC_DIR})
 set(COMPILER_SRC_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/src/include)
 include_directories(${COMPILER_SRC_INCLUDE_DIR})
 # all of C/C++ source files
-file(GLOB_RECURSE C_SOURCES "src/*.c","src/*/*.c","src/*/*/*.c")
-file(GLOB_RECURSE CXX_SOURCES "src/*.cpp","src/*/*.cpp","src/*/*/*.cpp")
-file(GLOB_RECURSE CC_SOURCES "src/*.cc,src/*/*.cc,src/*/*/*.cc")
+file(GLOB_RECURSE C_SOURCES "src/*.c" "src/*/*.c" "src/*/*/*.c")
+file(GLOB_RECURSE CXX_SOURCES "src/*.cpp" "src/*/*.cpp" "src/*/*/*.cpp")
+file(GLOB_RECURSE CC_SOURCES "src/*.cc" "src/*/*.cc" "src/*/*/*.cc")
 set(SOURCES ${C_SOURCES} ${CXX_SOURCES} ${CC_SOURCES}
             ${FLEX_Lexer_OUTPUTS} ${BISON_Parser_OUTPUT_SOURCE})
 
+
+
+# add glog
+include_directories(${GLOG_DIR}/build ${GLOG_DIR}/src)
 # executable
-add_library(compiler_shared STATIC ${SOURCES})
-target_link_libraries(compiler_shared)
 add_executable(compiler ${SOURCES})
+target_link_libraries(compiler ${GLOG_DIR}/build/libglog.so)
 # add command
 add_custom_target(
   run 
-  # message(status "test")
-  # message(STATUS "${CMAKE_BINARY_DIR}/${PROJECT_NAME} test ${CMAKE_SOURCE_DIR}/debug/hello.c -o hello.ll" )
+
   ${CMAKE_BINARY_DIR}/${PROJECT_NAME} test ${CMAKE_SOURCE_DIR}/debug/hello.c -o hello.ll
-  # depends ${CMAKE_BINARY_DIR}/${PROJECT_NAME} 
+
 )
 # add_dependencies(run ${PROJECT_NAME})
 

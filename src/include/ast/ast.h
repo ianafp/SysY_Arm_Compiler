@@ -6,13 +6,19 @@
 #include <string>
 #include <list>
 #include <vector>
-
 #include "position.h"
+
+
 /*
  * This file contains AST classes' declarations
  *
 */
-
+typedef enum{
+ConstDecl,VarDecl
+}AstKind;
+typedef enum{
+INT
+}VarType;
 // 所有 AST 的基类
 class BaseAST {
  public:
@@ -61,11 +67,10 @@ class CompunitAST : public BaseAST {
   }
 };
 
-//Declare Part
-// Decl 也是 BaseAST
+// member tp =  "ConstDecl" or "VarDecl"
 class DeclAST : public BaseAST {
  public:
-  std::string tp;
+  AstKind tp;
   BaseAST* const_or_var_decl;
   void Dump() const override{
     std::cout << "DeclAST { ";
@@ -79,18 +84,18 @@ class DeclAST : public BaseAST {
 };
 class VarDeclAST:public BaseAST{
 public:
-  std::string* BType;
+  VarType BType;
   std::vector<BaseAST*> VarDefVec;
   void Dump() const override{
     std::cout << "VarDeclAst{ ";
-    std::cout<<*BType;
+    std::cout<<"vartype:"<<BType;
     for(auto&it :VarDefVec){
       it->Dump();
     }
     std::cout << " }";
   }
 };
-class VarDefAst:public BaseAST{
+class VarDefAST:public BaseAST{
   public:
     std::string *VarIdent;
     std::vector<BaseAST*> DimSizeVec;
@@ -113,10 +118,10 @@ class VarDefAst:public BaseAST{
 };
 class ConstDeclAST : public BaseAST {
  public:
-  std::string *BType;
+  VarType BType;
   std::vector<BaseAST*>  ConstDefVec;
   void Dump() const override{
-    std::cout << "DeclAST { "<<*BType;
+    std::cout << "DeclAST { "<<"vartype:"<<BType;
     for(auto &it:ConstDefVec){
       it->Dump();
     }
@@ -127,7 +132,7 @@ class ConstDeclAST : public BaseAST {
     return *rst_ptr;
   }
   ~ConstDeclAST(){
-    delete BType;
+
   }
 };
 
@@ -189,14 +194,14 @@ class FuncFParamsAST : public BaseAST {
 class FuncFParamAST : public BaseAST {
  public:
   std::string tp;
-  std::string* Btype;
+  VarType Btype;
   std::string* ident;
   BaseAST* func_fparam;
   void Dump() const override {
     std::cout << "FuncFParamAST { ";
     if(tp == "single")
     {
-      std::cout << *Btype << ", " << *ident;
+      std::cout <<"Btype:"<<Btype << ", " << *ident;
     }
     else if(tp == "array")
     {

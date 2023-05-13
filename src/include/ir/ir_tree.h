@@ -62,6 +62,8 @@ public:
     static int GetId();
     static void Rewind();
 };
+bool isDigit(const std::string &str);
+void CheckAndConvertExpToTemp(std::string &str);
 
 class ExpIRT;
 class BinOpIRT;
@@ -284,16 +286,20 @@ public:
     void Dump() const override{}
     std::string ExpDump() const override ;
 };
+/**
+ * @author: zhang xin
+ * @brief: CallIRT class is an ir tree class with exp type
+ * @param: constructing a call irt needs return value type, function lable and args, with the ret lable implemented implicitly in ExpDump
+ * @usage: call ExpDump() to get a temp in which stores ret value of function  
+*/
 class CallIRT : public BaseIRT
 {
 public:
     ValueType RetValType;
-    LableIRT *FuncLable, *RetLable, *ExceptionLable;
+    LableIRT *FuncLable;
     std::vector<ExpIRT *> ArgsExpList;
     CallIRT(){}
-    CallIRT(ValueType type, LableIRT *call, LableIRT *ret, LableIRT *exclable, std::vector<ExpIRT *> args) : RetValType(type), FuncLable(call), RetLable(ret), ExceptionLable(exclable), ArgsExpList(args) {}
-    CallIRT(ValueType type, LableIRT *call, LableIRT *ret, LableIRT *exclable = NULL) : RetValType(type), FuncLable(call), RetLable(ret), ExceptionLable(exclable) {}
-    CallIRT(ValueType type, LableIRT *call, LableIRT *ret, std::vector<ExpIRT *> args) : RetValType(type), FuncLable(call), RetLable(ret), ArgsExpList(args) {}
+    CallIRT(ValueType type, LableIRT *call, LableIRT *ret, LableIRT *exclable, std::vector<ExpIRT *> args) : RetValType(type), FuncLable(call), ArgsExpList(args) {}
     void Dump() const override
     {
     }
@@ -332,5 +338,11 @@ public:
     void Dump() const override;
     std::string ExpDump() const override;
 };
-
+/**
+ * @auther: zhang xin
+ * @brief this function will concentenate an existing ir tree and a new stm irt to a new ir tree
+ * @param root: reference of the original ir stm tree
+ * @param stm: new statementIRT pointer
+*/
+void AddStmToTree(StatementIRT* &root,StatementIRT* stm);
 #endif
