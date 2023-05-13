@@ -1,5 +1,4 @@
 #include"ir/ir_tree.h"
-int TempIdAllocater::counter = 0;
 bool isDigit(const std::string &str){
     for(int i =0;i<str.length();++i){
         if(str[i]>'9' || str[i]<0){

@@ -1,6 +1,7 @@
 #include"translate/ir_generator.h"
-
+#include"symtable/symbol_table.h"
 void Program::DeclTranslater(DeclAST* decl,BaseIRT* &ir){
+
     if(decl->tp==AstKind::ConstDecl){
         ConstDeclTranslater(reinterpret_cast<ConstDeclAST*>(decl->const_or_var_decl),ir);
     }else{
@@ -10,6 +11,7 @@ void Program::DeclTranslater(DeclAST* decl,BaseIRT* &ir){
 }
 void Program::VarDeclTranslater(VarDeclAST* decl,BaseIRT* &ir){
     // to be implemented
+    SymbolTable test;
     if(decl->BType==VarType::INT){
 
     }

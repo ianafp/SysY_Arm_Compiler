@@ -239,5 +239,3 @@ std::string JumpIRT:: ExpDump() const  {return "";}
 std::string LableIRT:: ExpDump() const  {return "";}
 std::string SequenceIRT:: ExpDump() const  {return "";}
 std::string StatementIRT:: ExpDump() const {return "";}
-int TempIdAllocater:: GetId() { return counter++; }
-void TempIdAllocater:: Rewind(){ counter=0;}

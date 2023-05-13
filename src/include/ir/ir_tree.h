@@ -1,6 +1,7 @@
 
 #ifndef _IR_TREE_H_
 #define _IR_TREE_H_
+#include"common/temp_allocate.h"
 #include <string>
 #include <vector>
 #include <iostream>
@@ -53,15 +54,7 @@ typedef enum
     Call,
     Allocate 
 } ExpKind;
-class TempIdAllocater
-{
-private:
-    static int counter;
 
-public:
-    static int GetId();
-    static void Rewind();
-};
 bool isDigit(const std::string &str);
 void CheckAndConvertExpToTemp(std::string &str);
 
