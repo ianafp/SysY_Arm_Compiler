@@ -24,5 +24,8 @@ void SymbolTable::EnterScope(){
     this->TableVec.push_back(std::map<std::string,Symbol*>());
 }
 void SymbolTable::ExitScope(){
+    for(auto &it:this->TableVec[this->TableVec.size()-1]){
+        delete it.second;
+    }
     this->TableVec.pop_back();
 }
