@@ -93,6 +93,14 @@ class Program {
   */
   void VarDefTranslater(SymType type,VarDefAST* decl,BaseIRT* &ir);
   /**
+   * @brief this method handle the const var declarition ast translationg to ir
+   * @author: zhang
+   * @param type : the symbol type, define in symbol_table.h
+   * @param decl: porinter to VarDefAST to be handled
+   * @param ir: referrence of ir porinters which will point to the result ir tree  
+  */
+  void ConstDefTranslater(SymType type,VarDefAST* decl,BaseIRT* &ir);
+  /**
    * @brief this method handle the constdecl ast translationg to ir
    * @author: zhang
    * @param decl: porinter to ConstDeclAST to be handled

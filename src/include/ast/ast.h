@@ -7,8 +7,7 @@
 #include <list>
 #include <vector>
 #include "position.h"
-
-
+#include "glog/logging.h"
 /*
  * This file contains AST classes' declarations
  *
@@ -135,7 +134,15 @@ class ConstDeclAST : public BaseAST {
 
   }
 };
-
+class InitValTree{
+public:
+  std::vector<InitValTree*> childs;
+  std::vector<BaseAST*> keys;
+  std::vector<BaseAST*>* ConvertToInitValVec(std::vector<BaseAST*> DimVec){
+    DLOG(ERROR)<<"NOT IMPLEMENTED YET!\n";
+    return new std::vector<BaseAST*>();
+  }
+};
 //Function Definition Part
 // FuncDef 也是 BaseAST
 class FuncDefAST : public BaseAST {
@@ -158,6 +165,7 @@ class FuncDefAST : public BaseAST {
     return *rst_ptr;
   }
 };
+
 
 class FuncTypeAST : public BaseAST {
  public:

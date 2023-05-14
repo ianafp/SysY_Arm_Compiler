@@ -29,6 +29,7 @@ void yyerror(BaseAST* &ast, const char *s);
     BaseAST *ast_val;
     std::vector<int> *int_vec_val;
     std::vector<BaseAST*> *ast_vec_val;
+    InitValTree* init_val;
 }
 
 %parse-param { BaseAST* &ast }
@@ -41,7 +42,7 @@ void yyerror(BaseAST* &ast, const char *s);
 %type<type_val> BType
 %type <ast_val> CompUnit Compunit FuncDef FuncType Block block BlockItem Stmt FuncFParam Decl ConstDecl VarDecl Vardecl Vardef VarDef LVal Exp UnaryExp PrimaryExp Number UnaryOp AddExp MulExp RelExp EqExp LAndExp LOrExp FuncFParams  Funcfparam FuncRParams
 Constdecl Constdef ConstDef ConstExp
-%type <ast_vec_val> ConstInitVal Constinitval InitVal Initval
+%type <init_val> ConstInitVal Constinitval InitVal Initval
 
 %start CompUnit
 %%
@@ -128,7 +129,7 @@ Constdecl Constdef ConstDef ConstExp
             ;
     ConstDef: Constdef '=' ConstInitVal{
         auto ast = reinterpret_cast<VarDefAST*>($1);
-        ast->InitValueVec = $3;
+        ast->InitValueVec = $3->ConvertToInitValVec(ast->DimSizeVec);
         $$ = ast;
         $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
     }
@@ -149,34 +150,27 @@ Constdecl Constdef ConstDef ConstExp
     }
             ;
 ConstInitVal: ConstExp{
-    $$ = new std::vector<BaseAST*>();
-    $$->push_back($1); 
+    $$ = new InitValTree();
+    $$->keys.push_back($1); 
     
 }
             | '{' '}'
             {
-                $$ = NULL; 
+                $$ = new InitValTree(); 
             }
             | '{' Constinitval '}'{
-                $$ = $2;
+                $$ = new InitValTree();
+                $$->childs.push_back($2);
             }
             ;
-Constinitval: ConstInitVal {
-        $$ = $1;
-}
-            | Constinitval ',' ConstInitVal {
-                if($1 == NULL){
-                    $$ = $3;
-                }
-                else if($3 == NULL){
-                    $$ = $1;
-                }else{
-                    for(auto &it:*$3){
-                        $1->push_back(it);
-                    }
-                    delete $3;
-                    $$ = $1;
-                }
+Constinitval: ConstInitVal 
+            {
+                $$ = $1;
+            }
+            | Constinitval ',' ConstInitVal 
+            {
+                $1->childs.push_back($3);
+                $$ = $1;
             }
             ;
      VarDecl: Vardecl ';' 
@@ -208,7 +202,8 @@ Constinitval: ConstInitVal {
             }
             | Vardef '=' InitVal
             {
-                reinterpret_cast<VarDefAST*>($1)->InitValueVec = $3;
+                auto ast = reinterpret_cast<VarDefAST*>($1);
+                ast->InitValueVec = $3->ConvertToInitValVec(ast->DimSizeVec);
                 $$ = $1;
                 $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
             }
@@ -230,18 +225,19 @@ Constinitval: ConstInitVal {
             ;
      InitVal: Exp 
             {
-                $$ = new std::vector<BaseAST*>();
-                $$->push_back($1);
+                $$ = new InitValTree();
+                $$->keys.push_back($1);
                 
             }
             | '{' '}'
             {
-                $$ = NULL;
+                $$ = new InitValTree();
                 
             }
             | '{' Initval '}'
             {
-                $$ = $2;
+                $$ = new InitValTree();
+                $$->childs.push_back($2);
 
             }
             ;
@@ -251,19 +247,8 @@ Constinitval: ConstInitVal {
             }
             | Initval ',' InitVal
             {
-                if($1==NULL){
-                    $$ =$3;
-                }
-                else if($3==NULL){
-                    $$ = $1;
-                }
-                else{
-                    for(auto &it:*$3){
-                        $1->push_back(it);
-                    }
-                    delete $3;
-                    $$ = $1;
-                }
+                $1->childs.push_back($3);
+                $$ = $1;
             }
             ;   
      FuncDef: FuncType _identifier '(' ')' Block
