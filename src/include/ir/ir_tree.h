@@ -212,9 +212,7 @@ public:
     ExpIRT(MemIRT* mem):ContentKind(ExpKind::Mem),ExpContent(reinterpret_cast<BaseIRT*>(mem)){}
     ExpIRT(BinOpIRT* binop ):ContentKind(ExpKind::BinOp),ExpContent(reinterpret_cast<BaseIRT*>(binop)){} 
     ExpIRT(AllocateIRT* alloc):ContentKind(ExpKind::Allocate),ExpContent(reinterpret_cast<BaseIRT*>(alloc)) {}
-    void Dump() const override
-    {
-    }
+    void Dump() const override;
     std::string ExpDump() const override ;
 };
 class BinOpIRT : public BaseIRT

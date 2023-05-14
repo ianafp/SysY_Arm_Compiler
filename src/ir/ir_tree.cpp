@@ -260,7 +260,12 @@ void GlobalVarIRT::Dump() const{
         DLOG(ERROR)<<"NOT IMPLEMENTED YET!\n";
     }
 }
-
+void ExpIRT::Dump() const{
+    std::string ExpValStr = this->ExpContent->ExpDump();
+    if(ExpValStr[0]!='%'){
+        std::cout<<ExpValStr<<"\n";
+    }
+}
 std::string RetIRT:: ExpDump() const  {return "";};
 std::string FuncIRT:: ExpDump() const  {return "";};
 std::string MoveIRT:: ExpDump() const  { return "";}
