@@ -32,7 +32,7 @@ int main(int argc, const char *argv[]) {
   auto input = argv[2];
   auto output = argv[4];
   InitGoogleLog(argv[0]);
-  LOG(WARNING) <<"test";
+  DLOG(WARNING) <<"test";
   cout << "mode: " << mode << endl;
   cout << "output file: " << output << endl;
 

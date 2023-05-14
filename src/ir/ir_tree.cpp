@@ -230,6 +230,36 @@ void RetIRT::Dump() const{
     }
     std::cout<<"\n";
 }
+void GlobalVarIRT::Dump() const{
+    if(this->GlobalVarType == ValueType::INT32){
+        int AddressSpace = this->GlobalVarCount << 2;
+        std::cout<<this->GlobalVarName<<" = "<<"addrspace("<<AddressSpace<<") ";
+        if(this->IsConstant){
+            std::cout<<"constant ";
+        }else{
+            std::cout<<"global ";
+        }
+        std::cout<<"i32 ";
+        if(this->InitValVec.size()==1){
+            std::cout<<this->InitValVec[0];
+        }
+        else{
+            std::cout<<"[";
+            for(int i = 0;i <this->InitValVec.size();++i){
+                std::cout<<this->InitValVec[i];
+                if(i<this->InitValVec.size()-1){
+                    std::cout<<", ";
+                }
+            }
+            std::cout<<"]";
+        }
+        std::cout<<", align 4\n";
+    }
+    else{
+        // to be implemented
+        DLOG(ERROR)<<"NOT IMPLEMENTED YET!\n";
+    }
+}
 
 std::string RetIRT:: ExpDump() const  {return "";};
 std::string FuncIRT:: ExpDump() const  {return "";};
@@ -239,5 +269,3 @@ std::string JumpIRT:: ExpDump() const  {return "";}
 std::string LableIRT:: ExpDump() const  {return "";}
 std::string SequenceIRT:: ExpDump() const  {return "";}
 std::string StatementIRT:: ExpDump() const {return "";}
-int TempIdAllocater:: GetId() { return counter++; }
-void TempIdAllocater:: Rewind(){ counter=0;}

@@ -1,13 +1,16 @@
 
 #ifndef _IR_TREE_H_
 #define _IR_TREE_H_
+#include"common/temp_allocate.h"
 #include <string>
 #include <vector>
 #include <iostream>
 #include <ctype.h>
 #include <assert.h>
-typedef enum
+#include "glog/logging.h"
+enum class StmKind
 {
+    GlobalVar,
     Func,
     Sequence,
     Lable,
@@ -16,8 +19,8 @@ typedef enum
     Ret,
     Move,
     Exp
-} StmKind;
-typedef enum
+};
+enum class BinOpKind
 {
     plus,
     minus,
@@ -36,7 +39,7 @@ typedef enum
     IsGt,
     IsLe,
     IsGe
-} BinOpKind;
+} ;
 typedef enum
 {
     INT32,
@@ -53,15 +56,7 @@ typedef enum
     Call,
     Allocate 
 } ExpKind;
-class TempIdAllocater
-{
-private:
-    static int counter;
 
-public:
-    static int GetId();
-    static void Rewind();
-};
 bool isDigit(const std::string &str);
 void CheckAndConvertExpToTemp(std::string &str);
 
@@ -81,6 +76,7 @@ class MoveIRT;
 class LableIRT;
 class FuncIRT;
 class RetIRT;
+class GlobalVarIRT;
 class BaseIRT
 {
 public:
@@ -108,6 +104,20 @@ public:
     }
     std::string ExpDump() const override;
 
+};
+class GlobalVarIRT :public BaseIRT
+{
+public:
+    ValueType GlobalVarType;
+    std::string GlobalVarName;
+    bool IsConstant;
+    int GlobalVarCount;
+    std::vector<int> InitValVec;
+    GlobalVarIRT(ValueType type,std::string name,bool ConstFlag,int count=1):GlobalVarType(type),GlobalVarName(name),IsConstant(ConstFlag),GlobalVarCount(count){
+    }
+    GlobalVarIRT(ValueType type,std::string name,bool ConstFlag,int count,std::vector<int> init):GlobalVarType(type),GlobalVarName(name),IsConstant(ConstFlag),GlobalVarCount(count),InitValVec(init){}
+    void Dump() const override;
+    std::string ExpDump() const override{return "";}
 };
 class SequenceIRT : public BaseIRT
 {
