@@ -399,6 +399,13 @@ Constinitval: ConstInitVal {
                 ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
             }
             | Exp ';'
+            {
+                auto ast = new StmtAST();
+                ast->tp = "exp";
+                ast->ret_exp = $1;
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             | ';'
             | Block
             | _if '(' Cond ')' Stmt

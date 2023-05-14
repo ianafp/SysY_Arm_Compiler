@@ -250,7 +250,7 @@ class BlockAST : public BaseAST {
 
 class blockAST : public BaseAST {
  public:
-  std::list<BaseAST*> block_item;
+  std::vector<BaseAST*> block_item;
   void Dump() const override {
     // std::cout << "blockAST { ";
     for(auto &it:block_item)
@@ -324,7 +324,7 @@ class StmtAST : public BaseAST {
     std::cout << "StmtAST { ";
     if(tp == "retexp")
     {
-      // std::cout << ret_string << ", ";
+      std::cout << "ret , ";
       ret_exp->Dump();
       
     }
@@ -516,7 +516,8 @@ class UnaryExpAST : public BaseAST {
     else if(tp == "call")
     {
       std::cout << *ident << ", ";
-      func_rparam->Dump();
+      if(func_rparam != nullptr)
+        func_rparam->Dump();
     }
     std::cout << " }";
   }

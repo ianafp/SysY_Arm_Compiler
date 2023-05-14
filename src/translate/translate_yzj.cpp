@@ -5,7 +5,12 @@ void Program::logic_exp_dealer(BaseAST *exp, BaseIRT *&ir)
     // std::string return_str1("");
     // std::string return_str2("");
     BaseIRT *ir1 = new ExpIRT(), *ir2 = new ExpIRT();
-
+    if (exp->type() == "ExpAST")
+    {
+        ExpAST* Exp = dynamic_cast<ExpAST*>(exp);
+        assert(Exp->lor_exp != nullptr);
+        logic_exp_dealer(Exp->lor_exp, ir);
+    }
     if (exp->type() == "LOrExpAST")
     {
         // std::cout << "in logic" << std::endl;
@@ -184,14 +189,25 @@ void Program::unary_exp_dealer(BaseAST *exp, BaseIRT *&ir)
     }
     else if (unary_exp->tp == "call")
     {
-        // need symbol table!
-        //  if(unary_exp->func_rparam == nullptr)
-        //  {
-        //    std::vector<ExpIRT*> args;
-        //    BaseIRT* label = new LableIRT();
-        //    //need look up symbol table
-        //    ir = new ExpIRT(ExpKind::Call, new CallIRT(ValueType::INT32, new LableIRT(*unary_exp->ident), reinterpret_cast<LableIRT*>(label)));
-        //  }
+        // !!!***need symbol table!
+        std::vector<ExpIRT*> args;
+        if(unary_exp->func_rparam == nullptr)
+        {
+            //need look up symbol table
+            ir = new ExpIRT(ExpKind::Call, new CallIRT(ValueType::INT32, new LableIRT(*(unary_exp->ident)), args));
+            ir->ExpDump();
+        }
+        else
+        {   
+            BaseIRT* args_exp = nullptr;
+            FuncRParamsAST* func_r = dynamic_cast<FuncRParamsAST*>(unary_exp->func_rparam);
+            for(auto &it:func_r->exp)
+            {
+                logic_exp_dealer(it, args_exp);
+                args.push_back(reinterpret_cast<ExpIRT*>(args_exp));
+            }
+            ir = new ExpIRT(ExpKind::Call, new CallIRT(ValueType::INT32, new LableIRT(*unary_exp->ident), args));
+        }
     }
 }
 
@@ -216,6 +232,13 @@ void Program::block_dealer(BlockItemAST *block_item, BaseIRT *&ir)
             {
                 assert(stmt_available->ret_exp == nullptr);
                 ir = new StatementIRT(StmKind::Ret, new RetIRT(ValueType::VOID, NULL));
+            }
+            else if (stmt_available->tp == "exp")
+            {
+                assert(stmt_available->ret_exp != nullptr);
+                BaseIRT *ir_exp = nullptr;
+                logic_exp_dealer(stmt_available->ret_exp, ir_exp);
+                ir = new StatementIRT(StmKind::Exp, ir_exp);
             }
             // more to continue...
         }
@@ -271,20 +294,23 @@ void Program::func_dealer(FuncDefAST *func_def, BaseIRT *&ir)
     std::string INT_type("int");
     std::string VOID_type("void");
 
+    BaseIRT* ir1 = nullptr, *ir2 = nullptr;
     blockAST *block_true_available = nullptr;
     std::list<std::string> ret_stmt;
     if (block_true != nullptr)
     {
         block_true_available = dynamic_cast<blockAST *>(block_true);
+        //in function, there would be :blockitem -- blockitem -- ..
         if (block_true_available != nullptr)
         {
-            for (auto &it : block_true_available->block_item)
+            assert(block_true_available->block_item[0] != nullptr && block_true_available->block_item[0]->type() == "BlockItemAST");
+            block_dealer(dynamic_cast<BlockItemAST *>(block_true_available->block_item[0]), ir1);
+            for (int i=1; i<block_true_available->block_item.size(); i++)
             {
-                if (it != nullptr && it->type() == "BlockItemAST")
-                {
-                    block_dealer(dynamic_cast<BlockItemAST *>(it), ir);
-                }
+                block_dealer(dynamic_cast<BlockItemAST *>(block_true_available->block_item[i]), ir2);
+                ir1 = new StatementIRT(StmKind::Sequence, new SequenceIRT(reinterpret_cast<StatementIRT*>(ir1), reinterpret_cast<StatementIRT*>(ir2)));
             }
+            ir = ir1;
         }
     }
     else

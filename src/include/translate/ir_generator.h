@@ -27,6 +27,7 @@ class Program {
  public:
 
  /***************************************************************************************
+  *  @author    Zhoujun Ying
   *  @brief     Deal with logic expression recursively
   *  @param     exp:the ast node of logic exp; ir:the IR tree we wanna construct   
   *  @note      ir is a reference
@@ -34,6 +35,7 @@ class Program {
  *****************************************************************************************/
   void logic_exp_dealer(BaseAST* exp, BaseIRT* &ir);
 /***************************************************************************************
+  *  @author    Zhoujun Ying
   *  @brief     Deal with add expression recursively
   *  @param     exp:the ast node of add exp; ir:the IR tree we wanna construct   
   *  @note      ir is a reference
