@@ -195,7 +195,6 @@ void Program::unary_exp_dealer(BaseAST *exp, BaseIRT *&ir)
         {
             //need look up symbol table
             ir = new ExpIRT(ExpKind::Call, new CallIRT(ValueType::INT32, new LableIRT(*(unary_exp->ident)), args));
-            ir->ExpDump();
         }
         else
         {   
