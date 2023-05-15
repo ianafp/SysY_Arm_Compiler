@@ -304,7 +304,7 @@ Constinitval: ConstInitVal
   FuncFParam: BType _identifier
             {
                 auto ast = new FuncFParamAST();
-                ast->tp = "single";
+                ast->tp = ArgsType::Int32;
                 ast->Btype = $1;
                 ast->ident = $2;
                 ast->func_fparam = nullptr;
@@ -314,7 +314,7 @@ Constinitval: ConstInitVal
             | Funcfparam
             {
                 auto ast = new FuncFParamAST();
-                ast->tp = "array";
+                ast->tp = ArgsType::Int32Array;
                 //ast->Btype = nullptr;
                 ast->ident = nullptr;
                 ast->func_fparam = $1;
@@ -323,7 +323,7 @@ Constinitval: ConstInitVal
             }
             ;
   Funcfparam: BType _identifier '[' ']'
-            | Funcfparam '[' Exp ']'        
+            | Funcfparam '[' Exp ']'  
             ;
        Block: '{' block '}'
             {
@@ -468,7 +468,7 @@ Constinitval: ConstInitVal
   PrimaryExp: '(' Exp ')'
             {
                 auto ast = new PrimaryExpAST();
-                ast->tp = "exp";
+                ast->tp = PrimaryType::Exp;
                 ast->exp = $2;
                 ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
                 $$ = ast;
@@ -477,7 +477,7 @@ Constinitval: ConstInitVal
             | Number
             {
                 auto ast = new PrimaryExpAST();
-                ast->tp = "number";
+                ast->tp = PrimaryType::Num;
                 ast->number = $1;
                 ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
                 $$ = ast;
@@ -494,7 +494,7 @@ Constinitval: ConstInitVal
     UnaryExp: PrimaryExp
             {
                 auto ast = new UnaryExpAST();
-                ast->tp = "primary";
+                ast->tp = ExpType::Primary;
                 ast->primary_exp = $1;
                 ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
                 $$ = ast;
@@ -502,7 +502,7 @@ Constinitval: ConstInitVal
             | _identifier '(' ')'
             {
                 auto ast = new UnaryExpAST();
-                ast->tp = "call";
+                ast->tp = ExpType::Call;
                 ast->ident = $1;
                 ast->func_rparam = nullptr;
                 ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
@@ -511,7 +511,7 @@ Constinitval: ConstInitVal
             | _identifier '(' FuncRParams ')'
             {
                 auto ast = new UnaryExpAST();
-                ast->tp = "call";
+                ast->tp = ExpType::Call;
                 ast->ident = $1;
                 ast->func_rparam = $3;
                 ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
@@ -520,7 +520,7 @@ Constinitval: ConstInitVal
             | UnaryOp UnaryExp
             {
                 auto ast = new UnaryExpAST();
-                ast->tp = "op+exp";
+                ast->tp = ExpType::OpExp;
                 ast->unary_op = $1;
                 ast->unary_exp = $2;
                 ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;

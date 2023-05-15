@@ -8,7 +8,7 @@ void  Program::LValTranslater(LValAST* lval,BaseIRT* &ir){
         exit(-1);
     }
     // get var ir label name
-    LvalName = sym->SymbolName;
+    LvalName = sym->GetLabelStr(LvalName);
     if(sym->SymbolType == SymType::INT32){
         ir = new MemIRT(new ExpIRT(new NameIRT(LvalName)));
     }

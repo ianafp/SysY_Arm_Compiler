@@ -48,7 +48,8 @@ int main(int argc, const char *argv[]) {
   // 输出解析得到的 AST, 其实就是个字符串
   ast->Dump();
   cout << endl;
-
+  // init symbol table
+  SymbolTable::InitTable();
   // generate koopa IR
   Program p;
   BaseIRT *ir = NULL;

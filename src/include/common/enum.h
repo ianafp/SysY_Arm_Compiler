@@ -81,4 +81,13 @@ enum class SymType
     INT32,
     Int32Array
 };
+enum class ExpType{
+    Primary,
+    OpExp,
+    Call
+};
+enum class PrimaryType{
+    Exp,
+    Num
+};
 #endif
