@@ -1,18 +1,19 @@
 #include"symtable/symbol_table.h"
+std::vector<std::map<std::string,Symbol*>> SymbolTable::TableVec;
 std::string SymbolTable::AddSymbol(SymType type,std::string name){
     std::string SymName("");
-    int LastTableIndex = this->TableVec.size()-1;
+    int LastTableIndex = TableVec.size()-1;
     if(LastTableIndex!=1){
         SymName = "%" + name;
     }else{
         SymName = "@" + name;
     }
     
-    this->TableVec[LastTableIndex].insert(std::pair<std::string,Symbol*>(name,new Symbol(type,SymName)));
+    TableVec[LastTableIndex].insert(std::pair<std::string,Symbol*>(name,new Symbol(type,SymName)));
     return SymName;
 }
 Symbol* SymbolTable::FindSymbol(std::string name){
-    for(auto it = this->TableVec.rbegin();it!=this->TableVec.rend();it++){
+    for(auto it = TableVec.rbegin();it!=TableVec.rend();it++){
         auto FindIt = it->find(name);
         if(FindIt!=it->end()){
             return FindIt->second;
@@ -21,11 +22,11 @@ Symbol* SymbolTable::FindSymbol(std::string name){
     return NULL;
 }
 void SymbolTable::EnterScope(){
-    this->TableVec.push_back(std::map<std::string,Symbol*>());
+    TableVec.push_back(std::map<std::string,Symbol*>());
 }
 void SymbolTable::ExitScope(){
-    for(auto &it:this->TableVec[this->TableVec.size()-1]){
+    for(auto &it:TableVec[TableVec.size()-1]){
         delete it.second;
     }
-    this->TableVec.pop_back();
+    TableVec.pop_back();
 }

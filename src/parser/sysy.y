@@ -91,7 +91,7 @@ Constdecl Constdef ConstDef ConstExp
         Decl: ConstDecl
             {
                 auto ast = new DeclAST();
-                ast->tp = AstKind::ConstDecl;
+                ast->tp = AstType::ConstDecl;
                 ast->const_or_var_decl = $1;
                 $$ = ast;
                 $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
@@ -99,7 +99,7 @@ Constdecl Constdef ConstDef ConstExp
             | VarDecl
             {
                 auto ast = new DeclAST();
-                ast->tp = AstKind::VarDecl;
+                ast->tp = AstType::VarDecl;
                 ast->const_or_var_decl = $1;
                 $$ = ast;
                 $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
@@ -375,7 +375,7 @@ Constinitval: ConstInitVal
         Stmt: LVal '=' Exp ';'
             {
                 auto ast = new StmtAST();
-                ast->tp = "Assign";
+                ast->tp = StmtType::Assign;
                 auto assign = new AssignAST();
                 assign->LVal = $1;
                 assign->ValueExp = $3;
@@ -386,13 +386,19 @@ Constinitval: ConstInitVal
             | Exp ';'
             {
                 auto ast = new StmtAST();
-                ast->tp = "exp";
+                ast->tp = StmtType::Exp;
                 ast->ret_exp = $1;
                 ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
                 $$ = ast;
             }
             | ';'
             | Block
+            {
+                auto ast = new StmtAST();
+                ast->tp = StmtType::Block;
+                ast->ret_exp = $1;
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+            }
             | _if '(' Cond ')' Stmt
             | _if '(' Cond ')' Stmt _else Stmt
             | _while '(' Cond ')' Stmt
@@ -401,7 +407,7 @@ Constinitval: ConstInitVal
             | _return ';'
             {
                 auto ast = new StmtAST();
-                ast->tp = "retnull";
+                ast->tp = StmtType::ReturnVoid;
                 // ast->ret_string = "ret";
                 ast->ret_exp = nullptr;
                 ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
@@ -410,7 +416,7 @@ Constinitval: ConstInitVal
             | _return Exp ';'
             {
                 auto ast = new StmtAST();
-                ast->tp = "retexp";
+                ast->tp = StmtType::ReturnExp;
                 // ast->ret_string = "ret";
                 ast->ret_exp = $2;
                 ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;

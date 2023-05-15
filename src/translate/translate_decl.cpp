@@ -2,7 +2,7 @@
 
 void Program::DeclTranslater(DeclAST* decl,BaseIRT* &ir){
 
-    if(decl->tp==AstKind::ConstDecl){
+    if(decl->tp==AstType::ConstDecl){
         ConstDeclTranslater(reinterpret_cast<ConstDeclAST*>(decl->const_or_var_decl),ir);
     }else{
         VarDeclTranslater(reinterpret_cast<VarDeclAST*>(decl->const_or_var_decl),ir);

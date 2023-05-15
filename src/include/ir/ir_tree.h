@@ -73,7 +73,7 @@ class SequenceIRT;
 class JumpIRT;
 class CjumpIRT;
 class MoveIRT;
-class LableIRT;
+class LabelIRT;
 class FuncIRT;
 class RetIRT;
 class GlobalVarIRT;
@@ -94,7 +94,7 @@ public:
     StatementIRT(){}
     StatementIRT(StmKind kind, BaseIRT *content) : ContentKind(kind), StmContent(content) {}
     StatementIRT(SequenceIRT* seq):ContentKind(StmKind::Sequence),StmContent(reinterpret_cast<BaseIRT*>(seq)) {}
-    StatementIRT(LableIRT* lable):ContentKind(StmKind::Lable),StmContent(reinterpret_cast<BaseIRT*>(lable)) {}
+    StatementIRT(LabelIRT* label):ContentKind(StmKind::Lable),StmContent(reinterpret_cast<BaseIRT*>(label)) {}
     StatementIRT(JumpIRT* jump):ContentKind(StmKind::Jump),StmContent(reinterpret_cast<BaseIRT*>(jump)) {}
     StatementIRT(CjumpIRT* cjump):ContentKind(StmKind::Cjump),StmContent(reinterpret_cast<BaseIRT*>(cjump)) {}
     StatementIRT(MoveIRT* move):ContentKind(StmKind::Move),StmContent(reinterpret_cast<BaseIRT*>(move)) {}
@@ -136,13 +136,13 @@ public:
     std::string ExpDump() const override ;
     
 };
-class LableIRT : public BaseIRT
+class LabelIRT : public BaseIRT
 {
 public:
     std::string LableName;
     
-    LableIRT(std::string LableNameStr) { LableName = LableNameStr; }
-    LableIRT():LableName(std::string("temp_lable_"+std::to_string(TempIdAllocater::GetId()))){}
+    LabelIRT(std::string LableNameStr) { LableName = LableNameStr; }
+    LabelIRT():LableName(std::string("temp_lable_"+std::to_string(TempIdAllocater::GetId()))){}
     void Dump() const override
     {
         std::cout << LableName << ":\n";
@@ -152,15 +152,15 @@ public:
 class JumpIRT : public BaseIRT
 {
 public:
-    LableIRT *JumpLable;
-    // BaseIRT* lable;
+    LabelIRT *JumpLable;
+    // BaseIRT* label;
     // BaseIRT* AddressExp;
     // std::vector<BaseIRT*> LableList;
     JumpIRT(){}
-    JumpIRT(LableIRT *ArgLableIRT) : JumpLable(ArgLableIRT) {}
+    JumpIRT(LabelIRT *ArgLableIRT) : JumpLable(ArgLableIRT) {}
     void Dump() const override
     {
-        std::cout << "br lable %" << JumpLable->LableName << "\n";
+        std::cout << "br label %" << JumpLable->LableName << "\n";
     }
     std::string ExpDump() const override ;
 };
@@ -169,9 +169,9 @@ class CjumpIRT : public BaseIRT
 public:
     BinOpKind RelationOp;
     ExpIRT *LeftExp, *RightExp;
-    LableIRT *LabelTrue, *LableFalse;
+    LabelIRT *LabelTrue, *LableFalse;
     CjumpIRT(){}
-    CjumpIRT(BinOpKind kind, ExpIRT *left, ExpIRT *right, LableIRT *TrueLable, LableIRT *FalseLable)
+    CjumpIRT(BinOpKind kind, ExpIRT *left, ExpIRT *right, LabelIRT *TrueLable, LabelIRT *FalseLable)
         : RelationOp(kind), LeftExp(left), RightExp(right), LabelTrue(TrueLable), LableFalse(FalseLable)
     {
     }
@@ -297,17 +297,17 @@ public:
 /**
  * @author: zhang xin
  * @brief: CallIRT class is an ir tree class with exp type
- * @param: constructing a call irt needs return value type, function lable and args, with the ret lable implemented implicitly in ExpDump
+ * @param: constructing a call irt needs return value type, function label and args, with the ret label implemented implicitly in ExpDump
  * @usage: call ExpDump() to get a temp in which stores ret value of function  
 */
 class CallIRT : public BaseIRT
 {
 public:
     ValueType RetValType;
-    LableIRT *FuncLable;
+    LabelIRT *FuncLable;
     std::vector<ExpIRT *> ArgsExpList;
     CallIRT(){}
-    CallIRT(ValueType type, LableIRT *call, std::vector<ExpIRT *> args) : RetValType(type), FuncLable(call), ArgsExpList(args) {}
+    CallIRT(ValueType type, LabelIRT *call, std::vector<ExpIRT *> args) : RetValType(type), FuncLable(call), ArgsExpList(args) {}
     void Dump() const override
     {
     }
@@ -318,11 +318,11 @@ public:
 class FuncIRT:public BaseIRT{
 public:
     ValueType RetValType;
-    LableIRT *FuncLable;
+    LabelIRT *FuncLable;
     int ArgsCount;
     StatementIRT* FuncStm;
     FuncIRT(){}
-    FuncIRT(ValueType type, LableIRT *call, int count,StatementIRT* stm,ExpIRT* RetExp=NULL) : RetValType(type), FuncLable(call), ArgsCount(count),FuncStm(stm) {}
+    FuncIRT(ValueType type, LabelIRT *call, int count,StatementIRT* stm,ExpIRT* RetExp=NULL) : RetValType(type), FuncLable(call), ArgsCount(count),FuncStm(stm) {}
     void Dump() const override;
     std::string ExpDump() const override;
 };

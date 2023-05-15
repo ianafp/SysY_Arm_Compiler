@@ -151,6 +151,7 @@ std::string NameIRT::ExpDump() const
 std::string ConstIRT::ExpDump() const
 {
     return std::to_string(ConstVal);
+ 
 }
 std::string CallIRT::ExpDump() const
 {
@@ -171,14 +172,14 @@ std::string CallIRT::ExpDump() const
     ResString += "invoke signext " + RetTypeString + " @" + FuncLable->LableName + "(";
     for (int i = 0; i < ArgsStr.size(); ++i)
     {
-        std::cout << "i32 %" << ArgsStr[i];
+        std::cout << "i32 " << ArgsStr[i];
         if (i != ArgsStr.size() - 1)
         {
             std::cout<<", ";
         }
     }
     std::string RetLable = "%func_ret_"+std::to_string(TempIdAllocater::GetId());
-    std::cout<<") to lable %"<<RetLable<<" unwind lable "<<RetLable<<"\n";
+    std::cout<<") to lable "<<RetLable<<" unwind lable "<<RetLable<<"\n";
     ResString = "%" + std::to_string(TempId);
     return ResString;
 }
@@ -271,6 +272,6 @@ std::string FuncIRT:: ExpDump() const  {return "";};
 std::string MoveIRT:: ExpDump() const  { return "";}
 std::string CjumpIRT:: ExpDump() const  {return "";}
 std::string JumpIRT:: ExpDump() const  {return "";}
-std::string LableIRT:: ExpDump() const  {return "";}
+std::string LabelIRT:: ExpDump() const  {return "";}
 std::string SequenceIRT:: ExpDump() const  {return "";}
 std::string StatementIRT:: ExpDump() const {return "";}

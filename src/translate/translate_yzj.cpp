@@ -194,7 +194,7 @@ void Program::unary_exp_dealer(BaseAST *exp, BaseIRT *&ir)
         if(unary_exp->func_rparam == nullptr)
         {
             //need look up symbol table
-            ir = new ExpIRT(ExpKind::Call, new CallIRT(ValueType::INT32, new LableIRT(*(unary_exp->ident)), args));
+            ir = new ExpIRT(ExpKind::Call, new CallIRT(ValueType::INT32, new LabelIRT(*(unary_exp->ident)), args));
         }
         else
         {   
@@ -205,7 +205,7 @@ void Program::unary_exp_dealer(BaseAST *exp, BaseIRT *&ir)
                 logic_exp_dealer(it, args_exp);
                 args.push_back(reinterpret_cast<ExpIRT*>(args_exp));
             }
-            ir = new ExpIRT(ExpKind::Call, new CallIRT(ValueType::INT32, new LableIRT(*unary_exp->ident), args));
+            ir = new ExpIRT(ExpKind::Call, new CallIRT(ValueType::INT32, new LabelIRT(*unary_exp->ident), args));
         }
     }
 }
@@ -220,24 +220,31 @@ void Program::block_dealer(BlockItemAST *block_item, BaseIRT *&ir)
         if (stmt_available != nullptr)
         {
             // return Exp ;
-            if (stmt_available->tp == "retexp")
+            if (stmt_available->tp == StmtType::ReturnExp)
             {
                 assert(stmt_available->ret_exp != nullptr);
                 logic_exp_dealer(dynamic_cast<ExpAST *>(stmt_available->ret_exp)->lor_exp, ir);
                 ir = new StatementIRT(StmKind::Ret, new RetIRT(ValueType::INT32, reinterpret_cast<ExpIRT *>(ir)));
             }
             // return ;
-            else if (stmt_available->tp == "retnull")
+            else if (stmt_available->tp == StmtType::ReturnVoid)
             {
                 assert(stmt_available->ret_exp == nullptr);
                 ir = new StatementIRT(StmKind::Ret, new RetIRT(ValueType::VOID, NULL));
             }
-            else if (stmt_available->tp == "exp")
+            else if (stmt_available->tp == StmtType::Exp)
             {
                 assert(stmt_available->ret_exp != nullptr);
                 BaseIRT *ir_exp = nullptr;
                 logic_exp_dealer(stmt_available->ret_exp, ir_exp);
                 ir = new StatementIRT(StmKind::Exp, ir_exp);
+            }
+            // to be implemented
+            else if(stmt_available->tp == StmtType::Assign){
+
+            }
+            else if(stmt_available->tp == StmtType::Block){
+
             }
             // more to continue...
         }
@@ -318,9 +325,9 @@ void Program::func_dealer(FuncDefAST *func_def, BaseIRT *&ir)
     }
 
     if (type_analysis == INT_type)
-        ir = new StatementIRT(StmKind::Func, new FuncIRT(ValueType::INT32, new LableIRT(ident), para_cnt, reinterpret_cast<StatementIRT *>(ir)));
+        ir = new StatementIRT(StmKind::Func, new FuncIRT(ValueType::INT32, new LabelIRT(ident), para_cnt, reinterpret_cast<StatementIRT *>(ir)));
     if (type_analysis == VOID_type)
-        ir = new StatementIRT(StmKind::Func, new FuncIRT(ValueType::VOID, new LableIRT(ident), para_cnt, reinterpret_cast<StatementIRT *>(ir)));
+        ir = new StatementIRT(StmKind::Func, new FuncIRT(ValueType::VOID, new LabelIRT(ident), para_cnt, reinterpret_cast<StatementIRT *>(ir)));
 }
 
 void Program::Scan(BaseAST *root, BaseIRT *&ir)

@@ -109,6 +109,20 @@ class Program {
    * @param ir: referrence of ir porinters which will point to the result ir tree  
   */
   void ConstDeclTranslater(ConstDeclAST* decl,BaseIRT* &ir);
+  /**
+   * @brief this method handle the assign ast translating LVal = Exp to MOVE ir
+   * @param assign AssignAST ptr
+   * @param ir result ir ptr referrence
+   * 
+  */
+  void AssignTranslater(AssignAST* assign,BaseIRT* &ir);
+  /**
+   * @brief this method handle the lval ast translating LVal to MEM ir
+   * @param assign LValAST ptr
+   * @param ir result ir ptr referrence
+   * 
+  */
+  void LValAST(LValAST* lval,BaseIRT* &ir);
 };
 
 #endif
