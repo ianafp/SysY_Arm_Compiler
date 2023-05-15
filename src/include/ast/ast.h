@@ -590,7 +590,7 @@ public:
 class UnaryExpAST : public BaseAST
 {
 public:
-  std::string tp;
+  ExpType tp;
   BaseAST *primary_exp;
   BaseAST *unary_op;
   BaseAST *unary_exp;
@@ -599,15 +599,15 @@ public:
   void Dump() const override
   {
     std::cout << "UnaryExpAST { ";
-    if (tp == "primary")
+    if (tp == ExpType::Primary)
       primary_exp->Dump();
-    else if (tp == "op+exp")
+    else if (tp == ExpType::OpExp)
     {
       unary_op->Dump();
       std::cout << ", ";
       unary_exp->Dump();
     }
-    else if (tp == "call")
+    else if (tp == ExpType::Call)
     {
       std::cout << *ident << ", ";
       if (func_rparam != nullptr)
@@ -625,15 +625,15 @@ public:
 class PrimaryExpAST : public BaseAST
 {
 public:
-  std::string tp;
+  PrimaryType tp;
   BaseAST *exp;
   BaseAST *number;
   void Dump() const override
   {
     std::cout << "PrimaryExpAST { ";
-    if (tp == "exp")
+    if (tp == PrimaryType::Exp)
       exp->Dump();
-    else if (tp == "number")
+    else if (tp == PrimaryType::Num)
       number->Dump();
     std::cout << " }";
   }

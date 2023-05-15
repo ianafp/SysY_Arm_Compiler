@@ -450,7 +450,7 @@ Constinitval: ConstInitVal
   PrimaryExp: '(' Exp ')'
             {
                 auto ast = new PrimaryExpAST();
-                ast->tp = "exp";
+                ast->tp = PrimaryType::Exp;
                 ast->exp = $2;
                 ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
                 $$ = ast;
@@ -459,7 +459,7 @@ Constinitval: ConstInitVal
             | Number
             {
                 auto ast = new PrimaryExpAST();
-                ast->tp = "number";
+                ast->tp = PrimaryType::Num;
                 ast->number = $1;
                 ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
                 $$ = ast;
@@ -476,7 +476,7 @@ Constinitval: ConstInitVal
     UnaryExp: PrimaryExp
             {
                 auto ast = new UnaryExpAST();
-                ast->tp = "primary";
+                ast->tp = ExpType::Primary;
                 ast->primary_exp = $1;
                 ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
                 $$ = ast;
@@ -484,7 +484,7 @@ Constinitval: ConstInitVal
             | _identifier '(' ')'
             {
                 auto ast = new UnaryExpAST();
-                ast->tp = "call";
+                ast->tp = ExpType::Call;
                 ast->ident = $1;
                 ast->func_rparam = nullptr;
                 ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
@@ -493,7 +493,7 @@ Constinitval: ConstInitVal
             | _identifier '(' FuncRParams ')'
             {
                 auto ast = new UnaryExpAST();
-                ast->tp = "call";
+                ast->tp = ExpType::Call;
                 ast->ident = $1;
                 ast->func_rparam = $3;
                 ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
@@ -502,7 +502,7 @@ Constinitval: ConstInitVal
             | UnaryOp UnaryExp
             {
                 auto ast = new UnaryExpAST();
-                ast->tp = "op+exp";
+                ast->tp = ExpType::OpExp;
                 ast->unary_op = $1;
                 ast->unary_exp = $2;
                 ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
