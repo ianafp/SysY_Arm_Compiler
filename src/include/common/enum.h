@@ -88,6 +88,7 @@ enum class ExpType{
 };
 enum class PrimaryType{
     Exp,
-    Num
+    Num,
+    LVal
 };
 #endif

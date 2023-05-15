@@ -8,6 +8,7 @@
 #include <vector>
 #include "position.h"
 #include "glog/logging.h"
+#include "symtable/symbol_table.h"
 /*
  * This file contains AST classes' declarations
  *
@@ -91,6 +92,10 @@ public:
     std::unique_ptr<std::string> rst_ptr(new std::string("DeclAST"));
     return *rst_ptr;
   }
+  /**
+   * @brief chech the symbol decl, if right, add to symbol and return false, else return true
+  */
+  bool HandleSymbol() const;
 };
 class VarDeclAST : public BaseAST
 {
@@ -107,12 +112,16 @@ public:
     }
     std::cout << " }";
   }
+  /**
+   * @brief chech the symbol decl, if right, add to symbol and return false, else return true
+  */
+  bool HandleSymbol() const;
 };
 class VarDefAST : public BaseAST
 {
 public:
   std::string *VarIdent;
-  std::vector<BaseAST *> DimSizeVec;
+  std::vector<int> DimSizeVec;
   bool IsInited;
   std::vector<BaseAST *> *InitValueVec;
   void Dump() const override
@@ -152,20 +161,17 @@ public:
     std::unique_ptr<std::string> rst_ptr(new std::string("ConstDeclAST"));
     return *rst_ptr;
   }
-  ~ConstDeclAST()
-  {
-  }
+  /**
+   * @brief chech the symbol decl, if right, add to symbol and return false, else return true
+  */
+  bool HandleSymbol() const;
 };
 class InitValTree
 {
 public:
   std::vector<InitValTree *> childs;
   std::vector<BaseAST *> keys;
-  std::vector<BaseAST *> *ConvertToInitValVec(std::vector<BaseAST *> DimVec)
-  {
-    DLOG(ERROR) << "NOT IMPLEMENTED YET!\n";
-    return new std::vector<BaseAST *>();
-  }
+  std::vector<BaseAST *> *ConvertToInitValVec(std::vector<int> DimVec);
 };
 // Function Definition Part
 //  FuncDef 也是 BaseAST
@@ -375,6 +381,10 @@ public:
     std::unique_ptr<std::string> rst_ptr(new std::string("LValAST"));
     return *rst_ptr;
   }
+  /**
+   * @brief get value of const exp, return true if this exp is not const exp, otherwise return true
+  */
+  bool GetConstVal(int &val) const;
 };
 // tp = "block" indicate a block ast member ptr
 class StmtAST : public BaseAST
@@ -424,6 +434,10 @@ public:
     std::unique_ptr<std::string> rst_ptr(new std::string("ExpAST"));
     return *rst_ptr;
   }
+  /**
+   * @brief get value of const exp, return true if this exp is not const exp, otherwise return true
+  */
+  bool GetConstVal(int &val) const;
 };
 
 class LOrExpAST : public BaseAST
@@ -450,6 +464,10 @@ public:
     std::unique_ptr<std::string> rst_ptr(new std::string("LOrExpAST"));
     return *rst_ptr;
   }
+  /**
+   * @brief get value of const exp, return true if this exp is not const exp, otherwise return true
+  */
+  bool GetConstVal(int &val) const;
 };
 
 class LAndExpAST : public BaseAST
@@ -476,6 +494,10 @@ public:
     std::unique_ptr<std::string> rst_ptr(new std::string("LAndExpAST"));
     return *rst_ptr;
   }
+  /**
+   * @brief get value of const exp, return true if this exp is not const exp, otherwise return true
+  */
+  bool GetConstVal(int &val) const;
 };
 
 class EqExpAST : public BaseAST
@@ -502,6 +524,10 @@ public:
     std::unique_ptr<std::string> rst_ptr(new std::string("EqExpAST"));
     return *rst_ptr;
   }
+  /**
+   * @brief get value of const exp, return true if this exp is not const exp, otherwise return true
+  */
+  bool GetConstVal(int &val) const;
 };
 
 class RelExpAST : public BaseAST
@@ -528,6 +554,10 @@ public:
     std::unique_ptr<std::string> rst_ptr(new std::string("RelExpAST"));
     return *rst_ptr;
   }
+  /**
+   * @brief get value of const exp, return true if this exp is not const exp, otherwise return true
+  */
+  bool GetConstVal(int &val) const;
 };
 class AddExpAST : public BaseAST
 {
@@ -556,6 +586,10 @@ public:
     std::unique_ptr<std::string> rst_ptr(new std::string("AddExpAST"));
     return *rst_ptr;
   }
+  /**
+   * @brief get value of const exp, return true if this exp is not const exp, otherwise return true
+  */
+  bool GetConstVal(int &val) const;
 };
 
 class MulExpAST : public BaseAST
@@ -585,6 +619,10 @@ public:
     std::unique_ptr<std::string> rst_ptr(new std::string("MulExpAST"));
     return *rst_ptr;
   }
+  /**
+   * @brief get value of const exp, return true if this exp is not const exp, otherwise return true
+  */
+  bool GetConstVal(int &val) const;
 };
 
 class UnaryExpAST : public BaseAST
@@ -620,6 +658,10 @@ public:
     std::unique_ptr<std::string> rst_ptr(new std::string("UnaryExpAST"));
     return *rst_ptr;
   }
+  /**
+   * @brief get value of const exp, return true if this exp is not const exp, otherwise return true
+  */
+  bool GetConstVal(int &val) const;
 };
 
 class PrimaryExpAST : public BaseAST
@@ -628,6 +670,7 @@ public:
   PrimaryType tp;
   BaseAST *exp;
   BaseAST *number;
+  BaseAST* lval;
   void Dump() const override
   {
     std::cout << "PrimaryExpAST { ";
@@ -635,6 +678,9 @@ public:
       exp->Dump();
     else if (tp == PrimaryType::Num)
       number->Dump();
+    else{
+      lval->Dump();
+    }
     std::cout << " }";
   }
   std::string type(void) const override
@@ -642,6 +688,10 @@ public:
     std::unique_ptr<std::string> rst_ptr(new std::string("PrimaryExpAST"));
     return *rst_ptr;
   }
+  /**
+   * @brief get value of const exp, return true if this exp is not const exp, otherwise return true
+  */
+  bool GetConstVal(int &val) const;
 };
 
 class NumberAST : public BaseAST
@@ -659,6 +709,10 @@ public:
     std::unique_ptr<std::string> rst_ptr(new std::string("NumberAST"));
     return *rst_ptr;
   }
+  /**
+   * @brief get value of const exp, return true if this exp is not const exp, otherwise return true
+  */
+  bool GetConstVal(int &val) const;
 };
 
 class UnaryOpAST : public BaseAST
@@ -676,6 +730,7 @@ public:
     std::unique_ptr<std::string> rst_ptr(new std::string("UnaryOpAST"));
     return *rst_ptr;
   }
+
 };
 
 #endif

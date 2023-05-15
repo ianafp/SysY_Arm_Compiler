@@ -24,6 +24,7 @@ private:
 public:
     SymType SymbolType;
     bool ConstFlag;
+    std::vector<int> InitValVec;
     ArrayInfo ArrAttributes;
     FunctionInfo FunctionAttributes;
     /**
@@ -31,13 +32,21 @@ public:
     */
     Symbol(SymType type,bool IsConst = false):SymbolType(type),ConstFlag(IsConst){}
     /**
+     * @brief INT Symbol ctor with init
+    */
+    Symbol(SymType type,int initval,bool IsConst = false):SymbolType(type),ConstFlag(IsConst),InitValVec(initval){}
+    /**
      * @brief lable symbol ctor
     */
     Symbol():SymbolType(SymType::Label){}
     /**
-     * @brief array symbol ctor
+     * @brief array symbol ctor without init
     */
     Symbol(std::vector<int> vec,bool IsConst = false):SymbolType(SymType::Int32Array),ArrAttributes(vec){}
+    /**
+     * @brief array symbol ctor with init
+    */
+    Symbol(std::vector<int> vec,std::vector<int> initval,bool IsConst = false):SymbolType(SymType::Int32Array),InitValVec(initval),ArrAttributes(vec){}
     /**
      * @brief function symbol ctor
     */
@@ -66,10 +75,10 @@ public:
      * @brief add a new symbol
      * @author zhang xin
      * @param sym a symbol ptr
-     * @return return  symbol name string, which contains "%" or "@" to imply global or local
+     * @return return bool, true indicate duplicate symbol, false otherwise
      * @example: AddSymbol(new Symbol(SymType::INT32,"result"))
     */
-    static void AddSymbol(std::string name,Symbol* sym);
+    static bool AddSymbol(std::string name,Symbol* sym);
     /**
      * @brief get a symbol by name
      * @param name: symbol name string

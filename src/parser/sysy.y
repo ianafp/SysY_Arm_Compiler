@@ -144,7 +144,12 @@ Constdecl Constdef ConstDef ConstExp
     }
             | Constdef '[' ConstExp ']'{
         auto ast = reinterpret_cast<VarDefAST*>($1);
-        ast->DimSizeVec.push_back($3);
+        int val;
+        if(reinterpret_cast<ExpAST*>($3)->GetConstVal(val)){
+            LOG(ERROR) << "The array size can't be var\n";
+        }
+        val = 8;
+        ast->DimSizeVec.push_back(val);
         $$ = ast;
         $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
     }
@@ -218,7 +223,12 @@ Constinitval: ConstInitVal
             }
             | Vardef '[' ConstExp ']'
             {
-                reinterpret_cast<VarDefAST*>($1)->DimSizeVec.push_back($3);
+                int val;
+                if(reinterpret_cast<ExpAST*>($3)->GetConstVal(val)){
+                    LOG(ERROR)<<"the array length can not be variable\n";
+                }
+                val = 8;
+                reinterpret_cast<VarDefAST*>($1)->DimSizeVec.push_back(val);
                 $$ = $1;
                 $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
             }
@@ -456,6 +466,13 @@ Constinitval: ConstInitVal
                 $$ = ast;
             }
             | LVal
+            {
+                auto ast = new PrimaryExpAST();
+                ast->tp = PrimaryType::LVal;
+                ast->lval = $1;
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             | Number
             {
                 auto ast = new PrimaryExpAST();
