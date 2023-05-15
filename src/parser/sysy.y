@@ -40,7 +40,7 @@ void yyerror(BaseAST* &ast, const char *s);
 %token <str_val> _identifier _string 
 %token <int_val> _const_val
 %type<type_val> BType
-%type <ast_val> CompUnit Compunit FuncDef FuncType Block block BlockItem Stmt FuncFParam Decl ConstDecl VarDecl Vardecl Vardef VarDef LVal Exp UnaryExp PrimaryExp Number UnaryOp AddExp MulExp RelExp EqExp LAndExp LOrExp FuncFParams  Funcfparam FuncRParams
+%type <ast_val> CompUnit Compunit FuncDef FuncType Block block BlockItem Stmt FuncFParam Decl ConstDecl VarDecl Vardecl Vardef VarDef LVal Exp Cond UnaryExp PrimaryExp Number UnaryOp AddExp MulExp RelExp EqExp LAndExp LOrExp FuncFParams  Funcfparam FuncRParams
 Constdecl Constdef ConstDef ConstExp
 %type <init_val> ConstInitVal Constinitval InitVal Initval
 
@@ -398,9 +398,27 @@ Constinitval: ConstInitVal
                 ast->tp = StmtType::Block;
                 ast->ret_exp = $1;
                 ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
             }
             | _if '(' Cond ')' Stmt
+            {
+                auto ast = new StmtAST();
+                ast->tp = StmtType::If;
+                ast->cond_exp = $3;
+                ast->stmt_if = $5;
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             | _if '(' Cond ')' Stmt _else Stmt
+            {
+                auto ast = new StmtAST();
+                ast->tp = StmtType::IfElse;
+                ast->cond_exp = $3;
+                ast->stmt_if = $5;
+                ast->stmt_else = $7;
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             | _while '(' Cond ')' Stmt
             | _break ';'
             | _continue ';'

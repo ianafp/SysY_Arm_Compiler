@@ -384,6 +384,9 @@ public:
   // std::string ret_string;
   // int ret_number;
   BaseAST *ret_exp;
+  BaseAST *cond_exp;
+  BaseAST *stmt_if;
+  BaseAST *stmt_else;
   void Dump() const override
   {
     std::cout << "StmtAST { ";
@@ -397,6 +400,27 @@ public:
     {
       std::cout << EnumToString(tp);
       ret_exp->Dump();
+    } else if (tp == StmtType::If)
+    {
+      std::cout << EnumToString(tp);
+      std::cout << EnumToString(tp);
+      std::cout << std::endl << "if (" << std::endl;
+      cond_exp->Dump();
+      std::cout << std::endl << ") {" << std::endl;
+      stmt_if->Dump();
+      std::cout << std::endl << "}" << std::endl;
+    } else if (tp == StmtType::IfElse)
+    {
+      std::cout << EnumToString(tp);
+      std::cout << EnumToString(tp);
+      std::cout << std::endl << "if (" << std::endl;
+      cond_exp->Dump();
+      std::cout << std::endl << ") {" << std::endl;
+      stmt_if->Dump();
+      std::cout << std::endl << "}" << std::endl;
+      std::cout << std::endl << "else {" << std::endl;
+      stmt_else->Dump();
+      std::cout << std::endl << "}" << std::endl;
     }
     std::cout << " }";
   }
