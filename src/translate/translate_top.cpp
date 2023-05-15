@@ -141,7 +141,7 @@ void Program::func_dealer(FuncDefAST *func_def, BaseIRT *&ir)
         }
     }
     
-    SymbolTable::AddSymbol(ident, new Symbol(ident, ret, args));
+    SymbolTable::AddSymbol(ident, new Symbol( ret, args));
 }
 
 void Program::Scan(BaseAST *root, BaseIRT *&ir)
