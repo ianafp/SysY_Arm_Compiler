@@ -122,7 +122,7 @@ class Program {
    * @param ir result ir ptr referrence
    * 
   */
-  void LValAST(LValAST* lval,BaseIRT* &ir);
+  void LValTranslater(LValAST* lval,BaseIRT* &ir);
 };
 
 #endif

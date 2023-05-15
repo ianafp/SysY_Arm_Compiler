@@ -24,8 +24,21 @@ public:
     bool ConstFlag;
     ArrayInfo ArrAttributes;
     FunctionInfo FunctionAttributes;
+    /**
+     * @brief INT Symbol ctor
+    */
+    Symbol(SymType type,std::string name,bool IsConst = false):SymbolType(type),SymbolName(name),ConstFlag(IsConst){}
+    /**
+     * @brief lable symbol ctor
+    */
     Symbol(std::string name):SymbolType(SymType::Label),SymbolName(name){}
+    /**
+     * @brief array symbol ctor
+    */
     Symbol(std::string name,std::vector<int> vec,bool IsConst = false):SymbolType(SymType::Int32Array),SymbolName(name),ArrAttributes(vec){}
+    /**
+     * @brief function symbol ctor
+    */
     Symbol(std::string name,ValueType ret,std::vector<ArgsType> args):SymbolType(SymType::FuncName),FunctionAttributes(ret,args){}
 };
 class SymbolTable{
