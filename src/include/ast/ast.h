@@ -234,18 +234,18 @@ public:
 class FuncFParamAST : public BaseAST
 {
 public:
-  std::string tp;
+  ArgsType tp;
   VarType Btype;
   std::string *ident;
   BaseAST *func_fparam;
   void Dump() const override
   {
     std::cout << "FuncFParamAST { ";
-    if (tp == "single")
+    if (tp == ArgsType::Int32)
     {
       std::cout << "Btype:" << EnumToString(Btype) << ", " << *ident;
     }
-    else if (tp == "array")
+    else if (tp == ArgsType::Int32Array)
     {
       func_fparam->Dump();
     }

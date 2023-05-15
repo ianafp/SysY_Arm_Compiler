@@ -304,7 +304,7 @@ Constinitval: ConstInitVal
   FuncFParam: BType _identifier
             {
                 auto ast = new FuncFParamAST();
-                ast->tp = "single";
+                ast->tp = ArgsType::Int32;
                 ast->Btype = $1;
                 ast->ident = $2;
                 ast->func_fparam = nullptr;
@@ -314,7 +314,7 @@ Constinitval: ConstInitVal
             | Funcfparam
             {
                 auto ast = new FuncFParamAST();
-                ast->tp = "array";
+                ast->tp = ArgsType::Int32Array;
                 //ast->Btype = nullptr;
                 ast->ident = nullptr;
                 ast->func_fparam = $1;
@@ -323,7 +323,7 @@ Constinitval: ConstInitVal
             }
             ;
   Funcfparam: BType _identifier '[' ']'
-            | Funcfparam '[' Exp ']'        
+            | Funcfparam '[' Exp ']'  
             ;
        Block: '{' block '}'
             {

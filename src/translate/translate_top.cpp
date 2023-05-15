@@ -50,18 +50,18 @@ void Program::func_dealer(FuncDefAST *func_def, BaseIRT *&ir)
 {
     std::string result(""), ident("");
     BaseAST *func_type;
-    BaseAST *func_fparams;
+    FuncFParamsAST *func_fparams;
     BaseAST *block;
     int para_cnt = 0;
 
     // Start with FuncDefAST, we translate it to IR
     func_type = func_def->func_type;
     ident += *func_def->ident;
-    func_fparams = func_def->func_fparams;
+    func_fparams = dynamic_cast<FuncFParamsAST*>(func_def->func_fparams);
     block = func_def->block;
     // get the count of parameters
     if (func_fparams != nullptr)
-        para_cnt = dynamic_cast<FuncFParamsAST *>(func_fparams)->func_fparam.size();
+        para_cnt = func_fparams->func_fparam.size();
 
     // Deal with FuncType
     FuncTypeAST *func_type_available = nullptr;
@@ -114,10 +114,34 @@ void Program::func_dealer(FuncDefAST *func_def, BaseIRT *&ir)
         ir = new StatementIRT(StmKind::Ret, new RetIRT(ValueType::VOID, NULL));
     }
 
+    //construct func_ir tree
+    ValueType ret;
     if (type_analysis == INT_type)
+    {
         ir = new StatementIRT(StmKind::Func, new FuncIRT(ValueType::INT32, new LabelIRT(ident), para_cnt, reinterpret_cast<StatementIRT *>(ir)));
+        ret = ValueType::INT32;
+        
+    }
     if (type_analysis == VOID_type)
+    {
         ir = new StatementIRT(StmKind::Func, new FuncIRT(ValueType::VOID, new LabelIRT(ident), para_cnt, reinterpret_cast<StatementIRT *>(ir)));
+        ret = ValueType::VOID;
+    }
+        
+    //add symbol table of this function
+    std::vector<ArgsType> args;
+    if(func_fparams != nullptr)
+    {
+        for(int i=0; i<para_cnt; i++)
+        {
+            if(dynamic_cast<FuncFParamAST *>(func_fparams->func_fparam[i])->tp == ArgsType::Int32)
+                args.push_back(ArgsType::Int32);
+            else if(dynamic_cast<FuncFParamAST *>(func_fparams->func_fparam[i])->tp == ArgsType::Int32Array)
+                args.push_back(ArgsType::Int32Array);
+        }
+    }
+    
+    SymbolTable::AddSymbol(ident, new Symbol(ident, ret, args));
 }
 
 void Program::Scan(BaseAST *root, BaseIRT *&ir)
