@@ -1,16 +1,14 @@
 #include"symtable/symbol_table.h"
 std::vector<std::map<std::string,Symbol*>> SymbolTable::TableVec;
-std::string SymbolTable::AddSymbol(std::string name,Symbol* sym){
+void SymbolTable::AddSymbol(std::string name,Symbol* sym){
     std::string SymName("");
     int LastTableIndex = TableVec.size()-1;
     if(LastTableIndex!=1){
-        SymName = "%" + name;
+        sym->GlobalFlag = false;
     }else{
-        SymName = "@" + name;
+        sym->GlobalFlag = true;
     }
-    
     TableVec[LastTableIndex].insert(std::pair<std::string,Symbol*>(name,sym));
-    return SymName;
 }
 Symbol* SymbolTable::FindSymbol(std::string name){
     for(auto it = TableVec.rbegin();it!=TableVec.rend();it++){
@@ -29,4 +27,19 @@ void SymbolTable::ExitScope(){
         delete it.second;
     }
     TableVec.pop_back();
+}
+void SymbolTable::InitTable(){
+    if(TableVec.size()==0){
+        TableVec.push_back(std::map<std::string,Symbol*>());
+    }
+}
+bool Symbol::GetGlobalFlag() const{
+    return this->GlobalFlag;
+}
+std::string Symbol:: GetLabelStr(std::string SymName) const{
+    if(this->GlobalFlag){
+        return "@" + SymName;
+    }else{
+        return "%" + SymName;
+    }
 }

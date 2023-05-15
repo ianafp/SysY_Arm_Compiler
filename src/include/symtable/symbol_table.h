@@ -4,6 +4,7 @@
 #include<vector>
 #include"common/enum.h"
 class FunctionInfo{
+
 public:
     ValueType RetValType;
     std::vector<ArgsType> ArgsTypeVec;
@@ -16,30 +17,41 @@ public:
     ArrayInfo(){}
     ArrayInfo(std::vector<int> vec):ArrayDimVec(vec){}
 };
-// Note: the SymbolName is not equal to the key of table, SymbolName contains "%" or "@"
 class Symbol{
+    friend class SymbolTable;
+private:
+    bool GlobalFlag;
 public:
     SymType SymbolType;
-    std::string SymbolName;
     bool ConstFlag;
     ArrayInfo ArrAttributes;
     FunctionInfo FunctionAttributes;
     /**
      * @brief INT Symbol ctor
     */
-    Symbol(SymType type,std::string name,bool IsConst = false):SymbolType(type),SymbolName(name),ConstFlag(IsConst){}
+    Symbol(SymType type,bool IsConst = false):SymbolType(type),ConstFlag(IsConst){}
     /**
      * @brief lable symbol ctor
     */
-    Symbol(std::string name):SymbolType(SymType::Label),SymbolName(name){}
+    Symbol():SymbolType(SymType::Label){}
     /**
      * @brief array symbol ctor
     */
-    Symbol(std::string name,std::vector<int> vec,bool IsConst = false):SymbolType(SymType::Int32Array),SymbolName(name),ArrAttributes(vec){}
+    Symbol(std::vector<int> vec,bool IsConst = false):SymbolType(SymType::Int32Array),ArrAttributes(vec){}
     /**
      * @brief function symbol ctor
     */
-    Symbol(std::string name,ValueType ret,std::vector<ArgsType> args):SymbolType(SymType::FuncName),FunctionAttributes(ret,args){}
+    Symbol(ValueType ret,std::vector<ArgsType> args):SymbolType(SymType::FuncName),FunctionAttributes(ret,args){}
+
+    /**
+     * @brief get a bool return val, true indacates this symbol is global
+    */
+    bool GetGlobalFlag() const;
+    /**
+     * @brief this function process the symbol name to label (add '%' or '@' depends on global flag)
+    */
+   std::string GetLabelStr(std::string SymName) const;
+
 };
 class SymbolTable{
 public:
@@ -57,7 +69,7 @@ public:
      * @return return  symbol name string, which contains "%" or "@" to imply global or local
      * @example: AddSymbol(new Symbol(SymType::INT32,"result"))
     */
-    static std::string AddSymbol(std::string name,Symbol* sym);
+    static void AddSymbol(std::string name,Symbol* sym);
     /**
      * @brief get a symbol by name
      * @param name: symbol name string
@@ -73,6 +85,10 @@ public:
      * @brief call when you exit a  scope
     */
     static void ExitScope();
+    /**
+     * @brief Call only once in main, then you can use symbol table
+    */
+    static void InitTable();
 
 private:
     static std::vector<std::map<std::string,Symbol*>> TableVec;
