@@ -2,61 +2,13 @@
 #ifndef _IR_TREE_H_
 #define _IR_TREE_H_
 #include"common/temp_allocate.h"
+#include"common/enum.h"
 #include <string>
 #include <vector>
 #include <iostream>
 #include <ctype.h>
 #include <assert.h>
 #include "glog/logging.h"
-enum class StmKind
-{
-    GlobalVar,
-    Func,
-    Sequence,
-    Lable,
-    Jump,
-    Cjump,
-    Ret,
-    Move,
-    Exp
-};
-enum class BinOpKind
-{
-    plus,
-    minus,
-    mul,
-    _div,
-    rem,
-    LeftShift,
-    RightShift,
-    Neg,
-    LogicNot,
-    LogicAnd,
-    LogicOr,
-    IsEqual,
-    IsNe,
-    IsLt,
-    IsGt,
-    IsLe,
-    IsGe
-} ;
-typedef enum
-{
-    INT32,
-    VOID
-} ValueType;
-typedef enum
-{
-    BinOp,
-    Mem,
-    Temp,
-    ESeq,
-    Name,
-    Const,
-    Call,
-    Allocate 
-} ExpKind;
-
 bool isDigit(const std::string &str);
 void CheckAndConvertExpToTemp(std::string &str);
 

@@ -1,6 +1,6 @@
 #include"symtable/symbol_table.h"
 std::vector<std::map<std::string,Symbol*>> SymbolTable::TableVec;
-std::string SymbolTable::AddSymbol(SymType type,std::string name){
+std::string SymbolTable::AddSymbol(std::string name,Symbol* sym){
     std::string SymName("");
     int LastTableIndex = TableVec.size()-1;
     if(LastTableIndex!=1){
@@ -9,7 +9,7 @@ std::string SymbolTable::AddSymbol(SymType type,std::string name){
         SymName = "@" + name;
     }
     
-    TableVec[LastTableIndex].insert(std::pair<std::string,Symbol*>(name,new Symbol(type,SymName)));
+    TableVec[LastTableIndex].insert(std::pair<std::string,Symbol*>(name,sym));
     return SymName;
 }
 Symbol* SymbolTable::FindSymbol(std::string name){

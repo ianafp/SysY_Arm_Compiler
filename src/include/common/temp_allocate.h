@@ -9,4 +9,5 @@ public:
     static int GetId();
     static void Rewind();
 };
+
 #endif

@@ -1,6 +1,6 @@
 #ifndef __AST_H__
 #define __AST_H__
-
+#include"common/enum.h"
 #include <iostream>
 #include <memory>
 #include <string>
@@ -12,28 +12,7 @@
  * This file contains AST classes' declarations
  *
  */
-enum class AstType
-{
-  ConstDecl,
-  VarDecl,
-};
-enum class VarType
-{
-  INT
-};
-enum class StmtType
-{
-  Assign,
-  Exp,
-  Block,
-  If,
-  IfElse,
-  While,
-  Break,
-  Continue,
-  ReturnExp,
-  ReturnVoid
-};
+
 std::string EnumToString(AstType type);
 std::string EnumToString(VarType type);
 std::string EnumToString(StmtType type);
