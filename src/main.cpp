@@ -1,6 +1,7 @@
 #include <cassert>
 #include <cstdio>
 #include <iostream>
+#include<fstream>
 #include <memory>
 #include <string>
 #include "ast/ast.h"
@@ -66,6 +67,13 @@ int main(int argc, const char *argv[]) {
   
   ir->Dump();
   cout << endl;
+
+  visual.end_visualize();
+  cout << visual.output();
+
+  freopen(output, "w", stdout);
+  ir->Dump();
+  // cout.rdbuf(pOld);
   // ConstIRT c1(11),c2(1100), c3(1000);
   // ExpIRT c1Exp(ExpKind::Const,&c1),c2Exp(ExpKind::Const,&c2),c3Exp(ExpKind::Const,&c3);
   // BinOpIRT StoreAddr(BinOpKind::plus,&c1Exp,&c2Exp);
@@ -75,8 +83,6 @@ int main(int argc, const char *argv[]) {
   // MemIRT StoreAddrMem(&StoreAddrExp);
   // MoveIRT TestMove(&StoreAddrMem,new ExpIRT(new ConstIRT(3333)));
   // TestMove.Dump();
-  visual.end_visualize();
-  cout << visual.output();
 
   return 0;
 }
