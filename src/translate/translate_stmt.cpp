@@ -1,4 +1,52 @@
 #include"translate/ir_generator.h"
+//deal with statement
+void Program::stmt_dealer(StmtAST* stmt_available, BaseIRT* &ir)
+{
+    // Deal with Stmt
+    if (stmt_available != nullptr)
+    {
+        // return Exp ;
+        if (stmt_available->tp == StmtType::ReturnExp)
+        {
+            assert(stmt_available->ret_exp != nullptr);
+            logic_exp_dealer(dynamic_cast<ExpAST *>(stmt_available->ret_exp)->lor_exp, ir);
+            ir = new StatementIRT(StmKind::Ret, new RetIRT(ValueType::INT32, reinterpret_cast<ExpIRT *>(ir)));
+        }
+        // return ;
+        else if (stmt_available->tp == StmtType::ReturnVoid)
+        {
+            assert(stmt_available->ret_exp == nullptr);
+            ir = new StatementIRT(StmKind::Ret, new RetIRT(ValueType::VOID, NULL));
+        }
+        // if (cond) stmt_if, without else stmt_else
+        else if (stmt_available->tp == StmtType::If)
+        {
+            BranchTranslater(stmt_available, ir, false);
+        }
+        // if (cond) stmt_if, else stmt_else
+        else if (stmt_available->tp == StmtType::IfElse)
+        {
+            BranchTranslater(stmt_available, ir, true);
+        }
+        else if (stmt_available->tp == StmtType::Exp)
+        {
+            assert(stmt_available->ret_exp != nullptr);
+            BaseIRT *ir_exp = nullptr;
+            logic_exp_dealer(stmt_available->ret_exp, ir_exp);
+            ir = new StatementIRT(StmKind::Exp, ir_exp);
+        }
+        // to be implemented
+        else if(stmt_available->tp == StmtType::Assign){
+
+        }
+        else if(stmt_available->tp == StmtType::Block){
+
+        }
+        // more to continue...
+    }
+    //Further: need to consider: what if no return here in a void function while there are exp or other stmt??
+}
+
 void  Program::LValTranslater(LValAST* lval,BaseIRT* &ir){
     std::string LvalName = *lval->VarIdent;
     // get var ir label name
@@ -9,6 +57,7 @@ void  Program::LValTranslater(LValAST* lval,BaseIRT* &ir){
     }
     else if(sym->SymbolType == SymType::Int32Array){
         // get offset
+        // depends on const exp implement
         std::vector<int> &dim = sym->ArrAttributes->ArrayDimVec;
         if(lval->IndexVec.size()!=sym->ArrAttributes->ArrayDimVec.size()){
             LOG(ERROR)<<"Array Index of "<<*lval->VarIdent <<" mismatch dimension\n";
@@ -28,7 +77,7 @@ void  Program::LValTranslater(LValAST* lval,BaseIRT* &ir){
         }
         NameIRT* ident = new NameIRT(sym->GetLabelStr(*lval->VarIdent));
         ir = new MemIRT(new ExpIRT(new BinOpIRT(BinOpKind::plus,new ExpIRT(ident),offset)));
-    }
+            }
     // may add more lval type
     else{
         DLOG(ERROR)<<"Illegal Left Value \n";

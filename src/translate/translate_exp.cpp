@@ -215,3 +215,27 @@ void Program::unary_exp_dealer(BaseAST *exp, BaseIRT *&ir)
         }
     }
 }
+
+void Program::WhileTranslater(StmtAST* stmt_available, BaseIRT* &ir){
+    assert(stmt_available->ret_exp == nullptr); // not used in If statement
+    assert(stmt_available->cond_exp != nullptr && stmt_available->stmt_while != nullptr);
+    DLOG(WARNING) << "While statement";
+    LOrExpAST* conditional_exp = reinterpret_cast<LOrExpAST *>(stmt_available->cond_exp);
+    BaseIRT* ir_condition;
+    // note that the ExpIRT is the type of ir_condition
+    logic_exp_dealer(conditional_exp, ir_condition);
+    // short circuit? haven't implemented yet. Please do not use this trait in your program.
+    ExpIRT * ir_condition_exp = dynamic_cast<ExpIRT*>(ir_condition);
+    DLOG(WARNING) << "Condition of While statement is: " << ir_condition_exp->ExpDump();
+    BinOpKind opkind;
+    ExpIRT *leftExp = nullptr, *rightExp = nullptr;
+    // use BranchConditionJudge to extract the condition of if-statement    
+    BranchConditionJudge(ir_condition_exp, leftExp, rightExp, opkind);
+    LabelIRT* entry_label = new LabelIRT(std::string("loop_entry"));
+    LabelIRT* body_label = new LabelIRT(std::string("loop_body"));
+    LabelIRT* end_label = new LabelIRT(std::string("loop_end"));
+    // ir = new StatementIRT(StmKind::Sequence, new StatementIRT(StmKind::Lable, entry_label), new StatementIRT(StmKind::Cjump, new CjumpIRT(opkind, leftExp, rightExp, body_label, end_label)));
+
+    BaseIRT* stmt = nullptr;
+    // ir = new StatementIRT(StmKind::Sequence, ir, )
+}

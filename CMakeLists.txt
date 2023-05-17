@@ -78,6 +78,18 @@ add_custom_target(
   ${CMAKE_BINARY_DIR}/${PROJECT_NAME} test ${CMAKE_SOURCE_DIR}/debug/hello.c -o ${CMAKE_SOURCE_DIR}/debug/hello.ll
 
 )
+
+add_custom_target(
+  llvm 
+  
+  clang -S -emit-llvm ../debug/hello.c
+)
+
+add_custom_target(
+  bc
+  
+  llvm-as ${CMAKE_SOURCE_DIR}/debug/hello.ll -o hello.bc
+)
 # add_dependencies(run ${PROJECT_NAME})
 
 set_target_properties(compiler PROPERTIES C_STANDARD 11 CXX_STANDARD 17)
