@@ -7,101 +7,14 @@ void Program::block_dealer(BlockItemAST *block_item, BaseIRT *&ir)
     {
         StmtAST *stmt_available = dynamic_cast<StmtAST *>(block_item->decl_or_stmt);
         // Deal with Stmt
-        if (stmt_available != nullptr)
-        {
-            // return Exp ;
-            if (stmt_available->tp == StmtType::ReturnExp)
-            {
-                assert(stmt_available->ret_exp != nullptr);
-                logic_exp_dealer(dynamic_cast<ExpAST *>(stmt_available->ret_exp)->lor_exp, ir);
-                ir = new StatementIRT(StmKind::Ret, new RetIRT(ValueType::INT32, reinterpret_cast<ExpIRT *>(ir)));
-            }
-            // return ;
-            else if (stmt_available->tp == StmtType::ReturnVoid)
-            {
-                assert(stmt_available->ret_exp == nullptr);
-                ir = new StatementIRT(StmKind::Ret, new RetIRT(ValueType::VOID, NULL));
-            }
-            // if (cond) stmt_if, without else stmt_else
-            else if (stmt_available->tp == StmtType::If)
-            {
-                BranchTranslater(stmt_available, ir, false);
-            }
-            // if (cond) stmt_if, else stmt_else
-            else if (stmt_available->tp == StmtType::IfElse)
-            {
-                BranchTranslater(stmt_available, ir, true);
-            }
-            else if (stmt_available->tp == StmtType::Exp)
-            {
-                assert(stmt_available->ret_exp != nullptr);
-                BaseIRT *ir_exp = nullptr;
-                logic_exp_dealer(stmt_available->ret_exp, ir_exp);
-                ir = new StatementIRT(StmKind::Exp, ir_exp);
-            }
-            // to be implemented
-            else if(stmt_available->tp == StmtType::Assign){
-
-            }
-            else if(stmt_available->tp == StmtType::Block){
-
-            }
-            // more to continue...
-        }
+        stmt_dealer(stmt_available, ir);
         //Further: need to consider: what if no return here in a void function while there are exp or other stmt??
     }
     // deal with decl
     else if (block_item->decl_or_stmt != nullptr && block_item->decl_or_stmt->type() == "DeclAST")
     {
-        // for zx to finish
+        DeclTranslater(reinterpret_cast<DeclAST*>(block_item->decl_or_stmt), ir);
     }
-}
-
-void Program::stmt_dealer(StmtAST* stmt_available, BaseIRT* &ir)
-{
-    // Deal with Stmt
-    if (stmt_available != nullptr)
-    {
-        // return Exp ;
-        if (stmt_available->tp == StmtType::ReturnExp)
-        {
-            assert(stmt_available->ret_exp != nullptr);
-            logic_exp_dealer(dynamic_cast<ExpAST *>(stmt_available->ret_exp)->lor_exp, ir);
-            ir = new StatementIRT(StmKind::Ret, new RetIRT(ValueType::INT32, reinterpret_cast<ExpIRT *>(ir)));
-        }
-        // return ;
-        else if (stmt_available->tp == StmtType::ReturnVoid)
-        {
-            assert(stmt_available->ret_exp == nullptr);
-            ir = new StatementIRT(StmKind::Ret, new RetIRT(ValueType::VOID, NULL));
-        }
-        // if (cond) stmt_if, without else stmt_else
-        else if (stmt_available->tp == StmtType::If)
-        {
-            BranchTranslater(stmt_available, ir, false);
-        }
-        // if (cond) stmt_if, else stmt_else
-        else if (stmt_available->tp == StmtType::IfElse)
-        {
-            BranchTranslater(stmt_available, ir, true);
-        }
-        else if (stmt_available->tp == StmtType::Exp)
-        {
-            assert(stmt_available->ret_exp != nullptr);
-            BaseIRT *ir_exp = nullptr;
-            logic_exp_dealer(stmt_available->ret_exp, ir_exp);
-            ir = new StatementIRT(StmKind::Exp, ir_exp);
-        }
-        // to be implemented
-        else if(stmt_available->tp == StmtType::Assign){
-
-        }
-        else if(stmt_available->tp == StmtType::Block){
-
-        }
-        // more to continue...
-    }
-    //Further: need to consider: what if no return here in a void function while there are exp or other stmt??
 }
 
 void Program::func_dealer(FuncDefAST *func_def, BaseIRT *&ir)

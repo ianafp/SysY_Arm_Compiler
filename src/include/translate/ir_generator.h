@@ -141,7 +141,7 @@ class Program {
   void ConvertExpInitTreeToIR(InitValTree<BaseAST*> *AstTree,const std::vector<int> &dim,std::vector<int> &trait,ExpIRT* addr,StatementIRT* &ir);
   /**
    * @brief this method handle the if statement, translate if statement to IR (CJUMP as central block)
-   * @param assign StmtAST ptr as scanner's source.
+   * @param stmt_available StmtAST ptr as scanner's source.
    * @param ir pointer's reference
    * @param has_else true:this translater need to translate the else statement; false: no else statement.
    *
@@ -157,6 +157,13 @@ class Program {
    * 
   */
   void BranchConditionJudge(ExpIRT* ir_condition_exp,ExpIRT* &leftExp,ExpIRT* &rightExp,BinOpKind &opkind);
+  /**
+   * @brief this method handle the while statement, translate if statement to IR (CJUMP as central block)
+   * @param stmt_available StmtAST ptr as scanner's source.
+   * @param ir pointer's reference
+   *
+  */
+  void WhileTranslater(StmtAST* stmt_available, BaseIRT* &ir);
 };
 
 #endif
