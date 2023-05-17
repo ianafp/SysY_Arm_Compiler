@@ -129,7 +129,7 @@ class Program {
    * @return Mem IRT
   */
   void LValTranslater(LValAST* lval,BaseIRT* &ir);
-
+  void ConvertExpInitTreeToIR(InitValTree<BaseAST*> *AstTree,const std::vector<int> &dim,std::vector<int> &trait,ExpIRT* addr,StatementIRT* &ir);
   /**
    * @brief this method handle the if statement, translate if statement to IR (CJUMP as central block)
    * @param assign StmtAST ptr as scanner's source.

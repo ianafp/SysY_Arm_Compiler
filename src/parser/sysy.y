@@ -139,7 +139,7 @@ Constdecl Constdef ConstDef ConstExp
     ConstDef: Constdef '=' ConstInitVal
             {
                 auto ast = reinterpret_cast<VarDefAST*>($1);
-                ast->InitValueVec = $3->ConvertToInitValVec(ast->DimSizeVec);
+
                 ast->IntInitValue = $3;
                 $$ = ast;
                 $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
