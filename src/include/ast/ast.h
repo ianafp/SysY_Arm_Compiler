@@ -173,7 +173,6 @@ public:
   }
 };
 // Function Definition Part
-//  FuncDef 也是 BaseAST
 class FuncDefAST : public BaseAST
 {
 public:
@@ -187,8 +186,8 @@ public:
     std::string instance_name;
     if (int t = visual.find_map(std::string("CompunitAST"), instance_name)) {
       DLOG(WARNING) << "CompunitAST found " << t;
-      std::string id = std::string("ID_") + *ident;
-      DLOG(WARNING) << "ID: " << id;
+      std::string id = std::string("FunctionId_") + *ident;
+      DLOG(WARNING) << "ID is " << id;
       visual.add_pair(std::string(instance_name), std::string("FuncTypeAST_") + std::string(*ident), false);
       DLOG(WARNING) << "first add pair success";
       visual.add_pair(std::string(instance_name), std::string(id), false);
