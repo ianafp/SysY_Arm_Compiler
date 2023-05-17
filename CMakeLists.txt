@@ -75,7 +75,7 @@ target_link_libraries(compiler glog)
 add_custom_target(
   run 
 
-  ${CMAKE_BINARY_DIR}/${PROJECT_NAME} test ${CMAKE_SOURCE_DIR}/debug/hello.c -o hello.ll
+  ${CMAKE_BINARY_DIR}/${PROJECT_NAME} test ${CMAKE_SOURCE_DIR}/debug/hello.c -o ${CMAKE_SOURCE_DIR}/debug/hello.ll
 
 )
 # add_dependencies(run ${PROJECT_NAME})

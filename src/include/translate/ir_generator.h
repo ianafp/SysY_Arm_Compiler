@@ -129,10 +129,24 @@ class Program {
    * @return Mem IRT
   */
   void LValTranslater(LValAST* lval,BaseIRT* &ir);
+
   /**
-   * @brief init tool function
+   * @brief this method handle the if statement, translate if statement to IR (CJUMP as central block)
+   * @param assign StmtAST ptr as scanner's source.
+   * @param ir pointer's reference
+   *
   */
-void ConvertExpInitTreeToIR(InitValTree<BaseAST*> *AstTree,const std::vector<int> &dim,std::vector<int> &trait,ExpIRT* addr,StatementIRT* &ir);
+  void BranchTranslater(StmtAST* stmt_available,BaseIRT* &ir);
+
+  /**
+   * @brief this method is used in if and while condition translation
+   * @param ir_condition_exp is a ExpIRT ptr as a scanner's source
+   * @param leftExp is a reference to ExpIRT ptr as the left expression result of condition ir tree.
+   * @param rightExp is a reference to ExpIRT ptr as the right expression result of condition ir tree.
+   * @param opkind is a reference to operation kind of the condition expression ir tree.
+   * 
+  */
+  void BranchConditionJudge(ExpIRT* ir_condition_exp,ExpIRT* &leftExp,ExpIRT* &rightExp,BinOpKind &opkind);
 };
 
 #endif

@@ -97,7 +97,18 @@ class LabelIRT : public BaseIRT
 public:
     std::string LableName;
     
-    LabelIRT(std::string LableNameStr) { LableName = LableNameStr; }
+    LabelIRT(std::string LableNameStr) { 
+        if (LableNameStr == std::string("if")) {
+            LableName = std::string("IF_LABEL_" + std::to_string(TempIdAllocater::GetId()));
+        } else if (LableNameStr == std::string("else")) {
+            LableName = std::string("ELSE_LABEL_" + std::to_string(TempIdAllocater::GetId()));
+        } else if (LableNameStr == std::string("end")) {
+            LableName = std::string("END_LABEL_" + std::to_string(TempIdAllocater::GetId()));
+        }  
+        else {
+            LableName = LableNameStr;
+        } 
+    }
     LabelIRT():LableName(std::string("temp_lable_"+std::to_string(TempIdAllocater::GetId()))){}
     void Dump() const override
     {

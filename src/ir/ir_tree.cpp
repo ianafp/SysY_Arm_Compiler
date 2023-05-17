@@ -225,7 +225,7 @@ void RetIRT::Dump() const{
     }
     std::cout<<"ret ";
     if(this->RetValType==ValueType::VOID){
-        std::cout<<"";
+        std::cout<<"void";
     }else{
         std::cout<<" i32 "<<ValueStr;
     }

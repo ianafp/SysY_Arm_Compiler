@@ -191,7 +191,12 @@ void Program::unary_exp_dealer(BaseAST *exp, BaseIRT *&ir)
     {
         // !!!***need symbol table!
         std::vector<ExpIRT*> args;
-        Symbol* symbol = SymbolTable::FindSymbol(*(unary_exp->ident));
+        if(SymbolTable::FindSymbol(*(unary_exp->ident)) == NULL)
+        {
+            std::cout << "Error: function " + *(unary_exp->ident) + " haven't been declared." << std::endl;
+            exit(-1);
+        }
+        //Further: haven't implement args checking
         if(unary_exp->func_rparam == nullptr)
         {
             //need look up symbol table

@@ -1,15 +1,19 @@
 #include <cassert>
 #include <cstdio>
 #include <iostream>
+#include<fstream>
 #include <memory>
 #include <string>
 #include "ast/ast.h"
 #include "translate/ir_generator.h"
 #include "glog/logging.h"
+#include "common/visualize.h"
 // #include "koopa.h"
 // #include "headers/ir_tree.h"
 // the header file can be found at https://github.com/pku-minic/koopa/blob/master/crates/libkoopa/include/koopa.h
 // a implementation of the KOOPA definition.
+
+class Visualize visual;
 
 using namespace std;
 
@@ -23,16 +27,16 @@ void InitGoogleLog(const char *argv) {
 }
 
 int main(int argc, const char *argv[]) {
-  // 解析命令行参数. 测试脚本/评测平台要求你的编译器能接收如下参数:
+  // initialization
+  visual.init_visualize();
+
   // compiler 模式 输入文件 -o 输出文件
-
-
   assert(argc == 5);
   auto mode = argv[1];
   auto input = argv[2];
   auto output = argv[4];
   InitGoogleLog(argv[0]);
-  DLOG(WARNING) <<"test";
+  DLOG(WARNING) << "test";
   cout << "mode: " << mode << endl;
   cout << "output file: " << output << endl;
   // init symbol table
@@ -63,6 +67,13 @@ int main(int argc, const char *argv[]) {
   
   ir->Dump();
   cout << endl;
+
+  visual.end_visualize();
+  cout << visual.output();
+
+  freopen(output, "w", stdout);
+  ir->Dump();
+  // cout.rdbuf(pOld);
   // ConstIRT c1(11),c2(1100), c3(1000);
   // ExpIRT c1Exp(ExpKind::Const,&c1),c2Exp(ExpKind::Const,&c2),c3Exp(ExpKind::Const,&c3);
   // BinOpIRT StoreAddr(BinOpKind::plus,&c1Exp,&c2Exp);
@@ -72,5 +83,6 @@ int main(int argc, const char *argv[]) {
   // MemIRT StoreAddrMem(&StoreAddrExp);
   // MoveIRT TestMove(&StoreAddrMem,new ExpIRT(new ConstIRT(3333)));
   // TestMove.Dump();
+
   return 0;
 }

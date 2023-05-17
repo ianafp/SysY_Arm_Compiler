@@ -1,6 +1,7 @@
 #ifndef __AST_H__
 #define __AST_H__
-#include"common/enum.h"
+#include "common/enum.h"
+#include "common/visualize.h"
 #include <iostream>
 #include <memory>
 #include <string>
@@ -15,6 +16,8 @@
  *
  */
 
+extern class Visualize visual;
+
 std::string EnumToString(AstType type);
 std::string EnumToString(VarType type);
 std::string EnumToString(StmtType type);
@@ -23,14 +26,14 @@ std::string EnumToString(StmtType type);
 class CompUnitAST : public BaseAST
 {
 public:
-  // 用智能指针管理对象
   BaseAST *comp_unit;
   void Dump() const override
   {
 
-    std::cout << "CompUnitAST { \n\t";
+    std::cout << "CompUnitAST {\n";
+    visual.add_pair(std::string("CompUnitAST"), std::string("CompunitAST"), false);
     comp_unit->Dump();
-    std::cout << "\n\t }";
+    std::cout << "\n}(CompUnitAST ends) ";
   }
   std::string type(void) const override
   {
@@ -44,15 +47,17 @@ public:
 class CompunitAST : public BaseAST
 {
 public:
-  // 用智能指针管理对象
   std::vector<BaseAST *> decl_list;
   void Dump() const override
   {
 
+    int idx_visual = 0;
     // std::cout << "CompUnitAST { ";
     for (auto &it : decl_list)
     {
+      visual.add_pair(std::string("CompunitAST"), std::string("FuncDefAST_instance_") + std::to_string(idx_visual), true);
       it->Dump();
+      idx_visual++;
     }
     // std::cout << " }";
   }
@@ -72,9 +77,9 @@ public:
   BaseAST *const_or_var_decl;
   void Dump() const override
   {
-    std::cout << "DeclAST { ";
+    std::cout << "DeclAST {\n";
     const_or_var_decl->Dump();
-    std::cout << " }";
+    std::cout << "\n}(DeclAST ends) ";
   }
   std::string type(void) const override
   {
@@ -94,13 +99,13 @@ public:
   std::vector<BaseAST *> VarDefVec;
   void Dump() const override
   {
-    std::cout << "VarDeclAst{ ";
+    std::cout << "VarDeclAst {\n";
     std::cout << "vartype:" << EnumToString(BType);
     for (auto &it : VarDefVec)
     {
       it->Dump();
     }
-    std::cout << " }";
+    std::cout << "\n}(VarDeclAST ends) ";
   }
   /**
    * @brief chech the symbol decl, if right, add to symbol and return false, else return true
@@ -143,13 +148,13 @@ public:
   std::vector<BaseAST *> ConstDefVec;
   void Dump() const override
   {
-    std::cout << "DeclAST { "
+    std::cout << "DeclAST {\n"
               << "vartype:" << EnumToString(BType);
     for (auto &it : ConstDefVec)
     {
       it->Dump();
     }
-    std::cout << " }";
+    std::cout << "\n}(DeclAST ends) ";
   }
   std::string type(void) const override
   {
@@ -163,23 +168,36 @@ public:
 };
 
 // Function Definition Part
-//  FuncDef 也是 BaseAST
 class FuncDefAST : public BaseAST
 {
 public:
-  BaseAST *func_type;
+  VarType func_type;
   std::string *ident;
   BaseAST *func_fparams;
   BaseAST *block;
   void Dump() const override
   {
-    std::cout << "FuncDefAST { ";
-    func_type->Dump();
+    std::cout << "FuncDefAST {\n";
+    std::string instance_name;
+    if (int t = visual.find_map(std::string("CompunitAST"), instance_name)) {
+      DLOG(WARNING) << "CompunitAST found " << t;
+      std::string id = std::string("FunctionId_") + *ident;
+      DLOG(WARNING) << "ID is " << id;
+      visual.add_pair(std::string(instance_name), std::string("FuncTypeAST_") + std::string(*ident), false);
+      DLOG(WARNING) << "first add pair success";
+      visual.add_pair(std::string(instance_name), std::string(id), false);
+      visual.add_pair(std::string(instance_name), std::string("FuncFParamsAST_") + std::string(*ident), false);
+      visual.add_pair(std::string(instance_name), std::string("Block_") + std::string(*ident), false);
+      DLOG(WARNING) << "add pair finished";
+      visual.remove_map(std::string("CompunitAST"), instance_name);
+      DLOG(WARNING) << "remove map";
+    }
+    // func_type->Dump();
     std::cout << ", " << *ident << ", ";
     if (func_fparams != nullptr)
       func_fparams->Dump();
     block->Dump();
-    std::cout << " }";
+    std::cout << "\n}(FuncDefAST ends) ";
   }
   std::string type(void) const override
   {
@@ -194,9 +212,9 @@ public:
   std::string type_ret;
   void Dump() const override
   {
-    std::cout << "FuncTypeAST { ";
+    std::cout << "FuncTypeAST {\n";
     std::cout << type_ret;
-    std::cout << " }";
+    std::cout << "\n}(FuncTypeAST ends) ";
   }
   std::string type(void) const override
   {
@@ -211,12 +229,12 @@ public:
   std::vector<BaseAST *> func_fparam;
   void Dump() const override
   {
-    std::cout << "FuncFParamsAST { ";
+    std::cout << "FuncFParamsAST {\n";
     for (auto &it : func_fparam)
     {
       it->Dump();
     }
-    std::cout << " }";
+    std::cout << "\n}(FuncFParamsAST ends) ";
   }
   std::string type(void) const override
   {
@@ -232,19 +250,19 @@ public:
   ArgsType tp;
   VarType Btype;
   std::string *ident;
-  BaseAST *func_fparam;
+  std::vector<BaseAST *> dimension;
   void Dump() const override
   {
-    std::cout << "FuncFParamAST { ";
+    std::cout << "FuncFParamAST {\n";
     if (tp == ArgsType::Int32)
     {
       std::cout << "Btype:" << EnumToString(Btype) << ", " << *ident;
     }
     else if (tp == ArgsType::Int32Array)
     {
-      func_fparam->Dump();
+      // func_fparam->Dump();
     }
-    std::cout << " }";
+    std::cout << "\n}(FuncFParamAST ends) ";
   }
   std::string type(void) const override
   {
@@ -260,12 +278,12 @@ public:
   std::vector<BaseAST *> exp;
   void Dump() const override
   {
-    std::cout << "FuncRParamsAST { ";
+    std::cout << "FuncRParamsAST {\n";
     for (auto &it : exp)
     {
       it->Dump();
     }
-    std::cout << " }";
+    std::cout << "\n}(FuncRParamsAST ends) ";
   }
   std::string type(void) const override
   {
@@ -280,10 +298,10 @@ public:
   BaseAST *block;
   void Dump() const override
   {
-    std::cout << "BlockAST { ";
+    std::cout << "BlockAST {\n";
     if (block != nullptr)
       block->Dump();
-    std::cout << " }";
+    std::cout << "\n}(BlockAST ends) ";
   }
   std::string type(void) const override
   {
@@ -319,9 +337,9 @@ public:
   BaseAST *decl_or_stmt;
   void Dump() const override
   {
-    std::cout << "BlockItemAST { ";
+    std::cout << "BlockItemAST {\n";
     decl_or_stmt->Dump();
-    std::cout << " }";
+    std::cout << "\n}(BlockItemAST ends) ";
   }
   std::string type(void) const override
   {
@@ -336,11 +354,11 @@ public:
   BaseAST *ValueExp;
   void Dump() const override
   {
-    std::cout << "Assign {";
+    std::cout << "AssignAST {\n";
     LVal->Dump();
     std::cout << ", ";
     ValueExp->Dump();
-    std::cout << "}";
+    std::cout << "\n}(AssignAST ends) ";
   }
   std::string type(void) const override
   {
@@ -356,7 +374,7 @@ public:
   Symbol* LValSym;
   void Dump() const override
   {
-    std::cout << "LValAST{ ";
+    std::cout << "LValAST {\n";
     std::cout << *VarIdent;
     for (auto &it : IndexVec)
     {
@@ -364,7 +382,7 @@ public:
       it->Dump();
       std::cout << "]";
     }
-    std::cout << "}";
+    std::cout << "\n}(LValAST ends) ";
   }
   std::string type(void) const override
   {
@@ -384,9 +402,13 @@ public:
   // std::string ret_string;
   // int ret_number;
   BaseAST *ret_exp;
+  BaseAST *cond_exp;
+  BaseAST *stmt_if;
+  BaseAST *stmt_else;
+  BaseAST *stmt_while;
   void Dump() const override
   {
-    std::cout << "StmtAST { ";
+    std::cout << "StmtAST {\n";
     // if(tp == "retexp")
     // {
     //   std::cout << "ret , ";
@@ -397,8 +419,29 @@ public:
     {
       std::cout << EnumToString(tp);
       ret_exp->Dump();
+    } else if (tp == StmtType::If)
+    {
+      std::cout << EnumToString(tp);
+      std::cout << EnumToString(tp);
+      std::cout << std::endl << "if (" << std::endl;
+      cond_exp->Dump();
+      std::cout << std::endl << ") {" << std::endl;
+      stmt_if->Dump();
+      std::cout << std::endl << "}" << std::endl;
+    } else if (tp == StmtType::IfElse)
+    {
+      std::cout << EnumToString(tp);
+      std::cout << EnumToString(tp);
+      std::cout << std::endl << "if (" << std::endl;
+      cond_exp->Dump();
+      std::cout << std::endl << ") {" << std::endl;
+      stmt_if->Dump();
+      std::cout << std::endl << "}" << std::endl;
+      std::cout << std::endl << "else {" << std::endl;
+      stmt_else->Dump();
+      std::cout << std::endl << "}" << std::endl;
     }
-    std::cout << " }";
+    std::cout << "\n}(StmtAST ends) ";
   }
   std::string type(void) const override
   {
@@ -415,9 +458,9 @@ public:
   BaseAST *lor_exp;
   void Dump() const override
   {
-    std::cout << "ExpAST { ";
+    std::cout << "ExpAST {\n";
     lor_exp->Dump();
-    std::cout << " }";
+    std::cout << "\n}(ExpAST ends) ";
   }
   std::string type(void) const override
   {
@@ -437,7 +480,7 @@ public:
   std::vector<std::string> op;
   void Dump() const override
   {
-    std::cout << "LOrExpAST { ";
+    std::cout << "LOrExpAST {\n";
     for (int i = 0; i < land_exp.size(); i++)
     {
       if (i != 0)
@@ -447,7 +490,7 @@ public:
       land_exp[i]->Dump();
     }
 
-    std::cout << " }";
+    std::cout << "\n}(LOrExpAST ends) ";
   }
   std::string type(void) const override
   {
@@ -467,7 +510,7 @@ public:
   std::vector<std::string> op;
   void Dump() const override
   {
-    std::cout << "LAndExpAST { ";
+    std::cout << "LAndExpAST {\n";
     for (int i = 0; i < eq_exp.size(); i++)
     {
       if (i != 0)
@@ -477,7 +520,7 @@ public:
       eq_exp[i]->Dump();
     }
 
-    std::cout << " }";
+    std::cout << "\n}(LAndExpAST ends) ";
   }
   std::string type(void) const override
   {
@@ -497,7 +540,7 @@ public:
   std::vector<std::string> op;
   void Dump() const override
   {
-    std::cout << "EqExpAST { ";
+    std::cout << "EqExpAST {\n";
     for (int i = 0; i < rel_exp.size(); i++)
     {
       if (i != 0)
@@ -507,7 +550,7 @@ public:
       rel_exp[i]->Dump();
     }
 
-    std::cout << " }";
+    std::cout << "\n}(EqExpAST ends) ";
   }
   std::string type(void) const override
   {
@@ -527,7 +570,7 @@ public:
   std::vector<std::string> op;
   void Dump() const override
   {
-    std::cout << "RelExpAST { ";
+    std::cout << "RelExpAST {\n";
     for (int i = 0; i < add_exp.size(); i++)
     {
       if (i != 0)
@@ -537,7 +580,7 @@ public:
       add_exp[i]->Dump();
     }
 
-    std::cout << " }";
+    std::cout << "\n}(RelExpAST ends) ";
   }
   std::string type(void) const override
   {
@@ -559,7 +602,7 @@ public:
   // op: + -
   void Dump() const override
   {
-    std::cout << "AddExpAST { ";
+    std::cout << "AddExpAST {\n";
     for (int i = 0; i < mul_exp.size(); i++)
     {
       if (i != 0)
@@ -569,7 +612,7 @@ public:
       mul_exp[i]->Dump();
     }
 
-    std::cout << " }";
+    std::cout << "\n}(AddExpAST ends) ";
   }
   std::string type(void) const override
   {
@@ -592,7 +635,7 @@ public:
   // op: + -
   void Dump() const override
   {
-    std::cout << "MulExpAST { ";
+    std::cout << "MulExpAST {\n";
     for (int i = 0; i < unary_exp.size(); i++)
     {
       if (i != 0)
@@ -602,7 +645,7 @@ public:
       unary_exp[i]->Dump();
     }
 
-    std::cout << " }";
+    std::cout << "\n}(MulExpAST ends) ";
   }
   std::string type(void) const override
   {
@@ -627,7 +670,7 @@ public:
   Symbol* FuncSym;
   void Dump() const override
   {
-    std::cout << "UnaryExpAST { ";
+    std::cout << "UnaryExpAST {\n";
     if (tp == ExpType::Primary)
       primary_exp->Dump();
     else if (tp == ExpType::OpExp)
@@ -642,7 +685,7 @@ public:
       if (func_rparam != nullptr)
         func_rparam->Dump();
     }
-    std::cout << " }";
+    std::cout << "\n}(UnaryExpAST ends) ";
   }
   std::string type(void) const override
   {
@@ -664,7 +707,7 @@ public:
   BaseAST* lval;
   void Dump() const override
   {
-    std::cout << "PrimaryExpAST { ";
+    std::cout << "PrimaryExpAST {\n";
     if (tp == PrimaryType::Exp)
       exp->Dump();
     else if (tp == PrimaryType::Num)
@@ -672,7 +715,7 @@ public:
     else{
       lval->Dump();
     }
-    std::cout << " }";
+    std::cout << "\n}(PrimaryExpAST ends) ";
   }
   std::string type(void) const override
   {
@@ -691,9 +734,9 @@ public:
   int num;
   void Dump() const override
   {
-    std::cout << "NumberAST { ";
+    std::cout << "NumberAST {\n";
     std::cout << num;
-    std::cout << " }";
+    std::cout << "\n}(NumberAST ends) ";
   }
   std::string type(void) const override
   {
@@ -712,9 +755,9 @@ public:
   std::string op;
   void Dump() const override
   {
-    std::cout << "UnaryOpAST { ";
+    std::cout << "UnaryOpAST {\n";
     std::cout << op;
-    std::cout << " }";
+    std::cout << "\n}(UnaryOpAST ends) ";
   }
   std::string type(void) const override
   {

@@ -22,6 +22,18 @@ void Program::block_dealer(BlockItemAST *block_item, BaseIRT *&ir)
                 assert(stmt_available->ret_exp == nullptr);
                 ir = new StatementIRT(StmKind::Ret, new RetIRT(ValueType::VOID, NULL));
             }
+            // if (cond) stmt_if, without else stmt_else
+            else if (stmt_available->tp == StmtType::If)
+            {
+                BranchTranslater(stmt_available, ir);
+            }
+            // if (cond) stmt_if, else stmt_else
+            else if (stmt_available->tp == StmtType::IfElse)
+            {
+                assert(stmt_available->ret_exp == nullptr); // not used in If statement
+                assert(stmt_available->cond_exp != nullptr && stmt_available->stmt_if != nullptr && stmt_available->stmt_else != nullptr);
+                DLOG(WARNING) << "If else statement";
+            }
             else if (stmt_available->tp == StmtType::Exp)
             {
                 assert(stmt_available->ret_exp != nullptr);
@@ -38,6 +50,7 @@ void Program::block_dealer(BlockItemAST *block_item, BaseIRT *&ir)
             }
             // more to continue...
         }
+        //Further: need to consider: what if no return here in a void function while there are exp or other stmt??
     }
     // deal with decl
     else if (block_item->decl_or_stmt != nullptr && block_item->decl_or_stmt->type() == "DeclAST")
@@ -49,7 +62,7 @@ void Program::block_dealer(BlockItemAST *block_item, BaseIRT *&ir)
 void Program::func_dealer(FuncDefAST *func_def, BaseIRT *&ir)
 {
     std::string result(""), ident("");
-    BaseAST *func_type;
+    VarType func_type;
     FuncFParamsAST *func_fparams;
     BaseAST *block;
     int para_cnt = 0;
@@ -63,18 +76,6 @@ void Program::func_dealer(FuncDefAST *func_def, BaseIRT *&ir)
     if (func_fparams != nullptr)
         para_cnt = func_fparams->func_fparam.size();
 
-    // Deal with FuncType
-    FuncTypeAST *func_type_available = nullptr;
-    std::string type_analysis("");
-    if (func_type != nullptr)
-    {
-        func_type_available = dynamic_cast<FuncTypeAST *>(func_type);
-        if (func_type_available != nullptr)
-        {
-            type_analysis += func_type_available->type_ret;
-        }
-    }
-
     // Deal with Block
     BlockAST *block_available = nullptr;
     BaseAST *block_true = nullptr;
@@ -87,9 +88,7 @@ void Program::func_dealer(FuncDefAST *func_def, BaseIRT *&ir)
         }
     }
 
-    std::string INT_type("int");
-    std::string VOID_type("void");
-
+    //deal with blocks
     BaseIRT* ir1 = nullptr, *ir2 = nullptr;
     blockAST *block_true_available = nullptr;
     std::list<std::string> ret_stmt;
@@ -115,33 +114,15 @@ void Program::func_dealer(FuncDefAST *func_def, BaseIRT *&ir)
     }
 
     //construct func_ir tree
-    ValueType ret;
-    if (type_analysis == INT_type)
+    //notice that para_cnt may not work
+    if (func_type == VarType::INT)
     {
-        ir = new StatementIRT(StmKind::Func, new FuncIRT(ValueType::INT32, new LabelIRT(ident), para_cnt, reinterpret_cast<StatementIRT *>(ir)));
-        ret = ValueType::INT32;
-        
+        ir = new StatementIRT(StmKind::Func, new FuncIRT(ValueType::INT32, new LabelIRT(ident), para_cnt, reinterpret_cast<StatementIRT *>(ir)));        
     }
-    if (type_analysis == VOID_type)
+    if (func_type == VarType::VOID)
     {
         ir = new StatementIRT(StmKind::Func, new FuncIRT(ValueType::VOID, new LabelIRT(ident), para_cnt, reinterpret_cast<StatementIRT *>(ir)));
-        ret = ValueType::VOID;
     }
-        
-    //add symbol table of this function
-    std::vector<ArgsType> args;
-    if(func_fparams != nullptr)
-    {
-        for(int i=0; i<para_cnt; i++)
-        {
-            if(dynamic_cast<FuncFParamAST *>(func_fparams->func_fparam[i])->tp == ArgsType::Int32)
-                args.push_back(ArgsType::Int32);
-            else if(dynamic_cast<FuncFParamAST *>(func_fparams->func_fparam[i])->tp == ArgsType::Int32Array)
-                args.push_back(ArgsType::Int32Array);
-        }
-    }
-    
-    SymbolTable::AddSymbol(ident, new Symbol( ret, args));
 }
 
 void Program::Scan(BaseAST *root, BaseIRT *&ir)

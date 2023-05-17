@@ -43,7 +43,7 @@ void yyerror(BaseAST* &ast, const char *s);
 %token <str_val> _identifier _string 
 %token <int_val> _const_val
 %type<type_val> BType
-%type <ast_val> CompUnit Compunit FuncDef FuncType Block block BlockItem Stmt FuncFParam Decl ConstDecl VarDecl Vardecl Vardef VarDef LVal Exp UnaryExp PrimaryExp Number UnaryOp AddExp MulExp RelExp EqExp LAndExp LOrExp FuncFParams  Funcfparam FuncRParams FuncDeclare
+%type <ast_val> CompUnit Compunit FuncDef  Block block BlockItem Stmt FuncFParam Decl ConstDecl VarDecl Vardecl Vardef VarDef LVal Exp UnaryExp PrimaryExp Number UnaryOp AddExp MulExp RelExp EqExp LAndExp LOrExp FuncFParams  Funcfparam FuncRParams FuncDeclare Cond
 Constdecl Constdef ConstDef ConstExp
 %type <init_val>  InitVal Initval
 %type <const_init_val> ConstInitVal Constinitval 
@@ -58,14 +58,14 @@ Constdecl Constdef ConstDef ConstExp
                 comp_unit->position.line = cur_pos.line; comp_unit->position.column = cur_pos.column;
                 ast = move(comp_unit);
             }
-    Compunit: /*Compunit Decl
+    Compunit: Compunit Decl
             {
                 auto ast = reinterpret_cast<CompunitAST*>($1);
                 ast->decl_list.push_back($2);
                 root = ast;
                 $$ = ast;
                 $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
-            }*/
+            }
             | Compunit FuncDef
             {
                 auto ast = reinterpret_cast<CompunitAST*>($1);
@@ -74,14 +74,14 @@ Constdecl Constdef ConstDef ConstExp
                 $$ = ast;
                 $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
             }
-            /*| Decl
+            | Decl
             {
                 auto ast = new CompunitAST();
                 ast->decl_list.push_back($1);
                 root = ast;
                 $$ = ast;
                 $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
-            }*/
+            }
             | FuncDef
             {
                 auto ast = new CompunitAST();
@@ -121,54 +121,62 @@ Constdecl Constdef ConstDef ConstExp
                 ast->ConstDefVec.push_back($3);
                 $$ = ast;
                 $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
-    }
+            }
             | Constdecl ',' ConstDef{
                 reinterpret_cast<ConstDeclAST*>($1)->ConstDefVec.push_back($3);
                 $$ = $1;
                 $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
             }
             ;
-       BType: _int {
-        $$ = VarType::INT;
-       }
+       BType: _int 
+            {
+                $$ = VarType::INT;
+            }
+            | _void
+            {
+                $$ = VarType::VOID;
+            }
+    ConstDef: Constdef '=' ConstInitVal
+            {
+                auto ast = reinterpret_cast<VarDefAST*>($1);
+                ast->InitValueVec = $3->ConvertToInitValVec(ast->DimSizeVec);
+                ast->IntInitValue = $3;
+                $$ = ast;
+                $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
+            }
             ;
-    ConstDef: Constdef '=' ConstInitVal{
-        auto ast = reinterpret_cast<VarDefAST*>($1);
-        ast->IntInitValue = $3;
-        $$ = ast;
-        $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
-    }
-            ;
-    Constdef: _identifier {
-        auto ast = new VarDefAST();
-        ast->VarIdent = $1;
-        // ast->DimSizeVec = new std::vector<BaseAST*>();
-        ast->InitValue = NULL;
-        ast->IntInitValue = NULL;
-        $$ = ast;
-        $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
-    }
-            | Constdef '[' ConstExp ']'{
-        auto ast = reinterpret_cast<VarDefAST*>($1);
-        int val;
-        if(reinterpret_cast<ExpAST*>($3)->GetConstVal(val)){
-            LOG(ERROR) << "The array size can't be var\n";
+    Constdef: _identifier 
+        {
+            auto ast = new VarDefAST();
+            ast->VarIdent = $1;
+            // ast->DimSizeVec = new std::vector<BaseAST*>();
+            ast->InitValue = NULL;
+            ast->IntInitValue = NULL;
+            $$ = ast;
+            $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
         }
-        val = 8;
-        ast->DimSizeVec.push_back(val);
-        $$ = ast;
-        $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
+        | Constdef '[' ConstExp ']'
+        {
+            auto ast = reinterpret_cast<VarDefAST*>($1);
+            int val;
+            if(reinterpret_cast<ExpAST*>($3)->GetConstVal(val)){
+                LOG(ERROR) << "The array size can't be var\n";
+            }
+            val = 8;
+            ast->DimSizeVec.push_back(val);
+            $$ = ast;
+            $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
     }
             ;
-ConstInitVal: ConstExp{
-    $$ = new InitValTree<int>();
-    int temp;
-    if($1->GetConstVal(temp)){
-        LOG(ERROR)<<"the init value of const varieble is not const\n";
+ConstInitVal: ConstExp
+    {
+        $$ = new InitValTree<int>();
+        int temp;
+        if($1->GetConstVal(temp)){
+            LOG(ERROR)<<"the init value of const varieble is not const\n";
+        }
+        $$->keys.push_back(temp); 
     }
-    $$->keys.push_back(temp); 
-    
-}
             | '{' '}'
             {
                 $$ = new InitValTree<int>(); 
@@ -195,13 +203,13 @@ Constinitval: ConstInitVal
      }
             ;
      Vardecl: BType VarDef 
-     {
-        auto ast = new VarDeclAST();
-        ast->BType = $1;
-        ast->VarDefVec.push_back($2);
-        $$ = ast;
-        $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
-     }
+            {
+                auto ast = new VarDeclAST();
+                ast->BType = $1;
+                ast->VarDefVec.push_back($2);
+                $$ = ast;
+                $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
+            }
             | Vardecl ',' VarDef
             {
                 auto ast = reinterpret_cast<VarDeclAST*>($1);
@@ -278,7 +286,7 @@ Constinitval: ConstInitVal
                 $$ = $1;
             }
             ;   
-     FuncDeclare: FuncType _identifier '(' ')'
+     FuncDeclare: BType _identifier '(' ')'
             {
                 if(SymbolTable::FindSymbol(*$2)){
                     LOG(ERROR) <<"Multidefinition of function "<<*$2<<"\n";
@@ -294,7 +302,7 @@ Constinitval: ConstInitVal
                 ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
                 $$ = ast;
             }
-            | FuncType _identifier '(' FuncFParams ')'
+            | BType _identifier '(' FuncFParams ')'
             {
                 LOG(WARNING)<<"Function Def "<<*$2<<"\n";
                 if(SymbolTable::FindSymbol(*$2)){
@@ -324,7 +332,8 @@ Constinitval: ConstInitVal
                 ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
             }
             ;
-    FuncType: _int
+
+    /*FuncType: _int
             {
                 auto ast = new FuncTypeAST();
                 ast->type_ret = "int";
@@ -337,7 +346,7 @@ Constinitval: ConstInitVal
                 ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
                 $$ = ast;
             }
-            ;
+            ;*/
  FuncFParams: FuncFParam
             {
                 auto ast = new FuncFParamsAST();
@@ -359,23 +368,32 @@ Constinitval: ConstInitVal
                 ast->tp = ArgsType::Int32;
                 ast->Btype = $1;
                 ast->ident = $2;
-                ast->func_fparam = nullptr;
                 ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
                 $$ = ast;
             }
             | Funcfparam
             {
-                auto ast = new FuncFParamAST();
-                ast->tp = ArgsType::Int32Array;
-                //ast->Btype = nullptr;
-                ast->ident = nullptr;
-                ast->func_fparam = $1;
+                auto ast = $1;
                 ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
                 $$ = ast;
             }
             ;
   Funcfparam: BType _identifier '[' ']'
-            | Funcfparam '[' Exp ']'  
+            {
+                auto ast = new FuncFParamAST();
+                ast->tp = ArgsType::Int32Array;
+                ast->Btype = $1;
+                ast->ident = $2;
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
+            | Funcfparam '[' Exp ']'
+            {
+                auto ast = reinterpret_cast<FuncFParamAST*>($1);
+                ast->dimension.push_back($3);
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             ;
        Block: '{' block '}'
             {
@@ -450,10 +468,36 @@ Constinitval: ConstInitVal
                 ast->tp = StmtType::Block;
                 ast->ret_exp = $1;
                 ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
             }
             | _if '(' Cond ')' Stmt
+            {
+                auto ast = new StmtAST();
+                ast->tp = StmtType::If;
+                ast->cond_exp = $3;
+                ast->stmt_if = $5;
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             | _if '(' Cond ')' Stmt _else Stmt
+            {
+                auto ast = new StmtAST();
+                ast->tp = StmtType::IfElse;
+                ast->cond_exp = $3;
+                ast->stmt_if = $5;
+                ast->stmt_else = $7;
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             | _while '(' Cond ')' Stmt
+            {
+                auto ast = new StmtAST();
+                ast->tp = StmtType::While;
+                ast->cond_exp = $3;
+                ast->stmt_while = $5;
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             | _break ';'
             | _continue ';'
             | _return ';'
