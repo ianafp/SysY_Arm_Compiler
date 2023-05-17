@@ -84,6 +84,7 @@ class Program {
    * @author: zhang
    * @param decl: porinter to VarDeclAST to be handled
    * @param ir: referrence of ir porinters which will point to the result ir tree  
+   * @return statement IRT  
   */
   void VarDeclTranslater(VarDeclAST* decl,BaseIRT* &ir);
   /**
@@ -92,6 +93,7 @@ class Program {
    * @param type : the symbol type, define in symbol_table.h
    * @param decl: porinter to VarDefAST to be handled
    * @param ir: referrence of ir porinters which will point to the result ir tree  
+   * @return statement IRT  
   */
   void VarDefTranslater(SymType type,VarDefAST* decl,BaseIRT* &ir);
   /**
@@ -99,7 +101,8 @@ class Program {
    * @author: zhang
    * @param type : the symbol type, define in symbol_table.h
    * @param decl: porinter to VarDefAST to be handled
-   * @param ir: referrence of ir porinters which will point to the result ir tree  
+   * @param ir: referrence of ir porinters which will point to the result ir tree
+   * @return statement IRT  
   */
   void ConstDefTranslater(SymType type,VarDefAST* decl,BaseIRT* &ir);
   /**
@@ -107,12 +110,15 @@ class Program {
    * @author: zhang
    * @param decl: porinter to ConstDeclAST to be handled
    * @param ir: referrence of ir porinters which will point to the result ir tree  
+   * @return Statement IRT
   */
+
   void ConstDeclTranslater(ConstDeclAST* decl,BaseIRT* &ir);
   /**
    * @brief this method handle the assign ast translating LVal = Exp to MOVE ir
    * @param assign AssignAST ptr
    * @param ir result ir ptr referrence
+   * @return Statement IRT 
    * 
   */
   void AssignTranslater(AssignAST* assign,BaseIRT* &ir);
@@ -120,10 +126,10 @@ class Program {
    * @brief this method handle the lval ast translating LVal to MEM ir
    * @param assign LValAST ptr
    * @param ir result ir ptr referrence
-   * 
+   * @return Mem IRT
   */
   void LValTranslater(LValAST* lval,BaseIRT* &ir);
-
+  void ConvertExpInitTreeToIR(InitValTree<BaseAST*> *AstTree,const std::vector<int> &dim,std::vector<int> &trait,ExpIRT* addr,StatementIRT* &ir);
   /**
    * @brief this method handle the if statement, translate if statement to IR (CJUMP as central block)
    * @param assign StmtAST ptr as scanner's source.

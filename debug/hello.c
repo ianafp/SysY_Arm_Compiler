@@ -5,9 +5,9 @@
  4
 */
 
-void f() {
-  // half(1,2);
-}
+// void f() {
+//   half(1,2);
+// }
 
 int half(int x, int y) {
   // half(1, 2);

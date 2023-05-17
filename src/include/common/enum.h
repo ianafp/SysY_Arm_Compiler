@@ -25,7 +25,7 @@ enum class StmtType
   ReturnVoid
 };
 enum class StmKind
-{
+{  
     GlobalVar,
     Func,
     Sequence,
@@ -90,6 +90,7 @@ enum class ExpType{
 };
 enum class PrimaryType{
     Exp,
-    Num
+    Num,
+    LVal
 };
 #endif

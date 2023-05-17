@@ -17,5 +17,6 @@ void CheckAndConvertExpToTemp(std::string &str)
     }
 }
 void AddStmToTree(StatementIRT* &root,StatementIRT* stm){
-    root = new StatementIRT(new SequenceIRT(root,stm));
+    if(root==NULL) root = stm;
+    else root = new StatementIRT(new SequenceIRT(root,stm));
 }

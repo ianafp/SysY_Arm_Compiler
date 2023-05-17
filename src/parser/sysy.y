@@ -3,15 +3,17 @@
   #include <memory>
   #include <string>
   #include "ast/ast.h"
-  #include "ast/position.h"
+  #include "common/position.h"
+  #include "common/initval_tree.h"
 }
 
 %{
+#include "common/initval_tree.h"
 #include <iostream>
 #include <memory>
 #include <string>
 #include "ast/ast.h"
-#include "ast/position.h"
+#include "common/position.h"
 BaseAST *root;
 extern pos_t cur_pos;
 using namespace std;
@@ -29,7 +31,8 @@ void yyerror(BaseAST* &ast, const char *s);
     BaseAST *ast_val;
     std::vector<int> *int_vec_val;
     std::vector<BaseAST*> *ast_vec_val;
-    InitValTree* init_val;
+    InitValTree<BaseAST*>* init_val;
+    InitValTree<int>* const_init_val;
 }
 
 %parse-param { BaseAST* &ast }
@@ -39,11 +42,11 @@ void yyerror(BaseAST* &ast, const char *s);
 %token _equal _nequal _greater _less _greater_equal _less_equal _logical_and _logical_or
 %token <str_val> _identifier _string 
 %token <int_val> _const_val
-%type <type_val> BType
-%type <ast_val> CompUnit Compunit FuncDef Block block BlockItem Stmt FuncFParam Decl ConstDecl VarDecl Vardecl Vardef VarDef LVal Exp Cond UnaryExp PrimaryExp Number UnaryOp AddExp MulExp RelExp EqExp LAndExp LOrExp FuncFParams  Funcfparam FuncRParams
+%type<type_val> BType
+%type <ast_val> CompUnit Compunit FuncDef  Block block BlockItem Stmt FuncFParam Decl ConstDecl VarDecl Vardecl Vardef VarDef LVal Exp UnaryExp PrimaryExp Number UnaryOp AddExp MulExp RelExp EqExp LAndExp LOrExp FuncFParams  Funcfparam FuncRParams FuncDeclare Cond
 Constdecl Constdef ConstDef ConstExp
-%type <init_val> ConstInitVal Constinitval InitVal Initval
-
+%type <init_val>  InitVal Initval
+%type <const_init_val> ConstInitVal Constinitval 
 %start CompUnit
 %%
     CompUnit: Compunit
@@ -93,6 +96,7 @@ Constdecl Constdef ConstDef ConstExp
                 auto ast = new DeclAST();
                 ast->tp = AstType::ConstDecl;
                 ast->const_or_var_decl = $1;
+                ast->HandleSymbol();
                 $$ = ast;
                 $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
             }
@@ -101,6 +105,7 @@ Constdecl Constdef ConstDef ConstExp
                 auto ast = new DeclAST();
                 ast->tp = AstType::VarDecl;
                 ast->const_or_var_decl = $1;
+                ast->HandleSymbol();
                 $$ = ast;
                 $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
             }
@@ -131,43 +136,53 @@ Constdecl Constdef ConstDef ConstExp
             {
                 $$ = VarType::VOID;
             }
-            ;
     ConstDef: Constdef '=' ConstInitVal
             {
                 auto ast = reinterpret_cast<VarDefAST*>($1);
-                ast->InitValueVec = $3->ConvertToInitValVec(ast->DimSizeVec);
+
+                ast->IntInitValue = $3;
                 $$ = ast;
                 $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
             }
             ;
     Constdef: _identifier 
-            {
-                auto ast = new VarDefAST();
-                ast->VarIdent = $1;
-                // ast->DimSizeVec = new std::vector<BaseAST*>();
-                ast->InitValueVec = NULL;
-                $$ = ast;
-                $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
+        {
+            auto ast = new VarDefAST();
+            ast->VarIdent = $1;
+            // ast->DimSizeVec = new std::vector<BaseAST*>();
+            ast->InitValue = NULL;
+            ast->IntInitValue = NULL;
+            $$ = ast;
+            $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
+        }
+        | Constdef '[' ConstExp ']'
+        {
+            auto ast = reinterpret_cast<VarDefAST*>($1);
+            int val;
+            if(reinterpret_cast<ExpAST*>($3)->GetConstVal(val)){
+                LOG(ERROR) << "The array size can't be var\n";
             }
-            | Constdef '[' ConstExp ']'
-            {
-                auto ast = reinterpret_cast<VarDefAST*>($1);
-                ast->DimSizeVec.push_back($3);
-                $$ = ast;
-                $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
-            }
+            val = 8;
+            ast->DimSizeVec.push_back(val);
+            $$ = ast;
+            $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
+    }
             ;
 ConstInitVal: ConstExp
-            {
-                $$ = new InitValTree();
-                $$->keys.push_back($1); 
-            }
+    {
+        $$ = new InitValTree<int>();
+        int temp;
+        if($1->GetConstVal(temp)){
+            LOG(ERROR)<<"the init value of const varieble is not const\n";
+        }
+        $$->keys.push_back(temp); 
+    }
             | '{' '}'
             {
-                $$ = new InitValTree(); 
+                $$ = new InitValTree<int>(); 
             }
             | '{' Constinitval '}'{
-                $$ = new InitValTree();
+                $$ = new InitValTree<int>();
                 $$->childs.push_back($2);
             }
             ;
@@ -182,10 +197,10 @@ Constinitval: ConstInitVal
             }
             ;
      VarDecl: Vardecl ';' 
-            {
-                $$ = $1;
-                $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
-            }
+     {
+        $$ = $1;
+        $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
+     }
             ;
      Vardecl: BType VarDef 
             {
@@ -206,12 +221,14 @@ Constinitval: ConstInitVal
       VarDef: Vardef
             {
                 $$ = $1;
+
                 $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
             }
             | Vardef '=' InitVal
             {
                 auto ast = reinterpret_cast<VarDefAST*>($1);
-                ast->InitValueVec = $3->ConvertToInitValVec(ast->DimSizeVec);
+                ast->InitValue = $3;
+                ast->IsInited = true;
                 $$ = $1;
                 $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
             }
@@ -220,31 +237,41 @@ Constinitval: ConstInitVal
             {
                 auto ast = new VarDefAST();
                 ast->VarIdent = $1;
-                ast->InitValueVec = NULL;
+                ast->InitValue = NULL;
+                ast->IsInited = false;
                 $$ = ast;
+                
                 $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
             }
             | Vardef '[' ConstExp ']'
             {
-                reinterpret_cast<VarDefAST*>($1)->DimSizeVec.push_back($3);
+                int val;
+                
+                if(reinterpret_cast<ExpAST*>($3)->GetConstVal(val)){
+                    LOG(ERROR)<<"the array length can not be variable\n";
+                }
+                val = 8;
+                reinterpret_cast<VarDefAST*>($1)->DimSizeVec.push_back(val);
+                
                 $$ = $1;
+                
                 $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
             }
             ;
      InitVal: Exp 
             {
-                $$ = new InitValTree();
+                $$ = new InitValTree<BaseAST*>();
                 $$->keys.push_back($1);
                 
             }
             | '{' '}'
             {
-                $$ = new InitValTree();
+                $$ = new InitValTree<BaseAST*>();
                 
             }
             | '{' Initval '}'
             {
-                $$ = new InitValTree();
+                $$ = new InitValTree<BaseAST*>();
                 $$->childs.push_back($2);
 
             }
@@ -259,27 +286,53 @@ Constinitval: ConstInitVal
                 $$ = $1;
             }
             ;   
-     FuncDef: BType _identifier '(' ')' Block
+     FuncDeclare: BType _identifier '(' ')'
             {
+                if(SymbolTable::FindSymbol(*$2)){
+                    LOG(ERROR) <<"Multidefinition of function "<<*$2<<"\n";
+                    exit(-1);
+                }
+
                 auto ast = new FuncDefAST();
                 ast->func_type = $1;
                 ast->ident = $2;
                 ast->func_fparams = nullptr;
-                ast->block = $5;
+                ast->block = NULL;
+                SymbolTable::AddSymbol(*$2,new Symbol(ValueType::INT32,std::vector<ArgsType>()));
                 ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
                 $$ = ast;
             }
-            | BType _identifier '(' FuncFParams ')' Block
+            | BType _identifier '(' FuncFParams ')'
             {
+                LOG(WARNING)<<"Function Def "<<*$2<<"\n";
+                if(SymbolTable::FindSymbol(*$2)){
+                    LOG(ERROR) <<"Multidefinition of function "<<*$2<<"\n";
+                    exit(-1);
+                }
                 auto ast = new FuncDefAST();
                 ast->func_type = $1;
                 ast->ident = $2;
                 ast->func_fparams = $4;
-                ast->block = $6;
+                ast->block = NULL;
+                std::vector<ArgsType> args;
+                for(auto &it:reinterpret_cast<FuncFParamsAST*>($4)->func_fparam){
+                    auto param = reinterpret_cast<FuncFParamAST*>(it);
+                    args.push_back(param->tp);
+                }
+                SymbolTable::AddSymbol(*$2,new Symbol(ValueType::INT32,args));
                 ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
                 $$ = ast;
             }
             ;
+     FuncDef: FuncDeclare Block
+            {
+                auto ast = reinterpret_cast<FuncDefAST*>($1);
+                ast->block = $2;
+                $$ = ast;
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+            }
+            ;
+
     /*FuncType: _int
             {
                 auto ast = new FuncTypeAST();
@@ -478,14 +531,29 @@ Constinitval: ConstInitVal
             ;
         LVal: _identifier
             {
+                Symbol* sym = SymbolTable::FindSymbol(*$1);
+                if(sym==NULL){
+                    LOG(ERROR)<<"Undefined Varieble"<<*$1<<"\n";
+                    exit(-1);
+                }
                 auto ast = new LValAST();
                 ast->VarIdent = $1;
+                ast->LValSym = sym;
                 $$ = ast;
                 ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
             }
             | LVal '[' Exp ']'
             {
-                reinterpret_cast<LValAST*>($1)->IndexVec.push_back($3);
+                auto ast = reinterpret_cast<LValAST*>($1);
+                if(ast->LValSym->SymbolType!=SymType::Int32Array){
+                    LOG(ERROR)<<"Varieble "<<*(ast->VarIdent)<<" is not array\n";
+                    exit(-1);
+                }
+                ast->IndexVec.push_back($3);
+                if(ast->IndexVec.size()>ast->LValSym->ArrAttributes->ArrayDimVec.size()){
+                    LOG(ERROR)<<"Array "<<*(ast->VarIdent)<<" index dimension mismatch\n";
+                    exit(-1);
+                }
                 $$ = $1;
                 ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
             }
@@ -499,6 +567,13 @@ Constinitval: ConstInitVal
                 $$ = ast;
             }
             | LVal
+            {
+                auto ast = new PrimaryExpAST();
+                ast->tp = PrimaryType::LVal;
+                ast->lval = $1;
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             | Number
             {
                 auto ast = new PrimaryExpAST();
@@ -535,7 +610,21 @@ Constinitval: ConstInitVal
             }
             | _identifier '(' FuncRParams ')'
             {
+                Symbol* sym = SymbolTable::FindSymbol(*$1);
+                if(sym==NULL){
+                    LOG(ERROR)<<"Undefined identifier "<<*$1<<"\n";
+                    exit(-1);
+                }
+                if(sym->SymbolType!=SymType::FuncName){
+                    LOG(ERROR)<<"identifier "<<*$1<<" is not a function\n";
+                    exit(-1);
+                }
+                if(sym->FunctionAttributes->ArgsTypeVec.size()!=reinterpret_cast<FuncRParamsAST*>($3)->exp.size()){
+                    LOG(ERROR)<<"function "<<*$1<<" call args mismatch\n";
+                    exit(-1);
+                }
                 auto ast = new UnaryExpAST();
+                ast -> FuncSym = sym;
                 ast->tp = ExpType::Call;
                 ast->ident = $1;
                 ast->func_rparam = $3;

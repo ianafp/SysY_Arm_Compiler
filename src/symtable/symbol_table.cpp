@@ -1,6 +1,6 @@
 #include"symtable/symbol_table.h"
 std::vector<std::map<std::string,Symbol*>> SymbolTable::TableVec;
-void SymbolTable::AddSymbol(std::string name,Symbol* sym){
+bool SymbolTable::AddSymbol(std::string name,Symbol* sym){
     std::string SymName("");
     int LastTableIndex = TableVec.size()-1;
     if(LastTableIndex!=1){
@@ -8,7 +8,12 @@ void SymbolTable::AddSymbol(std::string name,Symbol* sym){
     }else{
         sym->GlobalFlag = true;
     }
+    if(TableVec[LastTableIndex].find(name)!=TableVec[LastTableIndex].end()) {
+        delete sym;
+        return true;
+    }
     TableVec[LastTableIndex].insert(std::pair<std::string,Symbol*>(name,sym));
+    return false;
 }
 Symbol* SymbolTable::FindSymbol(std::string name){
     for(auto it = TableVec.rbegin();it!=TableVec.rend();it++){

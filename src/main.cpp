@@ -39,7 +39,8 @@ int main(int argc, const char *argv[]) {
   DLOG(WARNING) << "test";
   cout << "mode: " << mode << endl;
   cout << "output file: " << output << endl;
-
+  // init symbol table
+  SymbolTable::InitTable();
   // 打开输入文件, 并且指定 lexer 在解析的时候读取这个文件
   yyin = fopen(input, "r");
   assert(yyin);
@@ -52,8 +53,7 @@ int main(int argc, const char *argv[]) {
   // 输出解析得到的 AST, 其实就是个字符串
   ast->Dump();
   cout << endl;
-  // init symbol table
-  SymbolTable::InitTable();
+
   // generate koopa IR
   Program p;
   BaseIRT *ir = NULL;

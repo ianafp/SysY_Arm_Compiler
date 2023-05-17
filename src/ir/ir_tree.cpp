@@ -233,7 +233,13 @@ void RetIRT::Dump() const{
 }
 void GlobalVarIRT::Dump() const{
     if(this->GlobalVarType == ValueType::INT32){
-        int AddressSpace = this->GlobalVarCount << 2;
+        int size = 1;
+        if(this->IsArray){
+            for(auto &it:this->DimVec){
+                size *= it;
+            }
+        }
+        int AddressSpace = size << 2;
         std::cout<<this->GlobalVarName<<" = "<<"addrspace("<<AddressSpace<<") ";
         if(this->IsConstant){
             std::cout<<"constant ";
@@ -241,18 +247,9 @@ void GlobalVarIRT::Dump() const{
             std::cout<<"global ";
         }
         std::cout<<"i32 ";
-        if(this->InitValVec.size()==1){
-            std::cout<<this->InitValVec[0];
-        }
-        else{
-            std::cout<<"[";
-            for(int i = 0;i <this->InitValVec.size();++i){
-                std::cout<<this->InitValVec[i];
-                if(i<this->InitValVec.size()-1){
-                    std::cout<<", ";
-                }
-            }
-            std::cout<<"]";
+
+        if(this->InitVal!=NULL){
+            ConvertIntTreeToInitializer(this->InitVal);
         }
         std::cout<<", align 4\n";
     }
