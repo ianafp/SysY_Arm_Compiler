@@ -9,6 +9,7 @@
 #include <ctype.h>
 #include <assert.h>
 #include "glog/logging.h"
+#include"common/initval_tree.h"
 bool isDigit(const std::string &str);
 void CheckAndConvertExpToTemp(std::string &str);
 
@@ -34,7 +35,7 @@ class BaseIRT
 public:
     virtual ~BaseIRT() = default;
     virtual void Dump() const = 0;
-    virtual std::string  ExpDump() const = 0;
+    virtual std::string  ExpDump() const {return "";}
 };
 
 
@@ -63,11 +64,14 @@ public:
     ValueType GlobalVarType;
     std::string GlobalVarName;
     bool IsConstant;
-    int GlobalVarCount;
-    std::vector<int> InitValVec;
-    GlobalVarIRT(ValueType type,std::string name,bool ConstFlag,int count=1):GlobalVarType(type),GlobalVarName(name),IsConstant(ConstFlag),GlobalVarCount(count){
+    // int GlobalVarCount;
+    bool IsArray;
+    std::vector<int> DimVec;
+    InitValTree<int>* InitVal;
+    GlobalVarIRT(ValueType type,std::string name,bool ConstFlag,std::vector<int> dim,InitValTree<int>* init):GlobalVarType(type),GlobalVarName(name),IsConstant(ConstFlag),IsArray(true),DimVec(dim),InitVal(init){
     }
-    GlobalVarIRT(ValueType type,std::string name,bool ConstFlag,int count,std::vector<int> init):GlobalVarType(type),GlobalVarName(name),IsConstant(ConstFlag),GlobalVarCount(count),InitValVec(init){}
+    GlobalVarIRT(ValueType type,std::string name,bool ConstFlag,InitValTree<int>* init):GlobalVarType(type),GlobalVarName(name),IsConstant(ConstFlag),IsArray(false),InitVal(init){
+    }
     void Dump() const override;
     std::string ExpDump() const override{return "";}
 };
@@ -163,6 +167,7 @@ public:
     ExpIRT(TempIRT* temp):ContentKind(ExpKind::Temp),ExpContent(reinterpret_cast<BaseIRT*>(temp)){}
     ExpIRT(MemIRT* mem):ContentKind(ExpKind::Mem),ExpContent(reinterpret_cast<BaseIRT*>(mem)){}
     ExpIRT(BinOpIRT* binop ):ContentKind(ExpKind::BinOp),ExpContent(reinterpret_cast<BaseIRT*>(binop)){} 
+    
     ExpIRT(AllocateIRT* alloc):ContentKind(ExpKind::Allocate),ExpContent(reinterpret_cast<BaseIRT*>(alloc)) {}
     void Dump() const override;
     std::string ExpDump() const override ;

@@ -23,7 +23,7 @@ enum class StmtType
   ReturnVoid
 };
 enum class StmKind
-{
+{  
     GlobalVar,
     Func,
     Sequence,

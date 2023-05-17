@@ -3,8 +3,15 @@
 #include<map>
 #include<vector>
 #include"common/enum.h"
+#include"common/initval_tree.h"
+#include"common/base_ast.h"
+class VarInfo{
+public:
+    int InitVal;
+    VarInfo(int val):InitVal(val) {}
+    VarInfo(){}
+};
 class FunctionInfo{
-
 public:
     ValueType RetValType;
     std::vector<ArgsType> ArgsTypeVec;
@@ -13,9 +20,20 @@ public:
 };
 class ArrayInfo{
 public:
+    bool IsInited;
+    bool IsConstInit;
     std::vector<int> ArrayDimVec;
-    ArrayInfo(){}
-    ArrayInfo(std::vector<int> vec):ArrayDimVec(vec){}
+    InitValTree<BaseAST*> *VarInitVal;
+    InitValTree<int> *ConstInitVal; 
+    ArrayInfo():IsInited(false),IsConstInit(false),VarInitVal(NULL),ConstInitVal(NULL){}
+    ArrayInfo(std::vector<int> vec):IsInited(false),IsConstInit(false),ArrayDimVec(vec),
+    VarInitVal(NULL),ConstInitVal(NULL){}
+    ArrayInfo(std::vector<int> vec,InitValTree<BaseAST*> * VarInit):IsInited(true),IsConstInit(false),ArrayDimVec(vec),VarInitVal(VarInit),ConstInitVal(NULL){}
+    ArrayInfo(std::vector<int> vec,InitValTree<int> * ConstInit):IsInited(true),IsConstInit(false),ArrayDimVec(vec),VarInitVal(NULL),ConstInitVal(ConstInit){}  
+    ~ArrayInfo(){
+        delete VarInitVal;
+        delete ConstInitVal;
+    }
 };
 class Symbol{
     friend class SymbolTable;
@@ -24,33 +42,50 @@ private:
 public:
     SymType SymbolType;
     bool ConstFlag;
-    std::vector<int> InitValVec;
-    ArrayInfo ArrAttributes;
-    FunctionInfo FunctionAttributes;
+    VarInfo VarArrtributes;
+    ArrayInfo* ArrAttributes;
+    FunctionInfo* FunctionAttributes;
     /**
-     * @brief INT Symbol ctor
+     * @brief var ctor
     */
-    Symbol(SymType type,bool IsConst = false):SymbolType(type),ConstFlag(IsConst){}
+   Symbol(bool IsConst,int val = 0):SymbolType(SymType::INT32),ConstFlag(IsConst),VarArrtributes(val){
+        ArrAttributes = NULL;
+        FunctionAttributes = NULL;
+   }
     /**
-     * @brief INT Symbol ctor with init
+     * 
+     * @brief var symbol ctor
     */
-    Symbol(SymType type,int initval,bool IsConst = false):SymbolType(type),ConstFlag(IsConst),InitValVec(initval){}
-    /**
-     * @brief lable symbol ctor
-    */
-    Symbol():SymbolType(SymType::Label){}
-    /**
-     * @brief array symbol ctor without init
-    */
-    Symbol(std::vector<int> vec,bool IsConst = false):SymbolType(SymType::Int32Array),ArrAttributes(vec){}
-    /**
-     * @brief array symbol ctor with init
-    */
-    Symbol(std::vector<int> vec,std::vector<int> initval,bool IsConst = false):SymbolType(SymType::Int32Array),InitValVec(initval),ArrAttributes(vec){}
-    /**
-     * @brief function symbol ctor
-    */
-    Symbol(ValueType ret,std::vector<ArgsType> args):SymbolType(SymType::FuncName),FunctionAttributes(ret,args){}
+//    Symbol(bool IsConst,int initval = 0,BaseAST* initexp = NULL):SymbolType(SymType::INT32),ConstFlag(IsConst)
+//    {
+//         if(initexp != NULL){
+//             VarArrtributes = new VarInfo(initexp);
+//         }
+//         else VarArrtributes = new VarInfo(initval);
+//         ArrAttributes = NULL;
+//         FunctionAttributes = NULL;
+//    }
+   /**
+    * @brief arr symbol ctor
+   */
+   Symbol(bool IsConst,std::vector<int> dim,InitValTree<int>* initval = NULL,InitValTree<BaseAST*>* initexp = NULL):SymbolType(SymType::Int32Array),ConstFlag(IsConst)
+   {
+        if(initexp != NULL){
+            ArrAttributes = new ArrayInfo(dim,initexp);
+        }
+        else ArrAttributes = new ArrayInfo(dim,initval);
+        // VarAttributes = NULL;
+        FunctionAttributes = NULL;
+   }
+   /**
+    * @brief fun symbol ctor
+   */
+   Symbol(ValueType ret,std::vector<ArgsType> args):SymbolType(SymType::FuncName)
+   {
+        ArrAttributes = NULL;
+        // VarAttributes = NULL;
+        FunctionAttributes = new FunctionInfo(ret,args);
+   }
 
     /**
      * @brief get a bool return val, true indacates this symbol is global
@@ -60,6 +95,12 @@ public:
      * @brief this function process the symbol name to label (add '%' or '@' depends on global flag)
     */
    std::string GetLabelStr(std::string SymName) const;
+   ~Symbol()
+   {
+        // delete VarArrtributes;
+        delete ArrAttributes;
+        delete FunctionAttributes;
+   }
 
 };
 class SymbolTable{

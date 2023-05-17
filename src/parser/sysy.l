@@ -7,7 +7,7 @@
 #include "sysy.tab.hpp"
 #include <cstdlib>
 #include <string>
-#include "ast/position.h"
+#include "common/position.h"
 
 pos_t cur_pos;
 int col_record = 1;

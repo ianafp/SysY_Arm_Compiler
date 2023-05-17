@@ -41,13 +41,10 @@ bool ConstDeclAST::HandleSymbol() const
                     LOG(ERROR) << "Multidefinition of symbol " << *DefAstPtr->VarIdent << "\n";
                     return true;
                 }
-                int initval;
-                if (reinterpret_cast<ExpAST *>((*(DefAstPtr->InitValueVec))[0])->GetConstVal(initval))
-                {
-                    LOG(ERROR) << "The Int32 " << *DefAstPtr->VarIdent << "'s init value is not const\n";
-                    return true;
-                }
-                SymbolTable::AddSymbol(*DefAstPtr->VarIdent, new Symbol(SymType::INT32, initval, true));
+                int initval = DefAstPtr->IntInitValue->keys[0];
+                Symbol* sym = new Symbol(true, initval);
+                SymbolTable::AddSymbol(*DefAstPtr->VarIdent, sym);
+                DefAstPtr->VarSym = sym;
                 return false;
             }
             else
@@ -65,19 +62,9 @@ bool ConstDeclAST::HandleSymbol() const
                         return true;
                     }
                     // create symbol info
-                    std::vector<int> initval;
-                    for (auto &it_init : *ConstDefPtr->InitValueVec)
-                    {
-                        int temp;
-                        if (reinterpret_cast<ExpAST *>(it_init)->GetConstVal(temp))
-                        {
-                            LOG(ERROR) << "The Array " << *DefAstPtr->VarIdent << "'s init value is not const\n";
-                            return true;
-                        }
-                        initval.push_back(temp);
-                    }
-                    Symbol *sym = new Symbol(ConstDefPtr->DimSizeVec, initval, true);
+                    Symbol *sym = new Symbol(true,ConstDefPtr->DimSizeVec,ConstDefPtr->IntInitValue);
                     SymbolTable::AddSymbol(*DefAstPtr->VarIdent, sym);
+                    ConstDefPtr->VarSym = sym;
                 }
                 return false;
                 // if(SymbolTable::AddSymbol(*DefAstPtr->VarIdent,new Symbol()))
@@ -107,7 +94,18 @@ bool VarDeclAST::HandleSymbol() const
                     LOG(ERROR) << "Multidefinition of symbol " << *DefAstPtr->VarIdent << "\n";
                     return true;
                 }
-                SymbolTable::AddSymbol(*DefAstPtr->VarIdent, new Symbol(SymType::INT32, false));
+                Symbol* sym = new Symbol(false);
+                SymbolTable::AddSymbol(*DefAstPtr->VarIdent,sym);
+                DefAstPtr->VarSym = sym;
+                if(sym->GetGlobalFlag()){
+                    InitValTree<int>* IntTree;
+                    if(ConvertTreeToInt(DefAstPtr->InitValue,IntTree)){
+                        LOG(ERROR) << "global symbol " << *DefAstPtr->VarIdent << " initialized by varieble!\n";
+                        exit(-1);
+                        return true;  
+                    }
+                    DefAstPtr->IntInitValue = IntTree;
+                }
                 return false;
             }
             else
@@ -125,8 +123,18 @@ bool VarDeclAST::HandleSymbol() const
                         return true;
                     }
                     // create symbol info
-                    Symbol *sym = new Symbol(ConstDefPtr->DimSizeVec, false);
+                    Symbol *sym = new Symbol(false,ConstDefPtr->DimSizeVec);
                     SymbolTable::AddSymbol(*DefAstPtr->VarIdent, sym);
+                    ConstDefPtr->VarSym = sym;
+                    if(sym->GetGlobalFlag()){
+                    InitValTree<int>* IntTree;
+                    if(ConvertTreeToInt(DefAstPtr->InitValue,IntTree)){
+                        LOG(ERROR) << "global varieble " << *DefAstPtr->VarIdent << " initialized by varieble!\n";
+                        exit(-1);
+                        // return true;  
+                    }
+                    DefAstPtr->IntInitValue = IntTree;
+                }
                 }
                 // if(SymbolTable::AddSymbol(*DefAstPtr->VarIdent,new Symbol()))
             }
@@ -419,101 +427,36 @@ bool LValAST::GetConstVal(int &val) const
             LOG(ERROR) << "Int32 " << *this->VarIdent << " is not const!\n";
             return true;
         }
-        val = sym->InitValVec[0];
+        val = sym->VarArrtributes.InitVal;
         return false;
     }
     if (sym->SymbolType == SymType::INT32)
     {
-        int offset = 0;
         if (sym->ConstFlag == false)
         {
             LOG(ERROR) << "Int32 Array " << *this->VarIdent << " is not const!\n";
             return true;
         }
         // check index
-        if (this->IndexVec.size() != sym->ArrAttributes.ArrayDimVec.size())
+        if (this->IndexVec.size() != sym->ArrAttributes->ArrayDimVec.size())
         {
             LOG(ERROR) << "Int32 Array " << *this->VarIdent << " 's shape mismatch this index\n";
             return true;
         }
-        for (int i = 0; i < this->IndexVec.size(); ++i)
-        {
-            auto const_exp = reinterpret_cast<ExpAST *>(this->IndexVec[i]);
-            int index_val;
-            if (const_exp->GetConstVal(index_val))
-            {
-                LOG(ERROR) << "Int32 Array " << *this->VarIdent << "'s " << i << " th index is not const\n";
+        std::vector<int> index;
+        for(auto &it:this->IndexVec){
+            int temp;
+            if(it->GetConstVal(temp)){
+                LOG(ERROR) << "the index is not const\n";
                 return true;
             }
-            if (index_val < 0 || index_val > sym->ArrAttributes.ArrayDimVec[i])
-            {
-                LOG(ERROR) << "Int32 Array " << *this->VarIdent << "'s " << i << " th index out of range\n";
-                return true;
-            }
-            offset += sym->ArrAttributes.ArrayDimVec[i] * index_val;
-            
+            index.push_back(temp);
         }
-        val = sym->InitValVec[offset];
+        sym->ArrAttributes->ConstInitVal->find(index,val);
+        // val = sym->InitValVec[offset];
+
         return false;
     }
     return true;
 }
-std::vector<BaseAST *> *InitValTree::ConvertToInitValVec(std::vector<int> DimVec)
-{
-    auto res = new std::vector<BaseAST *>();
-    if (this->childs.size())
-    {
-        std::vector<int> TempDim;
-        for (int i = 0; i < TempDim.size() - 1; ++i)
-        {
-            TempDim[i] = TempDim[i + 1];
-        }
-        TempDim.pop_back();
 
-        for (auto &it_child : this->childs)
-        {
-            std::vector<BaseAST *> *temp = it_child->ConvertToInitValVec(TempDim);
-            for (auto &it : *temp)
-            {
-                res->push_back(it);
-            }
-            delete temp;
-        }
-        return res;
-    }
-    else
-    {
-        for(auto &it:this->keys){
-            res->push_back(it);
-        }
-        int size = 1;
-        for(auto &it:DimVec){
-            size *= it;
-        }
-        for(int i = res->size();i<size;++i){
-            auto num = new NumberAST();
-            num->num = 0;
-            auto primary = new PrimaryExpAST();
-            primary->number = num;
-            primary->tp = PrimaryType::Num;
-            auto unary = new UnaryExpAST();
-            unary->primary_exp = primary;
-            auto mul = new MulExpAST();
-            mul->unary_exp.push_back(unary);
-            auto add = new AddExpAST();
-            add->mul_exp.push_back(mul);
-            auto rel = new RelExpAST();
-            rel->add_exp.push_back(add);
-            auto eq = new EqExpAST();
-            eq->rel_exp.push_back(rel);
-            auto land = new LAndExpAST();
-            land->eq_exp .push_back(eq);
-            auto lor = new LOrExpAST();
-            lor->land_exp.push_back(land);
-            auto exp = new ExpAST();
-            exp->lor_exp = lor;
-            res->push_back(exp);
-        }
-        return res;
-    }
-}
