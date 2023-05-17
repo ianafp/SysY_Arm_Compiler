@@ -315,23 +315,32 @@ Constinitval: ConstInitVal
                 ast->tp = ArgsType::Int32;
                 ast->Btype = $1;
                 ast->ident = $2;
-                ast->func_fparam = nullptr;
                 ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
                 $$ = ast;
             }
             | Funcfparam
             {
-                auto ast = new FuncFParamAST();
-                ast->tp = ArgsType::Int32Array;
-                //ast->Btype = nullptr;
-                ast->ident = nullptr;
-                ast->func_fparam = $1;
+                auto ast = $1;
                 ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
                 $$ = ast;
             }
             ;
   Funcfparam: BType _identifier '[' ']'
-            | Funcfparam '[' Exp ']'  
+            {
+                auto ast = new FuncFParamAST();
+                ast->tp = ArgsType::Int32Array;
+                ast->Btype = $1;
+                ast->ident = $2;
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
+            | Funcfparam '[' Exp ']'
+            {
+                auto ast = reinterpret_cast<FuncFParamAST*>($1);
+                ast->dimension.push_back($3);
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             ;
        Block: '{' block '}'
             {
@@ -428,6 +437,14 @@ Constinitval: ConstInitVal
                 $$ = ast;
             }
             | _while '(' Cond ')' Stmt
+            {
+                auto ast = new StmtAST();
+                ast->tp = StmtType::While;
+                ast->cond_exp = $3;
+                ast->stmt_while = $5;
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             | _break ';'
             | _continue ';'
             | _return ';'

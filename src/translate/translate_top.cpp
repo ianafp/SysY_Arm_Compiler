@@ -114,6 +114,7 @@ void Program::func_dealer(FuncDefAST *func_def, BaseIRT *&ir)
     }
 
     //construct func_ir tree
+    //notice that para_cnt may not work
     if (func_type == VarType::INT)
     {
         ir = new StatementIRT(StmKind::Func, new FuncIRT(ValueType::INT32, new LabelIRT(ident), para_cnt, reinterpret_cast<StatementIRT *>(ir)));        

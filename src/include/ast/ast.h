@@ -255,7 +255,7 @@ public:
   ArgsType tp;
   VarType Btype;
   std::string *ident;
-  BaseAST *func_fparam;
+  std::vector<BaseAST *> dimension;
   void Dump() const override
   {
     std::cout << "FuncFParamAST {\n";
@@ -265,7 +265,7 @@ public:
     }
     else if (tp == ArgsType::Int32Array)
     {
-      func_fparam->Dump();
+      // func_fparam->Dump();
     }
     std::cout << "\n}(FuncFParamAST ends) ";
   }
@@ -405,6 +405,7 @@ public:
   BaseAST *cond_exp;
   BaseAST *stmt_if;
   BaseAST *stmt_else;
+  BaseAST *stmt_while;
   void Dump() const override
   {
     std::cout << "StmtAST {\n";
