@@ -7,7 +7,9 @@ enum class AstType
 };
 enum class VarType
 {
-  INT
+  INT,
+  //potentially not used
+  VOID
 };
 enum class StmtType
 {

@@ -22,54 +22,6 @@ void Program::block_dealer(BlockItemAST *block_item, BaseIRT *&ir)
                 assert(stmt_available->ret_exp == nullptr);
                 ir = new StatementIRT(StmKind::Ret, new RetIRT(ValueType::VOID, NULL));
             }
-            // if (cond) stmt_if, without else stmt_else
-            else if (stmt_available->tp == StmtType::If)
-            {
-                assert(stmt_available->ret_exp == nullptr); // not used in If statement
-                assert(stmt_available->stmt_else == nullptr); // here the else statement block should not be used.
-                assert(stmt_available->cond_exp != nullptr && stmt_available->stmt_if != nullptr);
-                DLOG(WARNING) << "If statement";
-                DLOG(WARNING) << stmt_available->cond_exp->type();
-                // the type is LOrExpAST
-                LOrExpAST* conditional_exp = reinterpret_cast<LOrExpAST *>(stmt_available->cond_exp);
-                BaseIRT* ir_condition;
-                // note that the ExpIRT is the type of ir_condition
-                logic_exp_dealer(conditional_exp, ir_condition);
-                // short circuit? haven't implemented yet. Please do not use this trait in your program.
-                ExpIRT * ir_condition_exp = dynamic_cast<ExpIRT*>(ir_condition);
-                DLOG(WARNING) << "Condition of IF statement is: " << ir_condition_exp->ExpDump();
-                if (ir_condition_exp->ContentKind == ExpKind::BinOp) {
-                    // condition expression with two sides
-                    assert(ir_condition_exp->ContentKind == ExpKind::BinOp);
-                    BinOpIRT* ir_condition_binop = reinterpret_cast<BinOpIRT* >(ir_condition_exp->ExpContent);
-                    BinOpKind opkind;
-                    ExpIRT *leftExp = nullptr, *rightExp = nullptr;
-                    if (ir_condition_binop != nullptr) {
-                        opkind = ir_condition_binop->OpKind;
-                        leftExp = ir_condition_binop->LeftExp;
-                        rightExp = ir_condition_binop->RightExp;
-                        LabelIRT* if_block = new LabelIRT(std::string("if"));
-                        LabelIRT* end_label = new LabelIRT(std::string("end"));
-                        ir = new StatementIRT(StmKind::Cjump, new CjumpIRT(opkind, leftExp, rightExp, if_block, end_label));
-                    } else {
-                        DLOG(ERROR) << "Haven't implement error handling.";
-                    }
-                } else {
-                    // condition expresssion with only one side, now we need to add one side
-                    assert(ir_condition_exp->ContentKind == ExpKind::Const);
-                    ExpIRT* zero_irt = new ExpIRT(new ConstIRT());
-                    // waiting to implement!
-                }
-                
-            }
-            // if (cond) stmt_if, else stmt_else
-            else if (stmt_available->tp == StmtType::IfElse)
-            {
-                assert(stmt_available->ret_exp == nullptr); // not used in If statement
-                assert(stmt_available->cond_exp != nullptr && stmt_available->stmt_if != nullptr && stmt_available->stmt_else != nullptr);
-                DLOG(WARNING) << "If else statement";
-
-            }
             else if (stmt_available->tp == StmtType::Exp)
             {
                 assert(stmt_available->ret_exp != nullptr);
@@ -98,7 +50,7 @@ void Program::block_dealer(BlockItemAST *block_item, BaseIRT *&ir)
 void Program::func_dealer(FuncDefAST *func_def, BaseIRT *&ir)
 {
     std::string result(""), ident("");
-    BaseAST *func_type;
+    VarType func_type;
     FuncFParamsAST *func_fparams;
     BaseAST *block;
     int para_cnt = 0;
@@ -112,18 +64,6 @@ void Program::func_dealer(FuncDefAST *func_def, BaseIRT *&ir)
     if (func_fparams != nullptr)
         para_cnt = func_fparams->func_fparam.size();
 
-    // Deal with FuncType
-    FuncTypeAST *func_type_available = nullptr;
-    std::string type_analysis("");
-    if (func_type != nullptr)
-    {
-        func_type_available = dynamic_cast<FuncTypeAST *>(func_type);
-        if (func_type_available != nullptr)
-        {
-            type_analysis += func_type_available->type_ret;
-        }
-    }
-
     // Deal with Block
     BlockAST *block_available = nullptr;
     BaseAST *block_true = nullptr;
@@ -135,32 +75,6 @@ void Program::func_dealer(FuncDefAST *func_def, BaseIRT *&ir)
             block_true = block_available->block;
         }
     }
-
-    std::string INT_type("int");
-    std::string VOID_type("void");
-
-    //add symbol table of this function
-    ValueType ret;
-    if (type_analysis == INT_type)
-        ret = ValueType::INT32;
-    if (type_analysis == VOID_type)
-        ret = ValueType::VOID;
-
-    std::vector<ArgsType> args;
-    if(func_fparams != nullptr)
-    {
-        for(int i=0; i<para_cnt; i++)
-        {
-            if(dynamic_cast<FuncFParamAST *>(func_fparams->func_fparam[i])->tp == ArgsType::Int32)
-                args.push_back(ArgsType::Int32);
-            else if(dynamic_cast<FuncFParamAST *>(func_fparams->func_fparam[i])->tp == ArgsType::Int32Array)
-                args.push_back(ArgsType::Int32Array);
-        }
-    }
-    
-    SymbolTable::AddSymbol(ident, new Symbol( ret, args));
-    if(SymbolTable::FindSymbol(ident) == NULL)
-        std::cout << "error" + ident;
 
     //deal with blocks
     BaseIRT* ir1 = nullptr, *ir2 = nullptr;
@@ -188,11 +102,11 @@ void Program::func_dealer(FuncDefAST *func_def, BaseIRT *&ir)
     }
 
     //construct func_ir tree
-    if (type_analysis == INT_type)
+    if (func_type == VarType::INT)
     {
         ir = new StatementIRT(StmKind::Func, new FuncIRT(ValueType::INT32, new LabelIRT(ident), para_cnt, reinterpret_cast<StatementIRT *>(ir)));        
     }
-    if (type_analysis == VOID_type)
+    if (func_type == VarType::VOID)
     {
         ir = new StatementIRT(StmKind::Func, new FuncIRT(ValueType::VOID, new LabelIRT(ident), para_cnt, reinterpret_cast<StatementIRT *>(ir)));
     }
