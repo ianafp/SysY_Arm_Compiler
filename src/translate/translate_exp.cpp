@@ -234,8 +234,13 @@ void Program::WhileTranslater(StmtAST* stmt_available, BaseIRT* &ir){
     LabelIRT* entry_label = new LabelIRT(std::string("loop_entry"));
     LabelIRT* body_label = new LabelIRT(std::string("loop_body"));
     LabelIRT* end_label = new LabelIRT(std::string("loop_end"));
-    // ir = new StatementIRT(StmKind::Sequence, new StatementIRT(StmKind::Lable, entry_label), new StatementIRT(StmKind::Cjump, new CjumpIRT(opkind, leftExp, rightExp, body_label, end_label)));
+    ir = new StatementIRT(StmKind::Sequence, new SequenceIRT(new StatementIRT(StmKind::Lable, entry_label), new StatementIRT(StmKind::Cjump, new CjumpIRT(opkind, leftExp, rightExp, body_label, end_label))));
+    ir = new StatementIRT(StmKind::Sequence, new SequenceIRT(reinterpret_cast<StatementIRT*>(ir), new StatementIRT(StmKind::Lable, body_label)));
 
-    BaseIRT* stmt = nullptr;
-    // ir = new StatementIRT(StmKind::Sequence, ir, )
+    BaseIRT* stmt_ir = nullptr;
+    stmt_dealer(reinterpret_cast<StmtAST*>(stmt_available->stmt_while), stmt_ir);
+    if(stmt_ir != nullptr)
+        ir = new StatementIRT(StmKind::Sequence, new SequenceIRT(reinterpret_cast<StatementIRT*>(ir), reinterpret_cast<StatementIRT*>(stmt_ir)));
+    ir = new StatementIRT(StmKind::Sequence, new SequenceIRT(reinterpret_cast<StatementIRT*>(ir), new StatementIRT(StmKind::Jump, new JumpIRT(entry_label))));
+    ir = new StatementIRT(StmKind::Sequence, new SequenceIRT(reinterpret_cast<StatementIRT*>(ir), new StatementIRT(StmKind::Lable, end_label)));
 }

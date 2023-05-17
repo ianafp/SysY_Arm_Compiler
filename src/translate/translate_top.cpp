@@ -1,6 +1,6 @@
 #include "translate/ir_generator.h"
 
-void Program::block_dealer(BlockItemAST *block_item, BaseIRT *&ir)
+void Program::block_item_dealer(BlockItemAST *block_item, BaseIRT *&ir)
 {
     // std::cout << "in block" << std::endl;/
     if (block_item->decl_or_stmt != nullptr && block_item->decl_or_stmt->type() == "StmtAST")
@@ -17,23 +17,8 @@ void Program::block_dealer(BlockItemAST *block_item, BaseIRT *&ir)
     }
 }
 
-void Program::func_dealer(FuncDefAST *func_def, BaseIRT *&ir)
+void Program::block_dealer(BlockAST* block, BaseIRT* &ir)
 {
-    std::string result(""), ident("");
-    VarType func_type;
-    FuncFParamsAST *func_fparams;
-    BaseAST *block;
-    int para_cnt = 0;
-
-    // Start with FuncDefAST, we translate it to IR
-    func_type = func_def->func_type;
-    ident += *func_def->ident;
-    func_fparams = dynamic_cast<FuncFParamsAST*>(func_def->func_fparams);
-    block = func_def->block;
-    // get the count of parameters
-    if (func_fparams != nullptr)
-        para_cnt = func_fparams->func_fparam.size();
-
     // Deal with Block
     BlockAST *block_available = nullptr;
     BaseAST *block_true = nullptr;
@@ -57,10 +42,10 @@ void Program::func_dealer(FuncDefAST *func_def, BaseIRT *&ir)
         if (block_true_available != nullptr)
         {
             assert(block_true_available->block_item[0] != nullptr && block_true_available->block_item[0]->type() == "BlockItemAST");
-            block_dealer(dynamic_cast<BlockItemAST *>(block_true_available->block_item[0]), ir1);
+            block_item_dealer(dynamic_cast<BlockItemAST *>(block_true_available->block_item[0]), ir1);
             for (int i=1; i<block_true_available->block_item.size(); i++)
             {
-                block_dealer(dynamic_cast<BlockItemAST *>(block_true_available->block_item[i]), ir2);
+                block_item_dealer(dynamic_cast<BlockItemAST *>(block_true_available->block_item[i]), ir2);
                 ir1 = new StatementIRT(StmKind::Sequence, new SequenceIRT(reinterpret_cast<StatementIRT*>(ir1), reinterpret_cast<StatementIRT*>(ir2)));
             }
             ir = ir1;
@@ -70,7 +55,26 @@ void Program::func_dealer(FuncDefAST *func_def, BaseIRT *&ir)
     {
         ir = new StatementIRT(StmKind::Ret, new RetIRT(ValueType::VOID, NULL));
     }
+}
 
+void Program::func_dealer(FuncDefAST *func_def, BaseIRT *&ir)
+{
+    std::string result(""), ident("");
+    VarType func_type;
+    FuncFParamsAST *func_fparams;
+    BaseAST *block;
+    int para_cnt = 0;
+
+    // Start with FuncDefAST, we translate it to IR
+    func_type = func_def->func_type;
+    ident += *func_def->ident;
+    func_fparams = dynamic_cast<FuncFParamsAST*>(func_def->func_fparams);
+    block = func_def->block;
+    // get the count of parameters
+    if (func_fparams != nullptr)
+        para_cnt = func_fparams->func_fparam.size();
+
+    block_dealer(dynamic_cast<BlockAST *>(block), ir);
     //construct func_ir tree
     //notice that para_cnt may not work
     if (func_type == VarType::INT)

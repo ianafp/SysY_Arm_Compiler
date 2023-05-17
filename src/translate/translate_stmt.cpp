@@ -28,6 +28,10 @@ void Program::stmt_dealer(StmtAST* stmt_available, BaseIRT* &ir)
         {
             BranchTranslater(stmt_available, ir, true);
         }
+        else if (stmt_available->tp == StmtType::While)
+        {
+            WhileTranslater(stmt_available, ir);
+        }
         else if (stmt_available->tp == StmtType::Exp)
         {
             assert(stmt_available->ret_exp != nullptr);
@@ -40,7 +44,7 @@ void Program::stmt_dealer(StmtAST* stmt_available, BaseIRT* &ir)
 
         }
         else if(stmt_available->tp == StmtType::Block){
-
+            block_dealer(reinterpret_cast<BlockAST*>(stmt_available->ret_exp), ir);
         }
         // more to continue...
     }

@@ -55,8 +55,8 @@ class Program {
   *  @note      ir is a reference
   *  @Sample usage:     called in func_dealer() only recursively, no need for outer call
  *****************************************************************************************/
-  void block_dealer(BlockItemAST* block_item, BaseIRT* &ir);
-
+  void block_dealer(BlockAST* block_item, BaseIRT* &ir);
+  void block_item_dealer(BlockItemAST *block_item, BaseIRT *&ir);
 /***************************************************************************************
   *  @brief     This is just another version of the former function with different argument type.
   *  @param     stmt_available: the ast node of a statement; 
