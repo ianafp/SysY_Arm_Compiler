@@ -58,6 +58,15 @@ class Program {
   void block_dealer(BlockItemAST* block_item, BaseIRT* &ir);
 
 /***************************************************************************************
+  *  @brief     This is just another version of the former function with different argument type.
+  *  @param     stmt_available: the ast node of a statement; 
+  *  @param     ir: the IR tree to construct
+  *  @note      ir is a reference
+  *  @Sample usage:     called in IF statement to transfer the statement AST to IR.
+ *****************************************************************************************/
+  void stmt_dealer(StmtAST* stmt_available, BaseIRT* &ir);
+
+/***************************************************************************************
   *  @brief     Deal with the function definition of the IR construct process recursively
   *  @param     func_def:the ast node of func_def type; ir:the IR tree template we wanna construct   
   *  @note      ir is a reference
@@ -132,11 +141,12 @@ class Program {
   void ConvertExpInitTreeToIR(InitValTree<BaseAST*> *AstTree,const std::vector<int> &dim,std::vector<int> &trait,ExpIRT* addr,StatementIRT* &ir);
   /**
    * @brief this method handle the if statement, translate if statement to IR (CJUMP as central block)
-   * @param assign StmtAST ptr as scanner's source.
+   * @param stmt_available StmtAST ptr as scanner's source.
    * @param ir pointer's reference
+   * @param has_else true:this translater need to translate the else statement; false: no else statement.
    *
   */
-  void BranchTranslater(StmtAST* stmt_available,BaseIRT* &ir);
+  void BranchTranslater(StmtAST* stmt_available,BaseIRT* &ir,bool has_else);
 
   /**
    * @brief this method is used in if and while condition translation
@@ -147,6 +157,13 @@ class Program {
    * 
   */
   void BranchConditionJudge(ExpIRT* ir_condition_exp,ExpIRT* &leftExp,ExpIRT* &rightExp,BinOpKind &opkind);
+  /**
+   * @brief this method handle the while statement, translate if statement to IR (CJUMP as central block)
+   * @param stmt_available StmtAST ptr as scanner's source.
+   * @param ir pointer's reference
+   *
+  */
+  void WhileTranslater(StmtAST* stmt_available, BaseIRT* &ir);
 };
 
 #endif
