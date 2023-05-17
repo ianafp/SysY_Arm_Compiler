@@ -70,6 +70,9 @@ void Program::BranchTranslater(StmtAST* stmt_available, BaseIRT* &ir, bool has_e
         DLOG(WARNING) << "If statement";
         DLOG(WARNING) << stmt_available->cond_exp->type();
         // the type is LOrExpAST
+
+        /* 1. first part: deal with the condition of the expression, construct the CJUMP IR tree. */
+        BaseIRT* ir_cjump = nullptr; // this is used to receive the cjump ir tree.
         LOrExpAST* conditional_exp = reinterpret_cast<LOrExpAST *>(stmt_available->cond_exp);
         BaseIRT* ir_condition;
         // note that the ExpIRT is the type of ir_condition
@@ -83,11 +86,25 @@ void Program::BranchTranslater(StmtAST* stmt_available, BaseIRT* &ir, bool has_e
         BranchConditionJudge(ir_condition_exp, leftExp, rightExp, opkind);
         LabelIRT* if_block = new LabelIRT(std::string("if"));
         LabelIRT* end_label = new LabelIRT(std::string("end"));
-        ir = new StatementIRT(StmKind::Cjump, new CjumpIRT(opkind, leftExp, rightExp, if_block, end_label));
+        ir_cjump = new StatementIRT(StmKind::Cjump, new CjumpIRT(opkind, leftExp, rightExp, if_block, end_label));
+
+        /* 2. deal with the label, attach the label to the IR tree */
+        BaseIRT* ir_block;
+        BaseAST* stmt_if_ast = stmt_available->stmt_if;
+        assert(stmt_if_ast->type() == std::string("StmtAST"));
+        stmt_dealer(reinterpret_cast<StmtAST*>(stmt_if_ast), ir_block);
+        // attach the if_label to the start of the block
+        ir_block = new StatementIRT(StmKind::Sequence, new SequenceIRT(new StatementIRT(if_block), reinterpret_cast<StatementIRT *>(ir_block)));
+        // attach the end_label to the end of the block
+        ir_block = new StatementIRT(StmKind::Sequence, new SequenceIRT(reinterpret_cast<StatementIRT *>(ir_block), new StatementIRT(end_label)));
+        // attach the cjump ir to the block ir
+        ir = new StatementIRT(StmKind::Sequence, new SequenceIRT(reinterpret_cast<StatementIRT *>(ir_cjump), reinterpret_cast<StatementIRT*>(ir_block)));
     } else {
         assert(stmt_available->ret_exp == nullptr); // not used in If statement
         assert(stmt_available->cond_exp != nullptr && stmt_available->stmt_if != nullptr && stmt_available->stmt_else != nullptr);
         DLOG(WARNING) << "If else statement";
+        
+        /* 1. first part: deal with the condition of the expression, construct the CJUMP IR tree. */
         LOrExpAST* conditional_exp = reinterpret_cast<LOrExpAST *>(stmt_available->cond_exp);
         BaseIRT* ir_condition;
         // note that the ExpIRT is the type of ir_condition
@@ -102,5 +119,8 @@ void Program::BranchTranslater(StmtAST* stmt_available, BaseIRT* &ir, bool has_e
         LabelIRT* if_block = new LabelIRT(std::string("if"));
         LabelIRT* else_label = new LabelIRT(std::string("else"));
         ir = new StatementIRT(StmKind::Cjump, new CjumpIRT(opkind, leftExp, rightExp, if_block, else_label));
+    
+        /* 2. deal with the label, attach the label to the IR tree */
+        
     }
 }

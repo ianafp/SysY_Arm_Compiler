@@ -58,6 +58,15 @@ class Program {
   void block_dealer(BlockItemAST* block_item, BaseIRT* &ir);
 
 /***************************************************************************************
+  *  @brief     This is just another version of the former function with different argument type.
+  *  @param     stmt_available: the ast node of a statement; 
+  *  @param     ir: the IR tree to construct
+  *  @note      ir is a reference
+  *  @Sample usage:     called in IF statement to transfer the statement AST to IR.
+ *****************************************************************************************/
+  void stmt_dealer(StmtAST* stmt_available, BaseIRT* &ir);
+
+/***************************************************************************************
   *  @brief     Deal with the function definition of the IR construct process recursively
   *  @param     func_def:the ast node of func_def type; ir:the IR tree template we wanna construct   
   *  @note      ir is a reference
