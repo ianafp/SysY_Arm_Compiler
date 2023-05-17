@@ -62,7 +62,7 @@ void Program::block_dealer(BlockItemAST *block_item, BaseIRT *&ir)
 void Program::func_dealer(FuncDefAST *func_def, BaseIRT *&ir)
 {
     std::string result(""), ident("");
-    BaseAST *func_type;
+    VarType func_type;
     FuncFParamsAST *func_fparams;
     BaseAST *block;
     int para_cnt = 0;
@@ -76,18 +76,6 @@ void Program::func_dealer(FuncDefAST *func_def, BaseIRT *&ir)
     if (func_fparams != nullptr)
         para_cnt = func_fparams->func_fparam.size();
 
-    // Deal with FuncType
-    FuncTypeAST *func_type_available = nullptr;
-    std::string type_analysis("");
-    if (func_type != nullptr)
-    {
-        func_type_available = dynamic_cast<FuncTypeAST *>(func_type);
-        if (func_type_available != nullptr)
-        {
-            type_analysis += func_type_available->type_ret;
-        }
-    }
-
     // Deal with Block
     BlockAST *block_available = nullptr;
     BaseAST *block_true = nullptr;
@@ -99,32 +87,6 @@ void Program::func_dealer(FuncDefAST *func_def, BaseIRT *&ir)
             block_true = block_available->block;
         }
     }
-
-    std::string INT_type("int");
-    std::string VOID_type("void");
-
-    //add symbol table of this function
-    ValueType ret;
-    if (type_analysis == INT_type)
-        ret = ValueType::INT32;
-    if (type_analysis == VOID_type)
-        ret = ValueType::VOID;
-
-    std::vector<ArgsType> args;
-    if(func_fparams != nullptr)
-    {
-        for(int i=0; i<para_cnt; i++)
-        {
-            if(dynamic_cast<FuncFParamAST *>(func_fparams->func_fparam[i])->tp == ArgsType::Int32)
-                args.push_back(ArgsType::Int32);
-            else if(dynamic_cast<FuncFParamAST *>(func_fparams->func_fparam[i])->tp == ArgsType::Int32Array)
-                args.push_back(ArgsType::Int32Array);
-        }
-    }
-    
-    SymbolTable::AddSymbol(ident, new Symbol( ret, args));
-    if(SymbolTable::FindSymbol(ident) == NULL)
-        std::cout << "error" + ident;
 
     //deal with blocks
     BaseIRT* ir1 = nullptr, *ir2 = nullptr;
@@ -152,11 +114,11 @@ void Program::func_dealer(FuncDefAST *func_def, BaseIRT *&ir)
     }
 
     //construct func_ir tree
-    if (type_analysis == INT_type)
+    if (func_type == VarType::INT)
     {
         ir = new StatementIRT(StmKind::Func, new FuncIRT(ValueType::INT32, new LabelIRT(ident), para_cnt, reinterpret_cast<StatementIRT *>(ir)));        
     }
-    if (type_analysis == VOID_type)
+    if (func_type == VarType::VOID)
     {
         ir = new StatementIRT(StmKind::Func, new FuncIRT(ValueType::VOID, new LabelIRT(ident), para_cnt, reinterpret_cast<StatementIRT *>(ir)));
     }

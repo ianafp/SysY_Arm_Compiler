@@ -176,7 +176,7 @@ public:
 class FuncDefAST : public BaseAST
 {
 public:
-  BaseAST *func_type;
+  VarType func_type;
   std::string *ident;
   BaseAST *func_fparams;
   BaseAST *block;
@@ -197,7 +197,7 @@ public:
       visual.remove_map(std::string("CompunitAST"), instance_name);
       DLOG(WARNING) << "remove map";
     }
-    func_type->Dump();
+    // func_type->Dump();
     std::cout << ", " << *ident << ", ";
     if (func_fparams != nullptr)
       func_fparams->Dump();
