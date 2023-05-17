@@ -25,14 +25,13 @@ void Program::block_dealer(BlockItemAST *block_item, BaseIRT *&ir)
             // if (cond) stmt_if, without else stmt_else
             else if (stmt_available->tp == StmtType::If)
             {
-                BranchTranslater(stmt_available, ir);
+                BranchTranslater(stmt_available, ir, false);
             }
             // if (cond) stmt_if, else stmt_else
             else if (stmt_available->tp == StmtType::IfElse)
             {
-                assert(stmt_available->ret_exp == nullptr); // not used in If statement
-                assert(stmt_available->cond_exp != nullptr && stmt_available->stmt_if != nullptr && stmt_available->stmt_else != nullptr);
-                DLOG(WARNING) << "If else statement";
+                BranchTranslater(stmt_available, ir, true);
+                
             }
             else if (stmt_available->tp == StmtType::Exp)
             {

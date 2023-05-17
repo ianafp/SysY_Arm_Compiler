@@ -128,9 +128,10 @@ class Program {
    * @brief this method handle the if statement, translate if statement to IR (CJUMP as central block)
    * @param assign StmtAST ptr as scanner's source.
    * @param ir pointer's reference
+   * @param has_else true:this translater need to translate the else statement; false: no else statement.
    *
   */
-  void BranchTranslater(StmtAST* stmt_available,BaseIRT* &ir);
+  void BranchTranslater(StmtAST* stmt_available,BaseIRT* &ir,bool has_else);
 
   /**
    * @brief this method is used in if and while condition translation

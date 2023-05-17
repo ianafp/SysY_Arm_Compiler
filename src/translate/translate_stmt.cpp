@@ -49,25 +49,45 @@ void Program::BranchConditionJudge(ExpIRT* ir_condition_exp, ExpIRT* &leftExp, E
         rightExp = zero_irt;
     }
 }
-void Program::BranchTranslater(StmtAST* stmt_available, BaseIRT* &ir){
-    assert(stmt_available->ret_exp == nullptr); // not used in If statement
-    assert(stmt_available->stmt_else == nullptr); // here the else statement block should not be used.
-    assert(stmt_available->cond_exp != nullptr && stmt_available->stmt_if != nullptr);
-    DLOG(WARNING) << "If statement";
-    DLOG(WARNING) << stmt_available->cond_exp->type();
-    // the type is LOrExpAST
-    LOrExpAST* conditional_exp = reinterpret_cast<LOrExpAST *>(stmt_available->cond_exp);
-    BaseIRT* ir_condition;
-    // note that the ExpIRT is the type of ir_condition
-    logic_exp_dealer(conditional_exp, ir_condition);
-    // short circuit? haven't implemented yet. Please do not use this trait in your program.
-    ExpIRT * ir_condition_exp = dynamic_cast<ExpIRT*>(ir_condition);
-    DLOG(WARNING) << "Condition of IF statement is: " << ir_condition_exp->ExpDump();
-    BinOpKind opkind;
-    ExpIRT *leftExp = nullptr, *rightExp = nullptr;
-    // use BranchConditionJudge to extract the condition of if-statement    
-    BranchConditionJudge(ir_condition_exp, leftExp, rightExp, opkind);
-    LabelIRT* if_block = new LabelIRT(std::string("if"));
-    LabelIRT* end_label = new LabelIRT(std::string("end"));
-    ir = new StatementIRT(StmKind::Cjump, new CjumpIRT(opkind, leftExp, rightExp, if_block, end_label));
+void Program::BranchTranslater(StmtAST* stmt_available, BaseIRT* &ir, bool has_else){
+    if (!has_else){
+        assert(stmt_available->ret_exp == nullptr); // not used in If statement
+        assert(stmt_available->stmt_else == nullptr); // here the else statement block should not be used.
+        assert(stmt_available->cond_exp != nullptr && stmt_available->stmt_if != nullptr);
+        DLOG(WARNING) << "If statement";
+        DLOG(WARNING) << stmt_available->cond_exp->type();
+        // the type is LOrExpAST
+        LOrExpAST* conditional_exp = reinterpret_cast<LOrExpAST *>(stmt_available->cond_exp);
+        BaseIRT* ir_condition;
+        // note that the ExpIRT is the type of ir_condition
+        logic_exp_dealer(conditional_exp, ir_condition);
+        // short circuit? haven't implemented yet. Please do not use this trait in your program.
+        ExpIRT * ir_condition_exp = dynamic_cast<ExpIRT*>(ir_condition);
+        DLOG(WARNING) << "Condition of IF statement is: " << ir_condition_exp->ExpDump();
+        BinOpKind opkind;
+        ExpIRT *leftExp = nullptr, *rightExp = nullptr;
+        // use BranchConditionJudge to extract the condition of if-statement    
+        BranchConditionJudge(ir_condition_exp, leftExp, rightExp, opkind);
+        LabelIRT* if_block = new LabelIRT(std::string("if"));
+        LabelIRT* end_label = new LabelIRT(std::string("end"));
+        ir = new StatementIRT(StmKind::Cjump, new CjumpIRT(opkind, leftExp, rightExp, if_block, end_label));
+    } else {
+        assert(stmt_available->ret_exp == nullptr); // not used in If statement
+        assert(stmt_available->cond_exp != nullptr && stmt_available->stmt_if != nullptr && stmt_available->stmt_else != nullptr);
+        DLOG(WARNING) << "If else statement";
+        LOrExpAST* conditional_exp = reinterpret_cast<LOrExpAST *>(stmt_available->cond_exp);
+        BaseIRT* ir_condition;
+        // note that the ExpIRT is the type of ir_condition
+        logic_exp_dealer(conditional_exp, ir_condition);
+        // short circuit? haven't implemented yet. Please do not use this trait in your program.
+        ExpIRT * ir_condition_exp = dynamic_cast<ExpIRT*>(ir_condition);
+        DLOG(WARNING) << "Condition of IF statement is: " << ir_condition_exp->ExpDump();
+        BinOpKind opkind;
+        ExpIRT *leftExp = nullptr, *rightExp = nullptr;
+        // use BranchConditionJudge to extract the condition of if-statement    
+        BranchConditionJudge(ir_condition_exp, leftExp, rightExp, opkind);
+        LabelIRT* if_block = new LabelIRT(std::string("if"));
+        LabelIRT* else_label = new LabelIRT(std::string("else"));
+        ir = new StatementIRT(StmKind::Cjump, new CjumpIRT(opkind, leftExp, rightExp, if_block, else_label));
+    }
 }
