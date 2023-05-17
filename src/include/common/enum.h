@@ -1,5 +1,6 @@
 #ifndef _ENUM_H_
 #define _ENUM_H_
+#include<string>
 enum class AstType
 {
   ConstDecl,
@@ -93,4 +94,8 @@ enum class PrimaryType{
     Num,
     LVal
 };
+std::string EnumToString(AstType type);
+std::string EnumToString(VarType type);
+std::string EnumToString(StmtType type);
+std::string EnumToString(ArgsType type);
 #endif

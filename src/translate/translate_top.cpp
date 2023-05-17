@@ -115,13 +115,23 @@ void Program::func_dealer(FuncDefAST *func_def, BaseIRT *&ir)
 
     //construct func_ir tree
     //notice that para_cnt may not work
+
+    auto parameters = reinterpret_cast<FuncFParamsAST*>(func_def->func_fparams);
+    std::vector<std::string> names;
+    std::vector<ArgsType> types;
+    for(auto &it:parameters->func_fparam){
+        auto param = reinterpret_cast<FuncFParamAST*>(it);
+        names.push_back(*param->ident);
+        types.push_back(param->tp);
+    }
     if (func_type == VarType::INT)
     {
-        ir = new StatementIRT(StmKind::Func, new FuncIRT(ValueType::INT32, new LabelIRT(ident), para_cnt, reinterpret_cast<StatementIRT *>(ir)));        
+
+        ir = new StatementIRT(StmKind::Func, new FuncIRT(ValueType::INT32, new LabelIRT(ident),names,types, reinterpret_cast<StatementIRT *>(ir)));        
     }
     if (func_type == VarType::VOID)
     {
-        ir = new StatementIRT(StmKind::Func, new FuncIRT(ValueType::VOID, new LabelIRT(ident), para_cnt, reinterpret_cast<StatementIRT *>(ir)));
+        ir = new StatementIRT(StmKind::Func, new FuncIRT(ValueType::VOID, new LabelIRT(ident), names,types, reinterpret_cast<StatementIRT *>(ir)));
     }
 }
 

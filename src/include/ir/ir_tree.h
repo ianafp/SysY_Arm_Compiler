@@ -287,10 +287,11 @@ class FuncIRT:public BaseIRT{
 public:
     ValueType RetValType;
     LabelIRT *FuncLable;
-    int ArgsCount;
+    std::vector<std::string> ParameterNameVec;
+    std::vector<ArgsType> ArgsVec;
     StatementIRT* FuncStm;
     FuncIRT(){}
-    FuncIRT(ValueType type, LabelIRT *call, int count,StatementIRT* stm,ExpIRT* RetExp=NULL) : RetValType(type), FuncLable(call), ArgsCount(count),FuncStm(stm) {}
+    FuncIRT(ValueType type, LabelIRT *call,std::vector<std::string> name,std::vector<ArgsType> vec,StatementIRT* stm,ExpIRT* RetExp=NULL) : RetValType(type), FuncLable(call),ParameterNameVec(name),ArgsVec(vec),FuncStm(stm) {}
     void Dump() const override;
     std::string ExpDump() const override;
 };

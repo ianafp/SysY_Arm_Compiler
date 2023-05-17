@@ -168,8 +168,8 @@ std::string CallIRT::ExpDump() const
         RetTypeString = "i32";
     else
         RetTypeString = "void";
-    std::cout<<"%"<<TempId<<" = "<<"invoke signext " << RetTypeString << " @" << FuncLable->LableName + "(";
-    ResString += "invoke signext " + RetTypeString + " @" + FuncLable->LableName + "(";
+    std::cout<<"%"<<TempId<<" = "<<"call " << RetTypeString << " @" << FuncLable->LableName + "(";
+    ResString += "%"+std::to_string(TempId);
     for (int i = 0; i < ArgsStr.size(); ++i)
     {
         std::cout << "i32 " << ArgsStr[i];
@@ -178,9 +178,7 @@ std::string CallIRT::ExpDump() const
             std::cout<<", ";
         }
     }
-    std::string RetLable = "%func_ret_"+std::to_string(TempIdAllocater::GetId());
-    std::cout<<") to lable "<<RetLable<<" unwind lable "<<RetLable<<"\n";
-    ResString = "%" + std::to_string(TempId);
+    std::cout<<")\n";
     return ResString;
 }
 std::string AllocateIRT::ExpDump() const{
@@ -202,11 +200,19 @@ void FuncIRT::Dump() const{
     std::cout <<"define "<<FuncTypeStr<<" @"<<this->FuncLable->LableName<<"(";
     TempIdAllocater::Rewind();
     int TempId;
-    for(int i=0;i<this->ArgsCount;++i){
-        std::cout<<"i32 ";
-        TempId = TempIdAllocater::GetId();
-        std::cout<<"%"<<TempId;
-        if(i<this->ArgsCount-1){
+    // for(int i=0;i<this->ArgsCount;++i){
+    //     std::cout<<"i32 ";
+    //     TempId = TempIdAllocater::GetId();
+    //     std::cout<<"%"<<TempId;
+    //     if(i<this->ArgsCount-1){
+    //         std::cout<<", ";
+    //     }
+    // }
+    for(int i=0;i<this->ArgsVec.size();++i){
+        std::cout << EnumToString(ArgsVec[i]);
+        std::cout<<" ";
+        std::cout<< this->ParameterNameVec[i];
+        if(i!=this->ArgsVec.size()-1){
             std::cout<<", ";
         }
     }

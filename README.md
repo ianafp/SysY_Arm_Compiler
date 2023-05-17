@@ -14,3 +14,6 @@ The docker image can also be found in the document of PKU.
     cd build
     make run
 ```
+# llvm referrence document
+
+<a href="https://llvm.org/docs/LangRef.html#call-instruction">llvm ir</a>
