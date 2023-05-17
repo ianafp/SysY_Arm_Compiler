@@ -18,9 +18,7 @@
 
 extern class Visualize visual;
 
-std::string EnumToString(AstType type);
-std::string EnumToString(VarType type);
-std::string EnumToString(StmtType type);
+
 
 // CompUnit 是 BaseAST
 class CompUnitAST : public BaseAST
@@ -250,7 +248,8 @@ public:
   ArgsType tp;
   VarType Btype;
   std::string *ident;
-  std::vector<BaseAST *> dimension;
+  std::vector<int> dimension;
+  bool EmitHighestDimFlag;
   void Dump() const override
   {
     std::cout << "FuncFParamAST {\n";

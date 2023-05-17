@@ -43,7 +43,7 @@ void yyerror(BaseAST* &ast, const char *s);
 %token <str_val> _identifier _string 
 %token <int_val> _const_val
 %type<type_val> BType
-%type <ast_val> CompUnit Compunit FuncDef  Block block BlockItem Stmt FuncFParam Decl ConstDecl VarDecl Vardecl Vardef VarDef LVal Exp UnaryExp PrimaryExp Number UnaryOp AddExp MulExp RelExp EqExp LAndExp LOrExp FuncFParams  Funcfparam FuncRParams FuncDeclare Cond
+%type <ast_val> CompUnit Compunit FuncDef  Block block BlockItem Stmt FuncFParam Decl ConstDecl VarDecl Vardecl Vardef VarDef LVal Exp UnaryExp PrimaryExp Number UnaryOp AddExp MulExp RelExp EqExp LAndExp LOrExp FuncFParams  Funcfparam FuncRParams FuncDeclare Cond IfPrefix IfElsePrefix WhilePrefix
 Constdecl Constdef ConstDef ConstExp
 %type <init_val>  InitVal Initval
 %type <const_init_val> ConstInitVal Constinitval 
@@ -292,7 +292,7 @@ Constinitval: ConstInitVal
                     LOG(ERROR) <<"Multidefinition of function "<<*$2<<"\n";
                     exit(-1);
                 }
-
+                SymbolTable::EnterScope();
                 auto ast = new FuncDefAST();
                 ast->func_type = $1;
                 ast->ident = $2;
@@ -309,6 +309,7 @@ Constinitval: ConstInitVal
                     LOG(ERROR) <<"Multidefinition of function "<<*$2<<"\n";
                     exit(-1);
                 }
+                SymbolTable::EnterScope();
                 auto ast = new FuncDefAST();
                 ast->func_type = $1;
                 ast->ident = $2;
@@ -318,6 +319,18 @@ Constinitval: ConstInitVal
                 for(auto &it:reinterpret_cast<FuncFParamsAST*>($4)->func_fparam){
                     auto param = reinterpret_cast<FuncFParamAST*>(it);
                     args.push_back(param->tp);
+                    Symbol* sym = SymbolTable::FindSymbol(*param->ident);
+                    if(sym!=NULL){
+                        LOG(ERROR)<<"Multidefinition of function"<<*$2<<" parameter"<<*param->ident<<"\n";
+                        exit(-1);
+                    }
+                    if(param->tp == ArgsType::Int32){
+                        sym = new Symbol(false);
+                    }
+                    else if(param->tp == ArgsType::Int32Array){
+                        sym = new Symbol(false,param->dimension);
+                    }
+                    SymbolTable::AddSymbol(*param->ident,sym);
                 }
                 SymbolTable::AddSymbol(*$2,new Symbol(ValueType::INT32,args));
                 ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
@@ -326,6 +339,7 @@ Constinitval: ConstInitVal
             ;
      FuncDef: FuncDeclare Block
             {
+                SymbolTable::ExitScope();
                 auto ast = reinterpret_cast<FuncDefAST*>($1);
                 ast->block = $2;
                 $$ = ast;
@@ -384,17 +398,29 @@ Constinitval: ConstInitVal
                 ast->tp = ArgsType::Int32Array;
                 ast->Btype = $1;
                 ast->ident = $2;
+                if(ast->EmitHighestDimFlag==true){
+                    LOG(ERROR)<<"Array Parameter "<<*$2<<"Emit Too Many Dimensions\n";
+                    exit(-1);
+                }
+                ast->EmitHighestDimFlag = true;
+                ast->dimension.push_back(0);
                 ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
                 $$ = ast;
             }
             | Funcfparam '[' Exp ']'
             {
                 auto ast = reinterpret_cast<FuncFParamAST*>($1);
-                ast->dimension.push_back($3);
+                int temp;
+                if($3->GetConstVal(temp)){
+                    LOG(ERROR)<<"Array Parameter "<<*reinterpret_cast<FuncFParamAST*>($1)->ident<<" Has Varieble Dimension\n";
+                    exit(-1);
+                }
+                ast->dimension.push_back(temp);
                 ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
                 $$ = ast;
             }
             ;
+
        Block: '{' block '}'
             {
                 auto ast = new BlockAST();
@@ -442,6 +468,40 @@ Constinitval: ConstInitVal
                 $$ = ast;
             }
             ;
+        IfPrefix: _if '(' Cond ')' 
+            {
+                SymbolTable::EnterScope();
+                auto ast = new StmtAST();
+                ast->tp = StmtType::If;
+                ast->cond_exp = $3;
+                ast->stmt_if = NULL;
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
+            ;
+        IfElsePrefix: _if '(' Cond ')' Stmt _else
+            {
+                SymbolTable::EnterScope();
+                auto ast = new StmtAST();
+                ast->tp = StmtType::IfElse;
+                ast->cond_exp = $3;
+                ast->stmt_if = $5;
+                ast->stmt_else = NULL;
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
+            ;
+        WhilePrefix:_while '(' Cond ')' 
+            {
+                SymbolTable::EnterScope();
+                auto ast = new StmtAST();
+                ast->tp = StmtType::While;
+                ast->cond_exp = $3;
+                ast->stmt_while = NULL;
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
+            ;
         Stmt: LVal '=' Exp ';'
             {
                 auto ast = new StmtAST();
@@ -470,33 +530,29 @@ Constinitval: ConstInitVal
                 ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
                 $$ = ast;
             }
-            | _if '(' Cond ')' Stmt
+            | IfPrefix Stmt
             {
-                auto ast = new StmtAST();
-                ast->tp = StmtType::If;
-                ast->cond_exp = $3;
-                ast->stmt_if = $5;
+                auto ast = reinterpret_cast<StmtAST*>($1);
+                ast->stmt_if = $2;
                 ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
                 $$ = ast;
+                SymbolTable::ExitScope();
             }
-            | _if '(' Cond ')' Stmt _else Stmt
+            | IfElsePrefix Stmt
             {
-                auto ast = new StmtAST();
-                ast->tp = StmtType::IfElse;
-                ast->cond_exp = $3;
-                ast->stmt_if = $5;
-                ast->stmt_else = $7;
+                auto ast = reinterpret_cast<StmtAST*>($1);
+                ast->stmt_else = $2;
                 ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
                 $$ = ast;
+                SymbolTable::ExitScope();
             }
-            | _while '(' Cond ')' Stmt
+            | WhilePrefix Stmt
             {
-                auto ast = new StmtAST();
-                ast->tp = StmtType::While;
-                ast->cond_exp = $3;
-                ast->stmt_while = $5;
+                auto ast = reinterpret_cast<StmtAST*>($1);
+                ast->stmt_while = $2;
                 ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
                 $$ = ast;
+                SymbolTable::ExitScope();
             }
             | _break ';'
             | _continue ';'
