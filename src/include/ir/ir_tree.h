@@ -104,7 +104,13 @@ public:
             LableName = std::string("ELSE_LABEL_" + std::to_string(TempIdAllocater::GetId()));
         } else if (LableNameStr == std::string("end")) {
             LableName = std::string("END_LABEL_" + std::to_string(TempIdAllocater::GetId()));
-        }  
+        } else if (LableNameStr == std::string("loop_entry")) {
+            LableName = std::string("LOOP_ENTRY_" + std::to_string(TempIdAllocater::GetId()));
+        } else if (LableNameStr == std::string("loop_body")) {
+            LableName = std::string("LOOP_BODY_" + std::to_string(TempIdAllocater::GetId()));
+        } else if (LableNameStr == std::string("loop_end")) {
+            LableName = std::string("LOOP_END_" + std::to_string(TempIdAllocater::GetId()));
+        }
         else {
             LableName = LableNameStr;
         } 
