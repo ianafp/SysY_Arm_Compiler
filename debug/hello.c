@@ -9,12 +9,12 @@
 //   half(1,2);
 // }
 
-int half(int x, int y) {
-  // half(1, 2);
-  // sb();
-  // sb(1,2);
-  return 22 / 2;
-}
+// int half(int x, int y) {
+//   // half(1, 2);
+//   // sb();
+//   // sb(1,2);
+//   return 22 / 2;
+// }
 
 int main() {
   // test line comment

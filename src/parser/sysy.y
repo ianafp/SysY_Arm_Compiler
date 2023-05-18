@@ -301,8 +301,8 @@ Constinitval: ConstInitVal
                 ast->ident = $2;
                 ast->func_fparams = $4;
                 ast->block = $6;
-                std::vector<ArgsType> args;
                 /*
+                std::vector<ArgsType> args;
                 for(auto &it:reinterpret_cast<FuncFParamsAST*>($4)->func_fparam){
                     auto param = reinterpret_cast<FuncFParamAST*>(it);
                     args.push_back(param->tp);

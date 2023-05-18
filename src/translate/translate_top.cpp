@@ -30,7 +30,8 @@ void Program::block_dealer(BlockAST *block, BaseIRT *&ir)
             block_true = block_available->block;
         }
     }
-
+    // enter scope
+    SymbolTable::EnterScope();
     // deal with blocks
     BaseIRT *ir1 = nullptr, *ir2 = nullptr;
     blockAST *block_true_available = nullptr;
@@ -55,6 +56,8 @@ void Program::block_dealer(BlockAST *block, BaseIRT *&ir)
     {
         ir = new StatementIRT(StmKind::Ret, new RetIRT(ValueType::VOID, NULL));
     }
+    // leave scope
+    SymbolTable::ExitScope();
 }
 
 void Program::func_dealer(FuncDefAST *func_def, BaseIRT *&ir)
@@ -74,10 +77,40 @@ void Program::func_dealer(FuncDefAST *func_def, BaseIRT *&ir)
     if (func_fparams != nullptr)
         para_cnt = func_fparams->func_fparam.size();
 
+    // check symbol table
+    SymbolTable::EnterScope();
+    std::vector<ArgsType> args;
+    if (func_fparams)
+    {
+        for (auto &it : reinterpret_cast<FuncFParamsAST *>(func_fparams)->func_fparam)
+        {
+            auto param = reinterpret_cast<FuncFParamAST *>(it);
+            args.push_back(param->tp);
+            Symbol *sym = SymbolTable::FindSymbol(*param->ident);
+            if (sym != NULL)
+            {
+                LOG(ERROR) << "Multidefinition of function" << ident << " parameter" << *param->ident << "\n";
+                exit(-1);
+            }
+            if (param->tp == ArgsType::Int32)
+            {
+                sym = new Symbol(false);
+            }
+            else if (param->tp == ArgsType::Int32Array)
+            {
+                sym = new Symbol(false, param->dimension);
+            }
+            SymbolTable::AddSymbol(*param->ident, sym);
+        }
+    }
+    SymbolTable::AddSymbol(ident, new Symbol(ValueType::INT32, args));
+
+    // Symbol* sym = new Symbol(func_type,func_fparams->)
+    // if(SymbolTable::AddSymbol())
     block_dealer(dynamic_cast<BlockAST *>(block), ir);
     // construct func_ir tree
     // notice that para_cnt may not work
-
+    SymbolTable::ExitScope();
     auto parameters = reinterpret_cast<FuncFParamsAST *>(func_def->func_fparams);
     std::vector<std::string> names;
     std::vector<ArgsType> types;
@@ -127,7 +160,7 @@ void Program::Scan(BaseAST *root, BaseIRT *&ir)
         else if (Compunit->decl_list[0] != nullptr && Compunit->decl_list[0]->type() == "DeclAST")
         {
             // for lv4
-            this->DeclTranslater(reinterpret_cast<DeclAST*>(Compunit->decl_list[0]),ir1);
+            this->DeclTranslater(reinterpret_cast<DeclAST *>(Compunit->decl_list[0]), ir1);
         }
         for (int i = 1; i < Compunit->decl_list.size(); i++)
         {
@@ -137,8 +170,9 @@ void Program::Scan(BaseAST *root, BaseIRT *&ir)
                 func_dealer(dynamic_cast<FuncDefAST *>(Compunit->decl_list[i]), ir2);
                 ir1 = new StatementIRT(StmKind::Sequence, new SequenceIRT(reinterpret_cast<StatementIRT *>(ir1), reinterpret_cast<StatementIRT *>(ir2)));
             }
-            else if(Compunit->decl_list[i] != nullptr && Compunit->decl_list[i]->type() == "DeclAST"){
-                this->DeclTranslater(reinterpret_cast<DeclAST*>(Compunit->decl_list[i]),ir2);
+            else if (Compunit->decl_list[i] != nullptr && Compunit->decl_list[i]->type() == "DeclAST")
+            {
+                this->DeclTranslater(reinterpret_cast<DeclAST *>(Compunit->decl_list[i]), ir2);
                 ir1 = new StatementIRT(StmKind::Sequence, new SequenceIRT(reinterpret_cast<StatementIRT *>(ir1), reinterpret_cast<StatementIRT *>(ir2)));
             }
         }

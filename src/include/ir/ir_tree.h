@@ -264,8 +264,9 @@ class AllocateIRT: public BaseIRT{
 public:
     int NumOfInt;
     int AlignSize;
+    std::string ident;
     AllocateIRT(){}
-    AllocateIRT(int num=1,int align=1):NumOfInt(num),AlignSize(align){}
+    AllocateIRT(std::string name,int num=1,int align=1):NumOfInt(num),AlignSize(align),ident(name){}
     void Dump() const override{}
     std::string ExpDump() const override ;
 };

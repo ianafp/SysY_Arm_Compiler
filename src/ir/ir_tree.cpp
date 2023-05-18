@@ -182,16 +182,15 @@ std::string CallIRT::ExpDump() const
     return ResString;
 }
 std::string AllocateIRT::ExpDump() const{
-    std::string ResString("");
-    ResString += "alloca i32 ";
+    std::cout<<"%"<<this->ident<<" = " <<"alloca i32 ";
     if(NumOfInt>1){
-        ResString += ", i32 " + std::to_string(NumOfInt);
+        std::cout<< ", i32 " <<std::to_string(NumOfInt);
     }
     if(AlignSize>1){
-        ResString += ", align " + std::to_string(AlignSize);
+        std::cout<<", align " <<std::to_string(AlignSize);
     }
-    ResString += "\n";
-    return ResString;
+    std::cout<<"\n";
+    return "%" + this->ident;
 }
 void FuncIRT::Dump() const{
     std::string FuncTypeStr("");
