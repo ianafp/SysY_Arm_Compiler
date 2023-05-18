@@ -123,15 +123,30 @@ void Program::func_dealer(FuncDefAST *func_def, BaseIRT *&ir)
             types.push_back(param->tp);
         }
     }
+
+    ValueType ret;
+    if (func_type == VarType::INT)
+        ret = ValueType::INT32;
+    if (func_type == VarType::VOID)
+        ret = ValueType::VOID;
+
+    //add symbol table of this function
+    SymbolTable::AddSymbol(ident, new Symbol(ret, types));
+    //add symbols of fparameters
+    
+    //deal with block
+    block_dealer(dynamic_cast<BlockAST *>(block), ir);
+
+    //construct func_ir tree
     if (func_type == VarType::INT)
     {
-
         ir = new StatementIRT(StmKind::Func, new FuncIRT(ValueType::INT32, new LabelIRT(ident), names, types, reinterpret_cast<StatementIRT *>(ir)));
     }
     if (func_type == VarType::VOID)
     {
         ir = new StatementIRT(StmKind::Func, new FuncIRT(ValueType::VOID, new LabelIRT(ident), names, types, reinterpret_cast<StatementIRT *>(ir)));
     }
+
 }
 
 void Program::Scan(BaseAST *root, BaseIRT *&ir)
