@@ -469,7 +469,7 @@ bool LValAST::GetConstVal(int &val) const
     Symbol *sym = SymbolTable::FindSymbol(*this->VarIdent);
     if (sym == NULL)
     {
-        LOG(ERROR) << "Undifind Left Value " << *this->VarIdent << "\n";
+        LOG(ERROR) << "Undefined Left Value " << *this->VarIdent << "\n";
         return true;
     }
     // check sym type
