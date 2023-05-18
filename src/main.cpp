@@ -8,6 +8,7 @@
 #include "translate/ir_generator.h"
 #include "glog/logging.h"
 #include "common/visualize.h"
+#include "common/while_frame.h"
 // #include "koopa.h"
 // #include "headers/ir_tree.h"
 // the header file can be found at https://github.com/pku-minic/koopa/blob/master/crates/libkoopa/include/koopa.h

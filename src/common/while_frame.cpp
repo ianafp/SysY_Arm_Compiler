@@ -1,5 +1,5 @@
 #include "common/while_frame.h"
-std::vector<LabelIRT*> begin, end;
+std::vector<LabelIRT*> WhileFrame:: begin, WhileFrame::end;
 //init frame of while iter
 void WhileFrame::init_frame()
 {
