@@ -41,7 +41,7 @@ void Program::stmt_dealer(StmtAST* stmt_available, BaseIRT* &ir)
         }
         // to be implemented
         else if(stmt_available->tp == StmtType::Assign){
-
+            AssignTranslater(reinterpret_cast<AssignAST*>(stmt_available->ret_exp), ir);
         }
         else if(stmt_available->tp == StmtType::Block){
             block_dealer(reinterpret_cast<BlockAST*>(stmt_available->ret_exp), ir);
@@ -198,49 +198,32 @@ void Program::BranchTranslater(StmtAST* stmt_available, BaseIRT* &ir, bool has_e
         ir = new StatementIRT(StmKind::Sequence, new SequenceIRT(reinterpret_cast<StatementIRT *>(ir_cjump), reinterpret_cast<StatementIRT*>(ir_combine)));
     }
 }
-// void Program::stmt_dealer(StmtAST* stmt_available, BaseIRT* &ir)
-// {
-//     // Deal with Stmt
-//     if (stmt_available != nullptr)
-//     {
-//         // return Exp ;
-//         if (stmt_available->tp == StmtType::ReturnExp)
-//         {
-//             assert(stmt_available->ret_exp != nullptr);
-//             logic_exp_dealer(dynamic_cast<ExpAST *>(stmt_available->ret_exp)->lor_exp, ir);
-//             ir = new StatementIRT(StmKind::Ret, new RetIRT(ValueType::INT32, reinterpret_cast<ExpIRT *>(ir)));
-//         }
-//         // return ;
-//         else if (stmt_available->tp == StmtType::ReturnVoid)
-//         {
-//             assert(stmt_available->ret_exp == nullptr);
-//             ir = new StatementIRT(StmKind::Ret, new RetIRT(ValueType::VOID, NULL));
-//         }
-//         // if (cond) stmt_if, without else stmt_else
-//         else if (stmt_available->tp == StmtType::If)
-//         {
-//             BranchTranslater(stmt_available, ir, false);
-//         }
-//         // if (cond) stmt_if, else stmt_else
-//         else if (stmt_available->tp == StmtType::IfElse)
-//         {
-//             BranchTranslater(stmt_available, ir, true);
-//         }
-//         else if (stmt_available->tp == StmtType::Exp)
-//         {
-//             assert(stmt_available->ret_exp != nullptr);
-//             BaseIRT *ir_exp = nullptr;
-//             logic_exp_dealer(stmt_available->ret_exp, ir_exp);
-//             ir = new StatementIRT(StmKind::Exp, ir_exp);
-//         }
-//         // to be implemented
-//         else if(stmt_available->tp == StmtType::Assign){
 
-//         }
-//         else if(stmt_available->tp == StmtType::Block){
+void Program::WhileTranslater(StmtAST* stmt_available, BaseIRT* &ir){
+    assert(stmt_available->ret_exp == nullptr); // not used in If statement
+    assert(stmt_available->cond_exp != nullptr && stmt_available->stmt_while != nullptr);
+    DLOG(WARNING) << "While statement";
+    LOrExpAST* conditional_exp = reinterpret_cast<LOrExpAST *>(stmt_available->cond_exp);
+    BaseIRT* ir_condition;
+    // note that the ExpIRT is the type of ir_condition
+    logic_exp_dealer(conditional_exp, ir_condition);
+    // short circuit? haven't implemented yet. Please do not use this trait in your program.
+    ExpIRT * ir_condition_exp = dynamic_cast<ExpIRT*>(ir_condition);
+    DLOG(WARNING) << "Condition of While statement is: " << ir_condition_exp->ExpDump();
+    BinOpKind opkind;
+    ExpIRT *leftExp = nullptr, *rightExp = nullptr;
+    // use BranchConditionJudge to extract the condition of if-statement    
+    BranchConditionJudge(ir_condition_exp, leftExp, rightExp, opkind);
+    LabelIRT* entry_label = new LabelIRT(std::string("loop_entry"));
+    LabelIRT* body_label = new LabelIRT(std::string("loop_body"));
+    LabelIRT* end_label = new LabelIRT(std::string("loop_end"));
+    ir = new StatementIRT(StmKind::Sequence, new SequenceIRT(new StatementIRT(StmKind::Lable, entry_label), new StatementIRT(StmKind::Cjump, new CjumpIRT(opkind, leftExp, rightExp, body_label, end_label))));
+    ir = new StatementIRT(StmKind::Sequence, new SequenceIRT(reinterpret_cast<StatementIRT*>(ir), new StatementIRT(StmKind::Lable, body_label)));
 
-//         }
-//         // more to continue...
-//     }
-//     //Further: need to consider: what if no return here in a void function while there are exp or other stmt??
-// }
+    BaseIRT* stmt_ir = nullptr;
+    stmt_dealer(reinterpret_cast<StmtAST*>(stmt_available->stmt_while), stmt_ir);
+    if(stmt_ir != nullptr)
+        ir = new StatementIRT(StmKind::Sequence, new SequenceIRT(reinterpret_cast<StatementIRT*>(ir), reinterpret_cast<StatementIRT*>(stmt_ir)));
+    ir = new StatementIRT(StmKind::Sequence, new SequenceIRT(reinterpret_cast<StatementIRT*>(ir), new StatementIRT(StmKind::Jump, new JumpIRT(entry_label))));
+    ir = new StatementIRT(StmKind::Sequence, new SequenceIRT(reinterpret_cast<StatementIRT*>(ir), new StatementIRT(StmKind::Lable, end_label)));
+}
