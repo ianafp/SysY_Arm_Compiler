@@ -1,6 +1,6 @@
-define i32 @half(i32 %0, i32 %1){
-%2 = sdiv i32 22, 2
-ret  i32 %2
+define i32 @half(i32 x, i32 y){
+%0 = sdiv i32 22, 2
+ret  i32 %0
 }
 define i32 @main(){
 add i32 1, 2
@@ -24,9 +24,7 @@ END_LABEL_4:
 
 br i1 %4, lable %IF_LABEL_7, lable %END_LABEL_8
 IF_LABEL_7:
-IF_LABEL_0:
 2
-END_LABEL_1:
 END_LABEL_8:
 ret  i32 0
 }

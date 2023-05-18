@@ -8,16 +8,16 @@ void Program::block_item_dealer(BlockItemAST *block_item, BaseIRT *&ir)
         StmtAST *stmt_available = dynamic_cast<StmtAST *>(block_item->decl_or_stmt);
         // Deal with Stmt
         stmt_dealer(stmt_available, ir);
-        //Further: need to consider: what if no return here in a void function while there are exp or other stmt??
+        // Further: need to consider: what if no return here in a void function while there are exp or other stmt??
     }
     // deal with decl
     else if (block_item->decl_or_stmt != nullptr && block_item->decl_or_stmt->type() == "DeclAST")
     {
-        DeclTranslater(reinterpret_cast<DeclAST*>(block_item->decl_or_stmt), ir);
+        DeclTranslater(reinterpret_cast<DeclAST *>(block_item->decl_or_stmt), ir);
     }
 }
 
-void Program::block_dealer(BlockAST* block, BaseIRT* &ir)
+void Program::block_dealer(BlockAST *block, BaseIRT *&ir)
 {
     // Deal with Block
     BlockAST *block_available = nullptr;
@@ -31,22 +31,22 @@ void Program::block_dealer(BlockAST* block, BaseIRT* &ir)
         }
     }
 
-    //deal with blocks
-    BaseIRT* ir1 = nullptr, *ir2 = nullptr;
+    // deal with blocks
+    BaseIRT *ir1 = nullptr, *ir2 = nullptr;
     blockAST *block_true_available = nullptr;
     std::list<std::string> ret_stmt;
     if (block_true != nullptr)
     {
         block_true_available = dynamic_cast<blockAST *>(block_true);
-        //in function, there would be :blockitem -- blockitem -- ..
+        // in function, there would be :blockitem -- blockitem -- ..
         if (block_true_available != nullptr)
         {
             assert(block_true_available->block_item[0] != nullptr && block_true_available->block_item[0]->type() == "BlockItemAST");
             block_item_dealer(dynamic_cast<BlockItemAST *>(block_true_available->block_item[0]), ir1);
-            for (int i=1; i<block_true_available->block_item.size(); i++)
+            for (int i = 1; i < block_true_available->block_item.size(); i++)
             {
                 block_item_dealer(dynamic_cast<BlockItemAST *>(block_true_available->block_item[i]), ir2);
-                ir1 = new StatementIRT(StmKind::Sequence, new SequenceIRT(reinterpret_cast<StatementIRT*>(ir1), reinterpret_cast<StatementIRT*>(ir2)));
+                ir1 = new StatementIRT(StmKind::Sequence, new SequenceIRT(reinterpret_cast<StatementIRT *>(ir1), reinterpret_cast<StatementIRT *>(ir2)));
             }
             ir = ir1;
         }
@@ -68,32 +68,36 @@ void Program::func_dealer(FuncDefAST *func_def, BaseIRT *&ir)
     // Start with FuncDefAST, we translate it to IR
     func_type = func_def->func_type;
     ident += *func_def->ident;
-    func_fparams = dynamic_cast<FuncFParamsAST*>(func_def->func_fparams);
+    func_fparams = dynamic_cast<FuncFParamsAST *>(func_def->func_fparams);
     block = func_def->block;
     // get the count of parameters
     if (func_fparams != nullptr)
         para_cnt = func_fparams->func_fparam.size();
 
     block_dealer(dynamic_cast<BlockAST *>(block), ir);
-    //construct func_ir tree
-    //notice that para_cnt may not work
+    // construct func_ir tree
+    // notice that para_cnt may not work
 
-    auto parameters = reinterpret_cast<FuncFParamsAST*>(func_def->func_fparams);
+    auto parameters = reinterpret_cast<FuncFParamsAST *>(func_def->func_fparams);
     std::vector<std::string> names;
     std::vector<ArgsType> types;
-    for(auto &it:parameters->func_fparam){
-        auto param = reinterpret_cast<FuncFParamAST*>(it);
-        names.push_back(*param->ident);
-        types.push_back(param->tp);
+    if (parameters != nullptr)
+    {
+        for (auto &it : parameters->func_fparam)
+        {
+            auto param = reinterpret_cast<FuncFParamAST *>(it);
+            names.push_back(*param->ident);
+            types.push_back(param->tp);
+        }
     }
     if (func_type == VarType::INT)
     {
 
-        ir = new StatementIRT(StmKind::Func, new FuncIRT(ValueType::INT32, new LabelIRT(ident),names,types, reinterpret_cast<StatementIRT *>(ir)));        
+        ir = new StatementIRT(StmKind::Func, new FuncIRT(ValueType::INT32, new LabelIRT(ident), names, types, reinterpret_cast<StatementIRT *>(ir)));
     }
     if (func_type == VarType::VOID)
     {
-        ir = new StatementIRT(StmKind::Func, new FuncIRT(ValueType::VOID, new LabelIRT(ident), names,types, reinterpret_cast<StatementIRT *>(ir)));
+        ir = new StatementIRT(StmKind::Func, new FuncIRT(ValueType::VOID, new LabelIRT(ident), names, types, reinterpret_cast<StatementIRT *>(ir)));
     }
 }
 

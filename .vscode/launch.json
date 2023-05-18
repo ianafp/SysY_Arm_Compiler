@@ -6,7 +6,7 @@
         "type": "cppdbg",
         "request": "launch",
         "program": "/root/compiler/build/compiler",
-        "args": ["test","/root/compiler/debug/hello.c","-o","hello.ll"],
+        "args": ["test","/root/compiler/debug/zx_test.c","-o","zx_test.ll"],
         "stopAtEntry": false,
         "cwd": "${workspaceFolder}",
         "environment": [],

@@ -78,6 +78,11 @@ add_custom_target(
   ${CMAKE_BINARY_DIR}/${PROJECT_NAME} test ${CMAKE_SOURCE_DIR}/debug/hello.c -o ${CMAKE_SOURCE_DIR}/debug/hello.ll
 
 )
+add_custom_target(
+  zx_test 
+  ${CMAKE_BINARY_DIR}/${PROJECT_NAME} test ${CMAKE_SOURCE_DIR}/debug/zx_test.c -o ${CMAKE_SOURCE_DIR}/debug/zx_test.ll
+
+)
 
 add_custom_target(
   llvm 

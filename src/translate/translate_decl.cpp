@@ -1,7 +1,7 @@
 #include"translate/ir_generator.h"
 #include"common/initval_tree.h"
 void Program::DeclTranslater(DeclAST* decl,BaseIRT* &ir){
-
+    decl->HandleSymbol();
     if(decl->tp==AstType::ConstDecl){
         ConstDeclTranslater(reinterpret_cast<ConstDeclAST*>(decl->const_or_var_decl),ir);
     }else{

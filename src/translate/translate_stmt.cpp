@@ -54,7 +54,11 @@ void Program::stmt_dealer(StmtAST* stmt_available, BaseIRT* &ir)
 void  Program::LValTranslater(LValAST* lval,BaseIRT* &ir){
     std::string LvalName = *lval->VarIdent;
     // get var ir label name
-    Symbol* sym = lval->LValSym;
+    Symbol* sym = SymbolTable::FindSymbol(*lval->VarIdent);
+    if(sym==NULL){
+        LOG(ERROR)<<"Undefined Lval "<<*lval->VarIdent<<"\n";
+        exit(-1);
+    }
     LvalName = sym->GetLabelStr(LvalName);
     if(sym->SymbolType == SymType::INT32){
         ir = new MemIRT(new ExpIRT(new NameIRT(LvalName)));
@@ -194,49 +198,49 @@ void Program::BranchTranslater(StmtAST* stmt_available, BaseIRT* &ir, bool has_e
         ir = new StatementIRT(StmKind::Sequence, new SequenceIRT(reinterpret_cast<StatementIRT *>(ir_cjump), reinterpret_cast<StatementIRT*>(ir_combine)));
     }
 }
-void Program::stmt_dealer(StmtAST* stmt_available, BaseIRT* &ir)
-{
-    // Deal with Stmt
-    if (stmt_available != nullptr)
-    {
-        // return Exp ;
-        if (stmt_available->tp == StmtType::ReturnExp)
-        {
-            assert(stmt_available->ret_exp != nullptr);
-            logic_exp_dealer(dynamic_cast<ExpAST *>(stmt_available->ret_exp)->lor_exp, ir);
-            ir = new StatementIRT(StmKind::Ret, new RetIRT(ValueType::INT32, reinterpret_cast<ExpIRT *>(ir)));
-        }
-        // return ;
-        else if (stmt_available->tp == StmtType::ReturnVoid)
-        {
-            assert(stmt_available->ret_exp == nullptr);
-            ir = new StatementIRT(StmKind::Ret, new RetIRT(ValueType::VOID, NULL));
-        }
-        // if (cond) stmt_if, without else stmt_else
-        else if (stmt_available->tp == StmtType::If)
-        {
-            BranchTranslater(stmt_available, ir, false);
-        }
-        // if (cond) stmt_if, else stmt_else
-        else if (stmt_available->tp == StmtType::IfElse)
-        {
-            BranchTranslater(stmt_available, ir, true);
-        }
-        else if (stmt_available->tp == StmtType::Exp)
-        {
-            assert(stmt_available->ret_exp != nullptr);
-            BaseIRT *ir_exp = nullptr;
-            logic_exp_dealer(stmt_available->ret_exp, ir_exp);
-            ir = new StatementIRT(StmKind::Exp, ir_exp);
-        }
-        // to be implemented
-        else if(stmt_available->tp == StmtType::Assign){
+// void Program::stmt_dealer(StmtAST* stmt_available, BaseIRT* &ir)
+// {
+//     // Deal with Stmt
+//     if (stmt_available != nullptr)
+//     {
+//         // return Exp ;
+//         if (stmt_available->tp == StmtType::ReturnExp)
+//         {
+//             assert(stmt_available->ret_exp != nullptr);
+//             logic_exp_dealer(dynamic_cast<ExpAST *>(stmt_available->ret_exp)->lor_exp, ir);
+//             ir = new StatementIRT(StmKind::Ret, new RetIRT(ValueType::INT32, reinterpret_cast<ExpIRT *>(ir)));
+//         }
+//         // return ;
+//         else if (stmt_available->tp == StmtType::ReturnVoid)
+//         {
+//             assert(stmt_available->ret_exp == nullptr);
+//             ir = new StatementIRT(StmKind::Ret, new RetIRT(ValueType::VOID, NULL));
+//         }
+//         // if (cond) stmt_if, without else stmt_else
+//         else if (stmt_available->tp == StmtType::If)
+//         {
+//             BranchTranslater(stmt_available, ir, false);
+//         }
+//         // if (cond) stmt_if, else stmt_else
+//         else if (stmt_available->tp == StmtType::IfElse)
+//         {
+//             BranchTranslater(stmt_available, ir, true);
+//         }
+//         else if (stmt_available->tp == StmtType::Exp)
+//         {
+//             assert(stmt_available->ret_exp != nullptr);
+//             BaseIRT *ir_exp = nullptr;
+//             logic_exp_dealer(stmt_available->ret_exp, ir_exp);
+//             ir = new StatementIRT(StmKind::Exp, ir_exp);
+//         }
+//         // to be implemented
+//         else if(stmt_available->tp == StmtType::Assign){
 
-        }
-        else if(stmt_available->tp == StmtType::Block){
+//         }
+//         else if(stmt_available->tp == StmtType::Block){
 
-        }
-        // more to continue...
-    }
-    //Further: need to consider: what if no return here in a void function while there are exp or other stmt??
-}
+//         }
+//         // more to continue...
+//     }
+//     //Further: need to consider: what if no return here in a void function while there are exp or other stmt??
+// }

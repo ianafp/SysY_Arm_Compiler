@@ -370,7 +370,7 @@ class LValAST : public BaseAST
 public:
   std::string *VarIdent;
   std::vector<BaseAST *> IndexVec;
-  Symbol* LValSym;
+  // Symbol* LValSym;
   void Dump() const override
   {
     std::cout << "LValAST {\n";
@@ -666,7 +666,7 @@ public:
   BaseAST *unary_exp;
   std::string *ident;
   BaseAST *func_rparam;
-  Symbol* FuncSym;
+  // Symbol* FuncSym;
   void Dump() const override
   {
     std::cout << "UnaryExpAST {\n";
