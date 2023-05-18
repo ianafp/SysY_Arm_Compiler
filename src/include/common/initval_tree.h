@@ -71,6 +71,7 @@ private:
  * @param IntTree result int tree pointer referrence, will point to the result tree
 */
 bool ConvertTreeToInt(InitValTree<BaseAST*> *AstTree,InitValTree<int>* &IntTree);
-void ConvertIntTreeToInitializer(InitValTree<int>* IntTree);
+void ConvertIntTreeToInitializer(InitValTree<int>* IntTree);\
+void AdjustTree(InitValTree<BaseAST*>* &tree);
 #define _INIT_VAL_TREE_
 #endif

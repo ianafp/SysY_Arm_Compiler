@@ -116,7 +116,7 @@ void VarDeclAST::HandleSymbol() const
                 {
                     sym->VarArrtributes.IsInited = true;
                     InitValTree<int> *IntTree;
-                    IsConstInit = ConvertTreeToInt(DefAstPtr->InitValue, IntTree);
+                    IsConstInit = !ConvertTreeToInt(DefAstPtr->InitValue, IntTree);
                     if (IsGlobal)
                     {
                         if (!IsConstInit)
@@ -124,11 +124,11 @@ void VarDeclAST::HandleSymbol() const
                             LOG(ERROR) << "global symbol " << *DefAstPtr->VarIdent << " initialized by varieble!\n";
                             exit(-1);
                         }
-                        sym->VarArrtributes.InitVal = IntTree->childs[0]->keys[0];
+                        sym->VarArrtributes.InitVal = IntTree->keys[0];
                     }
                     else
                     {
-                        sym->VarArrtributes.ExpVal = DefAstPtr->InitValue->childs[0]->keys[0];
+                        sym->VarArrtributes.ExpVal = DefAstPtr->InitValue->keys[0];
                     }
                 }
                 else

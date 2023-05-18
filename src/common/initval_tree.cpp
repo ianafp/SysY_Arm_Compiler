@@ -50,3 +50,16 @@ void ConvertIntTreeToInitializer(InitValTree<int>* IntTree)
         std::cout<<"]";
     }
 }
+
+void AdjustTree(InitValTree<BaseAST*>* &tree)
+{
+    for(auto &it:tree->childs)
+    {
+        AdjustTree(it);
+    }
+    if(tree->childs.size()==1){
+        InitValTree<BaseAST*>* temp = tree->childs[0];
+        delete tree;
+        tree = temp;
+    }
+}
