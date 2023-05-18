@@ -45,8 +45,8 @@ void yyerror(BaseAST* &ast, const char *s);
 %type<type_val> BType
 %type <ast_val> CompUnit Compunit FuncDef  Block block BlockItem Stmt FuncFParam Decl ConstDecl VarDecl Vardecl Vardef VarDef LVal Exp UnaryExp PrimaryExp Number UnaryOp AddExp MulExp RelExp EqExp LAndExp LOrExp FuncFParams  Funcfparam FuncRParams FuncDeclare Cond 
 Constdecl Constdef ConstDef ConstExp
-%type <init_val>  InitVal Initval
-%type <const_init_val> ConstInitVal Constinitval 
+%type <init_val>  InitVal Initval ConstInitVal Constinitval
+
 %start CompUnit
 %%
     CompUnit: Compunit
@@ -105,7 +105,6 @@ Constdecl Constdef ConstDef ConstExp
                 auto ast = new DeclAST();
                 ast->tp = AstType::VarDecl;
                 ast->const_or_var_decl = $1;
-                ast->HandleSymbol();
                 $$ = ast;
                 $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
             }
@@ -139,8 +138,7 @@ Constdecl Constdef ConstDef ConstExp
     ConstDef: Constdef '=' ConstInitVal
             {
                 auto ast = reinterpret_cast<VarDefAST*>($1);
-
-                ast->IntInitValue = $3;
+                ast->InitValue = $3;
                 $$ = ast;
                 $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
             }
@@ -151,38 +149,28 @@ Constdecl Constdef ConstDef ConstExp
             ast->VarIdent = $1;
             // ast->DimSizeVec = new std::vector<BaseAST*>();
             ast->InitValue = NULL;
-            ast->IntInitValue = NULL;
             $$ = ast;
             $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
         }
         | Constdef '[' ConstExp ']'
         {
             auto ast = reinterpret_cast<VarDefAST*>($1);
-            int val;
-            if(reinterpret_cast<ExpAST*>($3)->GetConstVal(val)){
-                LOG(ERROR) << "The array size can't be var\n";
-            }
-            val = 8;
-            ast->DimSizeVec.push_back(val);
+            ast->DimSizeVec.push_back($3);
             $$ = ast;
             $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
     }
             ;
 ConstInitVal: ConstExp
     {
-        $$ = new InitValTree<int>();
-        int temp;
-        if($1->GetConstVal(temp)){
-            LOG(ERROR)<<"the init value of const varieble is not const\n";
-        }
-        $$->keys.push_back(temp); 
+        $$ = new InitValTree<BaseAST*>();
+        $$->keys.push_back($1); 
     }
             | '{' '}'
             {
-                $$ = new InitValTree<int>(); 
+                $$ = new InitValTree<BaseAST*>(); 
             }
             | '{' Constinitval '}'{
-                $$ = new InitValTree<int>();
+                $$ = new InitValTree<BaseAST*>();
                 $$->childs.push_back($2);
             }
             ;
@@ -245,16 +233,9 @@ Constinitval: ConstInitVal
             }
             | Vardef '[' ConstExp ']'
             {
-                int val;
-                
-                if(reinterpret_cast<ExpAST*>($3)->GetConstVal(val)){
-                    LOG(ERROR)<<"the array length can not be variable\n";
-                }
-                val = 8;
-                reinterpret_cast<VarDefAST*>($1)->DimSizeVec.push_back(val);
-                
+
+                reinterpret_cast<VarDefAST*>($1)->DimSizeVec.push_back($3);
                 $$ = $1;
-                
                 $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
             }
             ;
@@ -278,7 +259,8 @@ Constinitval: ConstInitVal
             ;
      Initval: InitVal
             {
-                $$ = $1;
+                $$ = new InitValTree<BaseAST*>();
+                $$->childs.push_back($1);
             }
             | Initval ',' InitVal
             {

@@ -88,7 +88,7 @@ public:
   /**
    * @brief chech the symbol decl, if right, add to symbol and return false, else return true
   */
-  bool HandleSymbol() const;
+  // bool HandleSymbol() const;
 };
 class VarDeclAST : public BaseAST
 {
@@ -108,17 +108,17 @@ public:
   /**
    * @brief chech the symbol decl, if right, add to symbol and return false, else return true
   */
-  bool HandleSymbol() const;
+  void HandleSymbol() const;
 };
 
 class VarDefAST : public BaseAST
 {
 public:
   std::string *VarIdent;
-  std::vector<int> DimSizeVec;
+  std::vector<BaseAST*> DimSizeVec;
   bool IsInited;
   InitValTree<BaseAST*>* InitValue;
-  InitValTree<int>* IntInitValue;
+  // InitValTree<int>* IntInitValue;
   Symbol* VarSym;
   // std::vector<BaseAST *> *InitValueVec;
   void Dump() const override
@@ -126,11 +126,13 @@ public:
     std::cout << *VarIdent;
     for (auto &it : DimSizeVec)
     {
-      std::cout << "[" << it << "]";
+      std::cout << "[";
+      it->Dump(); 
+      std::cout << "]";
     }
     std::cout << " = "
               << "{ ";
-    InitValue->Dump();
+    if(InitValue!=NULL) InitValue->Dump();
     // for (auto &it : *InitValueVec)
     // {
     //   it->Dump();
@@ -162,7 +164,7 @@ public:
   /**
    * @brief chech the symbol decl, if right, add to symbol and return false, else return true
   */
-  bool HandleSymbol() const;
+  void HandleSymbol() const;
 };
 
 // Function Definition Part

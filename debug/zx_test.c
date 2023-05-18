@@ -8,7 +8,7 @@
 // void f() {
 //   half(1,2);
 // }
-
+int array[5][5] = {1,2,3,4,5};
 int half(int x, int y) {
   // half(1, 2);
   // sb();

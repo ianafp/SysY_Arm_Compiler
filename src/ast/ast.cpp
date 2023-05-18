@@ -1,16 +1,16 @@
 #include "ast/ast.h"
-bool DeclAST::HandleSymbol() const
-{
-    if (this->tp == AstType::ConstDecl)
-    {
-        return reinterpret_cast<ConstDeclAST *>(this->const_or_var_decl)->HandleSymbol();
-    }
-    else
-    {
-        return reinterpret_cast<VarDeclAST *>(this->const_or_var_decl)->HandleSymbol();
-    }
-}
-bool ConstDeclAST::HandleSymbol() const
+// bool DeclAST::HandleSymbol() const
+// {
+//     if (this->tp == AstType::ConstDecl)
+//     {
+//         return reinterpret_cast<ConstDeclAST *>(this->const_or_var_decl)->HandleSymbol();
+//     }
+//     else
+//     {
+//         return reinterpret_cast<VarDeclAST *>(this->const_or_var_decl)->HandleSymbol();
+//     }
+// }
+void ConstDeclAST::HandleSymbol() const
 {
     if (this->BType == VarType::INT)
     {
@@ -23,13 +23,21 @@ bool ConstDeclAST::HandleSymbol() const
                 if (SymbolTable::FindSymbol(*DefAstPtr->VarIdent))
                 {
                     LOG(ERROR) << "Multidefinition of symbol " << *DefAstPtr->VarIdent << "\n";
-                    return true;
+                    // return true;
+                    exit(-1);
                 }
-                int initval = DefAstPtr->IntInitValue->keys[0];
-                Symbol* sym = new Symbol(true, initval);
+                int initval;
+                if (DefAstPtr->InitValue->keys[0]->GetConstVal(initval))
+                {
+                    LOG(ERROR) << "Initialization of const variable " << *DefAstPtr->VarIdent << "uses variable values\n";
+                    // return true;
+                    exit(-1);
+                }
+                Symbol *sym = new Symbol(true, initval);
                 SymbolTable::AddSymbol(*DefAstPtr->VarIdent, sym);
                 DefAstPtr->VarSym = sym;
-                return false;
+
+                // return false;
             }
             else
             {
@@ -43,27 +51,46 @@ bool ConstDeclAST::HandleSymbol() const
                     if (SymbolTable::FindSymbol(*ConstDefPtr->VarIdent))
                     {
                         LOG(ERROR) << "Multidefinition of symbol " << *ConstDefPtr->VarIdent << "\n";
-                        return true;
+                        // return true;
+                        exit(-1);
                     }
                     // create symbol info
-                    Symbol *sym = new Symbol(true,ConstDefPtr->DimSizeVec,ConstDefPtr->IntInitValue);
+                    InitValTree<int> *initval = NULL;
+                    if (ConstDefPtr->InitValue && ConvertTreeToInt(ConstDefPtr->InitValue, initval))
+                    {
+                        LOG(ERROR) << "Initialization of const array variable " << *DefAstPtr->VarIdent << "uses variable values\n";
+                        exit(-1);
+                    }
+
+                    std::vector<int> dim;
+                    for (auto &it : ConstDefPtr->DimSizeVec)
+                    {
+                        int temp;
+                        if (it->GetConstVal(temp))
+                        {
+                            LOG(ERROR) << "The Array " << *ConstDefPtr->VarIdent << " Dimension\n";
+                            exit(-1);
+                        }
+                        dim.push_back(temp);
+                    }
+                    Symbol *sym = new Symbol(true, dim, initval);
                     SymbolTable::AddSymbol(*DefAstPtr->VarIdent, sym);
                     ConstDefPtr->VarSym = sym;
                 }
-                return false;
+                // return false;
                 // if(SymbolTable::AddSymbol(*DefAstPtr->VarIdent,new Symbol()))
             }
-
         }
-        return false;
+        // return false;
     }
     else
     {
-        DLOG(ERROR) << "NOT IMPLEMENTED YET\n";
-        return true;
+        LOG(ERROR) << "NOT IMPLEMENTED YET\n";
+        // return true;
+        exit(-1);
     }
 }
-bool VarDeclAST::HandleSymbol() const
+void VarDeclAST::HandleSymbol() const
 {
     if (this->BType == VarType::INT)
     {
@@ -76,21 +103,38 @@ bool VarDeclAST::HandleSymbol() const
                 if (SymbolTable::FindSymbol(*DefAstPtr->VarIdent))
                 {
                     LOG(ERROR) << "Multidefinition of symbol " << *DefAstPtr->VarIdent << "\n";
-                    return true;
+                    // return true;
+                    exit(-1);
                 }
-                Symbol* sym = new Symbol(false);
-                SymbolTable::AddSymbol(*DefAstPtr->VarIdent,sym);
+                Symbol *sym = new Symbol(false);
+                SymbolTable::AddSymbol(*DefAstPtr->VarIdent, sym);
                 DefAstPtr->VarSym = sym;
-                if(sym->GetGlobalFlag()){
-                    InitValTree<int>* IntTree;
-                    if(ConvertTreeToInt(DefAstPtr->InitValue,IntTree)){
-                        LOG(ERROR) << "global symbol " << *DefAstPtr->VarIdent << " initialized by varieble!\n";
-                        exit(-1);
-                        return true;  
+                bool IsInit = !!DefAstPtr->InitValue;
+                bool IsConstInit;
+                bool IsGlobal = sym->GetGlobalFlag();
+                if (IsInit)
+                {
+                    sym->VarArrtributes.IsInited = true;
+                    InitValTree<int> *IntTree;
+                    IsConstInit = ConvertTreeToInt(DefAstPtr->InitValue, IntTree);
+                    if (IsGlobal)
+                    {
+                        if (!IsConstInit)
+                        {
+                            LOG(ERROR) << "global symbol " << *DefAstPtr->VarIdent << " initialized by varieble!\n";
+                            exit(-1);
+                        }
+                        sym->VarArrtributes.InitVal = IntTree->childs[0]->keys[0];
                     }
-                    DefAstPtr->IntInitValue = IntTree;
+                    else
+                    {
+                        sym->VarArrtributes.ExpVal = DefAstPtr->InitValue->childs[0]->keys[0];
+                    }
                 }
-                return false;
+                else
+                {
+                    sym->VarArrtributes.IsInited = false;
+                }
             }
             else
             {
@@ -104,41 +148,72 @@ bool VarDeclAST::HandleSymbol() const
                     if (SymbolTable::FindSymbol(*ConstDefPtr->VarIdent))
                     {
                         LOG(ERROR) << "Multidefinition of symbol " << *ConstDefPtr->VarIdent << "\n";
-                        return true;
                     }
                     // create symbol info
-                    Symbol *sym = new Symbol(false,ConstDefPtr->DimSizeVec);
+                    std::vector<int> dim;
+                    for (auto &it : ConstDefPtr->DimSizeVec)
+                    {
+                        int temp;
+                        if (it->GetConstVal(temp))
+                        {
+                            LOG(ERROR) << "The Array " << *ConstDefPtr->VarIdent << " Dimension\n";
+                            exit(-1);
+                        }
+                        dim.push_back(temp);
+                    }
+                    Symbol *sym = new Symbol(false, dim);
                     SymbolTable::AddSymbol(*DefAstPtr->VarIdent, sym);
                     ConstDefPtr->VarSym = sym;
-                    if(sym->GetGlobalFlag()){
-                    InitValTree<int>* IntTree;
-                    if(ConvertTreeToInt(DefAstPtr->InitValue,IntTree)){
-                        LOG(ERROR) << "global varieble " << *DefAstPtr->VarIdent << " initialized by varieble!\n";
-                        exit(-1);
-                        // return true;  
+                    bool IsInit = !!ConstDefPtr->InitValue;
+                    bool IsConstInit;
+                    bool IsGlobal = sym->GetGlobalFlag();
+                    if (IsInit)
+                    {
+                        sym->ArrAttributes->IsInited = true;
+                        InitValTree<int> *IntTree;
+                        IsConstInit = !ConvertTreeToInt(ConstDefPtr->InitValue, IntTree);
+                        if (IsGlobal)
+                        {
+                            if (!IsConstInit)
+                            {
+                                LOG(ERROR) << "global symbol " << *ConstDefPtr->VarIdent << " initialized by varieble!\n";
+                                exit(-1);
+                            }
+                            sym->ArrAttributes->ConstInitVal = IntTree;
+                            sym->ArrAttributes->VarInitVal = NULL;
+                        }
+                        else
+                        {
+                            sym->ArrAttributes->ConstInitVal = NULL;
+                            sym->ArrAttributes->VarInitVal = ConstDefPtr->InitValue;
+                        }
                     }
-                    DefAstPtr->IntInitValue = IntTree;
+                    else
+                    {
+                        sym->ArrAttributes->IsInited = false;
+                    }
                 }
-                }
-                // if(SymbolTable::AddSymbol(*DefAstPtr->VarIdent,new Symbol()))
             }
+            // if(SymbolTable::AddSymbol(*DefAstPtr->VarIdent,new Symbol()))
         }
-        return false;
     }
+
     else
     {
-        DLOG(ERROR) << "NOT IMPLEMENTED YET\n";
-        return true;
+        LOG(ERROR) << "NOT IMPLEMENTED YET\n";
+        exit(-1);
     }
 }
 
 bool NumberAST::GetConstVal(int &val) const
 {
+    DLOG(INFO) << "num\n";
     val = this->num;
-    return true;
+    return false;
 }
 bool PrimaryExpAST::GetConstVal(int &val) const
 {
+    DLOG(INFO) << "primary\n";
     if (this->tp == PrimaryType::Num)
     {
         return reinterpret_cast<NumberAST *>(this->number)->GetConstVal(val);
@@ -155,6 +230,7 @@ bool PrimaryExpAST::GetConstVal(int &val) const
 }
 bool UnaryExpAST::GetConstVal(int &val) const
 {
+    DLOG(INFO) << "unary\n";
     if (tp == ExpType::Primary)
     {
         return reinterpret_cast<PrimaryExpAST *>(this->primary_exp)->GetConstVal(val);
@@ -175,6 +251,7 @@ bool UnaryExpAST::GetConstVal(int &val) const
 }
 bool MulExpAST::GetConstVal(int &val) const
 {
+    DLOG(INFO) << "mul\n";
     int temp, res;
     bool flag;
     // first unary exp
@@ -218,6 +295,7 @@ bool MulExpAST::GetConstVal(int &val) const
 
 bool AddExpAST::GetConstVal(int &val) const
 {
+    DLOG(INFO) << "add\n";
     int temp, res;
     bool flag;
     // first unary exp
@@ -253,6 +331,7 @@ bool AddExpAST::GetConstVal(int &val) const
 }
 bool RelExpAST::GetConstVal(int &val) const
 {
+    DLOG(INFO) << "rel\n";
     int temp, res;
     bool flag;
     // first unary exp
@@ -302,6 +381,7 @@ bool RelExpAST::GetConstVal(int &val) const
 }
 bool EqExpAST::GetConstVal(int &val) const
 {
+    DLOG(INFO) << "eq\n";
     int temp, res;
     bool flag;
     // first unary exp
@@ -337,6 +417,7 @@ bool EqExpAST::GetConstVal(int &val) const
 }
 bool LAndExpAST::GetConstVal(int &val) const
 {
+    DLOG(INFO) << "LAnd\n";
     int temp, res;
     bool flag;
     // first unary exp
@@ -357,6 +438,7 @@ bool LAndExpAST::GetConstVal(int &val) const
 }
 bool LOrExpAST::GetConstVal(int &val) const
 {
+    DLOG(INFO) << "Lor\n";
     int temp, res;
     bool flag;
     // first unary exp
@@ -377,10 +459,12 @@ bool LOrExpAST::GetConstVal(int &val) const
 }
 bool ExpAST::GetConstVal(int &val) const
 {
+    DLOG(INFO) << "EXP ";
     return reinterpret_cast<LOrExpAST *>(this->lor_exp)->GetConstVal(val);
 }
 bool LValAST::GetConstVal(int &val) const
 {
+    DLOG(INFO) << "LVal\n";
     // search symbol table
     Symbol *sym = SymbolTable::FindSymbol(*this->VarIdent);
     if (sym == NULL)
@@ -428,19 +512,20 @@ bool LValAST::GetConstVal(int &val) const
             return true;
         }
         std::vector<int> index;
-        for(auto &it:this->IndexVec){
+        for (auto &it : this->IndexVec)
+        {
             int temp;
-            if(it->GetConstVal(temp)){
+            if (it->GetConstVal(temp))
+            {
                 LOG(ERROR) << "the index is not const\n";
                 return true;
             }
             index.push_back(temp);
         }
-        sym->ArrAttributes->ConstInitVal->find(index,val);
+        sym->ArrAttributes->ConstInitVal->find(index, val);
         // val = sym->InitValVec[offset];
 
         return false;
     }
     return true;
 }
-

@@ -1,7 +1,6 @@
 #include"translate/ir_generator.h"
 #include"common/initval_tree.h"
 void Program::DeclTranslater(DeclAST* decl,BaseIRT* &ir){
-    decl->HandleSymbol();
     if(decl->tp==AstType::ConstDecl){
         ConstDeclTranslater(reinterpret_cast<ConstDeclAST*>(decl->const_or_var_decl),ir);
     }else{
@@ -10,6 +9,7 @@ void Program::DeclTranslater(DeclAST* decl,BaseIRT* &ir){
     return;
 }
 void Program::VarDeclTranslater(VarDeclAST* decl,BaseIRT* &ir){
+    decl->HandleSymbol();
     if(decl->BType==VarType::INT){
         for(auto &it:decl->VarDefVec){
             this->VarDefTranslater(SymType::INT32,reinterpret_cast<VarDefAST*>(it),ir);
@@ -56,29 +56,31 @@ void Program::ConvertExpInitTreeToIR(InitValTree<BaseAST*> *AstTree,const std::v
     }
 }
 void Program::VarDefTranslater(SymType type,VarDefAST* decl,BaseIRT* &ir){
+    Symbol* sym = decl->VarSym;
     if(type==SymType::INT32){
         // if global
         if(decl->VarSym->GetGlobalFlag()){
             // if array
             if(decl->DimSizeVec.size()){
-                ir = new GlobalVarIRT(ValueType::INT32,*decl->VarIdent,false,decl->DimSizeVec,decl->IntInitValue);
+                ir = new GlobalVarIRT(ValueType::INT32,*decl->VarIdent,false,sym->ArrAttributes->ArrayDimVec,sym->ArrAttributes->ConstInitVal);
             }
             // var
+            else
             {
-                ir = new GlobalVarIRT(ValueType::INT32,*decl->VarIdent,false,decl->IntInitValue);
+                ir = new GlobalVarIRT(ValueType::INT32,*decl->VarIdent,false,sym->VarArrtributes.InitVal);
             }
         }
         // local
         else{
             // get stack space
             int size = 1;
-            for(auto &it:decl->DimSizeVec){
+            for(auto &it:sym->ArrAttributes->ArrayDimVec){
                 size *= it;
             }
             auto addr = new ExpIRT(new AllocateIRT(size<<2,4));
             StatementIRT* init = NULL;
             std::vector<int> trait;
-            this->ConvertExpInitTreeToIR(decl->InitValue,decl->DimSizeVec,trait,addr,init);
+            this->ConvertExpInitTreeToIR(decl->InitValue,sym->ArrAttributes->ArrayDimVec,trait,addr,init);
             ir = new StatementIRT(addr);
             ir = new StatementIRT(new SequenceIRT(reinterpret_cast<StatementIRT*>(ir),init));
         }
@@ -89,16 +91,17 @@ void Program::VarDefTranslater(SymType type,VarDefAST* decl,BaseIRT* &ir){
     return;
 }
 void Program:: ConstDefTranslater(SymType type,VarDefAST* decl,BaseIRT* &ir){
+    Symbol* sym = decl->VarSym;
     if(type==SymType::INT32){
         // if global
         if(decl->VarSym->GetGlobalFlag()){
             // if array
             if(decl->DimSizeVec.size()){
-                ir = new GlobalVarIRT(ValueType::INT32,*decl->VarIdent,true,decl->DimSizeVec,decl->IntInitValue);
+                ir = new GlobalVarIRT(ValueType::INT32,*decl->VarIdent,true,sym->ArrAttributes->ArrayDimVec,sym->ArrAttributes->ConstInitVal);
             }
             // var
             {
-                ir = new GlobalVarIRT(ValueType::INT32,*decl->VarIdent,true,decl->IntInitValue);
+                ir = new GlobalVarIRT(ValueType::INT32,*decl->VarIdent,true,sym->VarArrtributes.InitVal);
             }
         }
         // local
@@ -124,6 +127,7 @@ void Program:: ConstDefTranslater(SymType type,VarDefAST* decl,BaseIRT* &ir){
     return;
 }
 void Program::ConstDeclTranslater(ConstDeclAST* decl,BaseIRT* &ir){
+    decl->HandleSymbol();
     if(decl->BType==VarType::INT){
         for(auto &it:decl->ConstDefVec){
             this->ConstDefTranslater(SymType::INT32,reinterpret_cast<VarDefAST*>(it),ir);

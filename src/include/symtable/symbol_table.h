@@ -7,9 +7,11 @@
 #include"common/base_ast.h"
 class VarInfo{
 public:
+    bool IsInited;
     int InitVal;
-    VarInfo(int val):InitVal(val) {}
-    VarInfo(){}
+    BaseAST* ExpVal;
+    VarInfo(int val):IsInited(true),InitVal(val),ExpVal(NULL) {}
+    VarInfo():IsInited(false),InitVal(0),ExpVal(NULL){}
 };
 class FunctionInfo{
 public:

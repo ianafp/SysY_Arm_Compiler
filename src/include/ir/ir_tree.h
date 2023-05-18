@@ -68,9 +68,10 @@ public:
     bool IsArray;
     std::vector<int> DimVec;
     InitValTree<int>* InitVal;
+    int Int32Val;
     GlobalVarIRT(ValueType type,std::string name,bool ConstFlag,std::vector<int> dim,InitValTree<int>* init):GlobalVarType(type),GlobalVarName(name),IsConstant(ConstFlag),IsArray(true),DimVec(dim),InitVal(init){
     }
-    GlobalVarIRT(ValueType type,std::string name,bool ConstFlag,InitValTree<int>* init):GlobalVarType(type),GlobalVarName(name),IsConstant(ConstFlag),IsArray(false),InitVal(init){
+    GlobalVarIRT(ValueType type,std::string name,bool ConstFlag,int init):GlobalVarType(type),GlobalVarName(name),IsConstant(ConstFlag),IsArray(false),InitVal(NULL),Int32Val(init){
     }
     void Dump() const override;
     std::string ExpDump() const override{return "";}

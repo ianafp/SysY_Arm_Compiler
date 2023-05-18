@@ -257,6 +257,9 @@ void GlobalVarIRT::Dump() const{
         if(this->InitVal!=NULL){
             ConvertIntTreeToInitializer(this->InitVal);
         }
+        else{
+            std::cout<<this->Int32Val;
+        }
         std::cout<<", align 4\n";
     }
     else{

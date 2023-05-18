@@ -25,7 +25,10 @@ bool ConvertTreeToInt(InitValTree<BaseAST*> *AstTree,InitValTree<int>* &IntTree)
 }
 void ConvertIntTreeToInitializer(InitValTree<int>* IntTree)
 {
-    std::cout<<"[";
+    if(IntTree->childs.size()>1)
+    {
+        std::cout<<"[";
+    }
     if(IntTree->childs.size()){
         for(auto &it:IntTree->childs){
             ConvertIntTreeToInitializer(it);
@@ -37,7 +40,13 @@ void ConvertIntTreeToInitializer(InitValTree<int>* IntTree)
             if(i!=IntTree->keys.size()-1){
                 std::cout<<", ";
             }
+            else{
+                std::cout<<" ";
+            }
         }
     }
-    std::cout<<"]";
+    if(IntTree->childs.size()>1)
+    {
+        std::cout<<"]";
+    }
 }

@@ -127,6 +127,7 @@ void Program::Scan(BaseAST *root, BaseIRT *&ir)
         else if (Compunit->decl_list[0] != nullptr && Compunit->decl_list[0]->type() == "DeclAST")
         {
             // for lv4
+            this->DeclTranslater(reinterpret_cast<DeclAST*>(Compunit->decl_list[0]),ir1);
         }
         for (int i = 1; i < Compunit->decl_list.size(); i++)
         {
@@ -134,6 +135,10 @@ void Program::Scan(BaseAST *root, BaseIRT *&ir)
             if (Compunit->decl_list[i] != nullptr && Compunit->decl_list[i]->type() == "FuncDefAST")
             {
                 func_dealer(dynamic_cast<FuncDefAST *>(Compunit->decl_list[i]), ir2);
+                ir1 = new StatementIRT(StmKind::Sequence, new SequenceIRT(reinterpret_cast<StatementIRT *>(ir1), reinterpret_cast<StatementIRT *>(ir2)));
+            }
+            else if(Compunit->decl_list[i] != nullptr && Compunit->decl_list[i]->type() == "DeclAST"){
+                this->DeclTranslater(reinterpret_cast<DeclAST*>(Compunit->decl_list[i]),ir2);
                 ir1 = new StatementIRT(StmKind::Sequence, new SequenceIRT(reinterpret_cast<StatementIRT *>(ir1), reinterpret_cast<StatementIRT *>(ir2)));
             }
         }

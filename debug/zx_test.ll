@@ -1,3 +1,4 @@
+array = addrspace(100) global i32 [i32 1 i32 2 i32 3 i32 4 i32 5 ], align 4
 define i32 @half(i32 x, i32 y){
 %0 = sdiv i32 22, 2
 ret  i32 %0
