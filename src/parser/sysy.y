@@ -145,27 +145,27 @@ Constdecl Constdef ConstDef ConstExp
             }
             ;
     Constdef: _identifier 
-        {
-            auto ast = new VarDefAST();
-            ast->VarIdent = $1;
-            // ast->DimSizeVec = new std::vector<BaseAST*>();
-            ast->InitValue = NULL;
-            $$ = ast;
-            $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
-        }
-        | Constdef '[' ConstExp ']'
-        {
-            auto ast = reinterpret_cast<VarDefAST*>($1);
-            ast->DimSizeVec.push_back($3);
-            $$ = ast;
-            $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
-    }
+            {
+                auto ast = new VarDefAST();
+                ast->VarIdent = $1;
+                // ast->DimSizeVec = new std::vector<BaseAST*>();
+                ast->InitValue = NULL;
+                $$ = ast;
+                $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
+            }
+            | Constdef '[' ConstExp ']'
+            {
+                auto ast = reinterpret_cast<VarDefAST*>($1);
+                ast->DimSizeVec.push_back($3);
+                $$ = ast;
+                $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
+            }
             ;
 ConstInitVal: ConstExp
-    {
-        $$ = new InitValTree<BaseAST*>();
-        $$->keys.push_back($1); 
-    }
+            {
+                $$ = new InitValTree<BaseAST*>();
+                $$->keys.push_back($1); 
+            }
             | '{' '}'
             {
                 $$ = new InitValTree<BaseAST*>(); 
@@ -186,10 +186,10 @@ Constinitval: ConstInitVal
             }
             ;
      VarDecl: Vardecl ';' 
-     {
-        $$ = $1;
-        $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
-     }
+            {
+                $$ = $1;
+                $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
+            }
             ;
      Vardecl: BType VarDef 
             {
@@ -504,7 +504,19 @@ Constinitval: ConstInitVal
                 $$ = ast;
             }
             | _break ';'
+            {
+                auto ast = new StmtAST();
+                ast->tp = StmtType::Break;
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             | _continue ';'
+            {
+                auto ast = new StmtAST();
+                ast->tp = StmtType::Continue;
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             | _return ';'
             {
                 auto ast = new StmtAST();

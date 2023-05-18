@@ -41,6 +41,7 @@ int main(int argc, const char *argv[]) {
   cout << "output file: " << output << endl;
   // init symbol table
   SymbolTable::InitTable();
+  WhileFrame::init_frame();
   // 打开输入文件, 并且指定 lexer 在解析的时候读取这个文件
   yyin = fopen(input, "r");
   assert(yyin);
