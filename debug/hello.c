@@ -15,8 +15,10 @@
 //   // sb(1,2);
 //   return 22 / 2;
 // }
-
-int main() {
+int v;
+int g[8] = {1,2,7,8};
+int main() 
+{
   // test line comment
   // return 3+3-((-1)*2+3/(!5)-10%3) || (5+2>3-3);
   
@@ -39,8 +41,9 @@ int main() {
   // while (1 && 2 && 3) {
   //   1+3*5;
   // }
-  
-  int a = 3;
-
+  int ss[8] = {1};
+  int a = v;
+  a = a * 5;
+  a = a + 9*8/7+!8;
   return a;
 }

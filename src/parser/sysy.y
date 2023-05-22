@@ -138,7 +138,7 @@ Constdecl Constdef ConstDef ConstExp
     ConstDef: Constdef '=' ConstInitVal
             {
                 auto ast = reinterpret_cast<VarDefAST*>($1);
-                AdjustTree($3);
+                // AdjustTree($3);
                 ast->InitValue = $3;
                 $$ = ast;
                 $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
@@ -216,8 +216,8 @@ Constinitval: ConstInitVal
             | Vardef '=' InitVal
             {
                 auto ast = reinterpret_cast<VarDefAST*>($1);
-                AdjustTree($3);
-                ast->InitValue = $3;
+                // AdjustTree($3);
+                 ast->InitValue = $3;
                 ast->IsInited = true;
                 $$ = $1;
                 $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;

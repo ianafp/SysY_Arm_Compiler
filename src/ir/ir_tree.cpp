@@ -3,29 +3,27 @@
 void CjumpIRT::Dump() const
 {
     BinOpIRT CondExp(RelationOp, LeftExp, RightExp);
-    std::string ConString = CondExp.ExpDump();
-    CheckAndConvertExpToTemp(ConString);
+    auto ConValue = CondExp.ExpDump();
     std::cout << "\n";
-    std::cout << "br i1 " << ConString << ", lable %" << LabelTrue->LableName << ", lable %" << LableFalse->LableName << "\n";
+    std::cout << "br "<< ConValue.TypeToString()<<" "<< ConValue.LabelToString() << ", lable %" << LabelTrue->LableName << ", lable %" << LableFalse->LableName << "\n";
     
 }
 void MoveIRT::Dump() const
 {
-    std::string SrcString = SrcExp->ExpDump();
+    auto SrcExpVal = SrcExp->ExpDump();
     if (MoveKind == ToTemp)
     {
-        std::cout << "%" << DstTemp->TempVarId << " = " << SrcString;
+        std::cout << "%" << DstTemp->TempVarId << " = " << SrcExpVal.LabelToString();
         std::cout << "\n";
     }
     else
     {
-        std::string DstAddrString = DstMem->ExpDump();
-        CheckAndConvertExpToTemp(SrcString);
-        CheckAndConvertExpToTemp(DstAddrString);
-        std::cout << "store i32 " << SrcString << ", ptr " << DstAddrString << "\n";
+        auto DstAddrVal = DstMem->ExpDump();
+        BitCast(DstAddrVal,SrcExpVal.ExpType,true);
+        std::cout << "store "<< SrcExpVal.TypeToString() <<" "<< SrcExpVal.LabelToString() << ", "<<DstAddrVal.TypeToString()<<" "<< DstAddrVal.LabelToString() << "\n";
     }
 }
-std::string ExpIRT::ExpDump() const 
+ExpValue ExpIRT::ExpDump() const 
 {
     BinOpIRT *BinOpContent = reinterpret_cast<BinOpIRT *>(ExpContent);
     MemIRT *MemContent = reinterpret_cast<MemIRT *>(ExpContent);
@@ -62,135 +60,205 @@ std::string ExpIRT::ExpDump() const
         return AllocateContent->ExpDump();
     }
 }
-std::string BinOpIRT::ExpDump() const
+ExpValue BinOpIRT::ExpDump() const
 {
-    int temp1,temp2;
-    std::string ResString("");
-    std::string LeftTempString = LeftExp->ExpDump(), RightTempString = RightExp->ExpDump();
-    CheckAndConvertExpToTemp(LeftTempString);
-    CheckAndConvertExpToTemp(RightTempString);
+    int temp1,temp2,res,temp ;
+    std::string ResString(""),TempString;
+    // ExpValue ResVal;
+    ExpValue ResVal;
+    auto LeftValue = LeftExp->ExpDump(), RightValue = RightExp->ExpDump();
+    // OpBitSignedExtension(LeftValue,RightValue);
     switch (OpKind)
     {
     case BinOpKind::plus:
-        ResString += "add i32 " + LeftTempString + ", " + RightTempString ;
+        res = TempIdAllocater::GetId();
+        ResString += "%" + std::to_string(res);
+        
+        std::cout<<ResString<<" = "<<"add "<<LeftValue.TypeToString()<<" "<<LeftValue.LabelToString()<<", "<<RightValue.LabelToString()<<"\n";  
         break;
     case BinOpKind::minus:
-        ResString += "sub i32 " + LeftTempString + ", " + RightTempString ;
+        res = TempIdAllocater::GetId();
+        ResString += "%" + std::to_string(res);
+
+        std::cout<<ResString<<" = "<<"sub "<<LeftValue.TypeToString()<<" "<<LeftValue.LabelToString()<<", "<<RightValue.LabelToString()<<"\n";  
         break;
     case BinOpKind::mul:
-        ResString += "mul i32 " + LeftTempString + ", " + RightTempString ;
+        res = TempIdAllocater::GetId();
+        ResString += "%" + std::to_string(res);
+
+        std::cout<<ResString<<" = "<<"mul "<<LeftValue.TypeToString()<<" "<<LeftValue.LabelToString()<<", "<<RightValue.LabelToString()<<"\n";  
         break;
     case BinOpKind::_div:
-        ResString += "sdiv i32 " + LeftTempString + ", " + RightTempString ;
+        res = TempIdAllocater::GetId();
+        ResString += "%" + std::to_string(res);
+        std::cout<<ResString<<" = "<<"sdiv "<<LeftValue.TypeToString()<<" "<<LeftValue.LabelToString()<<", "<<RightValue.LabelToString()<<"\n";  
         break;
     case BinOpKind::IsEqual:
-        ResString += "icmp eq i32 " + LeftTempString + ", " + RightTempString ;
+        temp = TempIdAllocater::GetId();
+        TempString = "%" + std::to_string(temp);
+        res = TempIdAllocater::GetId();
+        ResString += "%" + std::to_string(res);
+        std::cout<<TempString<<" = "<<"icmp eq "<<LeftValue.TypeToString() <<" " <<LeftValue.LabelToString()<<", "<<RightValue.LabelToString()<<"\n";  
+        std::cout<<ResString<<" = "<<"zext i1 "<<TempString<<" to i32\n";
         break;
     case BinOpKind::IsNe:
-        ResString += "icmp ne i32 " + LeftTempString + ", " + RightTempString ;
+        temp = TempIdAllocater::GetId();
+        TempString = "%" + std::to_string(temp);
+        res = TempIdAllocater::GetId();
+        ResString += "%" + std::to_string(res);
+        std::cout<<TempString<<" = "<<"icmp ne "<<LeftValue.TypeToString() <<" " <<LeftValue.LabelToString()<<", "<<RightValue.LabelToString()<<"\n";  
+        std::cout<<ResString<<" = "<<"zext i1 "<<TempString<<" to i32\n";
         break;
     case BinOpKind::IsLt:
-        ResString += "icmp slt i32 " + LeftTempString + ", " + RightTempString ;
+        temp = TempIdAllocater::GetId();
+        TempString = "%" + std::to_string(temp);
+        res = TempIdAllocater::GetId();
+        ResString += "%" + std::to_string(res);
+        std::cout<<TempString<<" = "<<"icmp slt "<<LeftValue.TypeToString() <<" " <<LeftValue.LabelToString()<<", "<<RightValue.LabelToString()<<"\n";  
+        std::cout<<ResString<<" = "<<"zext i1 "<<TempString<<" to i32\n";
         break;
     case BinOpKind::IsLe:
-        ResString += "icmp sle i32 " + LeftTempString + ", " + RightTempString ;
+         temp = TempIdAllocater::GetId();
+        TempString = "%" + std::to_string(temp);
+        res = TempIdAllocater::GetId();
+        ResString += "%" + std::to_string(res);
+        std::cout<<TempString<<" = "<<"icmp sle "<<LeftValue.TypeToString() <<" " <<LeftValue.LabelToString()<<", "<<RightValue.LabelToString()<<"\n";  
+        std::cout<<ResString<<" = "<<"zext i1 "<<TempString<<" to i32\n";
         break;
     case BinOpKind::IsGt:
-        ResString += "icmp sgt i32 " + LeftTempString + ", " + RightTempString ;
+        temp = TempIdAllocater::GetId();
+        TempString = "%" + std::to_string(temp);
+        res = TempIdAllocater::GetId();
+        ResString += "%" + std::to_string(res);
+        std::cout<<TempString<<" = "<<"icmp sgt "<<LeftValue.TypeToString() <<" " <<LeftValue.LabelToString()<<", "<<RightValue.LabelToString()<<"\n";  
+        std::cout<<ResString<<" = "<<"zext i1 "<<TempString<<" to i32\n";
         break;
     case BinOpKind::IsGe:
-        ResString += "icmp sge i32 " + LeftTempString + ", " + RightTempString ;
+        temp = TempIdAllocater::GetId();
+        TempString = "%" + std::to_string(temp);
+        res = TempIdAllocater::GetId();
+        ResString += "%" + std::to_string(res);
+        std::cout<<TempString<<" = "<<"icmp sge "<<LeftValue.TypeToString() <<" " <<LeftValue.LabelToString()<<", "<<RightValue.LabelToString()<<"\n";  
+        std::cout<<ResString<<" = "<<"zext i1 "<<TempString<<" to i32\n";
         break;
     case BinOpKind::rem:
-        ResString += "srem i32 " + LeftTempString + ", " + RightTempString ;
+        res = TempIdAllocater::GetId();
+        ResString += "%" + std::to_string(res);
+        std::cout<<ResString<<" = "<<"srem "<<LeftValue.TypeToString()<<" "<<LeftValue.LabelToString()<<", "<<RightValue.LabelToString()<<"\n";  
         break;
     case BinOpKind::LogicAnd:
         temp1 = TempIdAllocater::GetId();
         temp2 = TempIdAllocater::GetId();
-        
-        std::cout<<"%"<<temp1<<" = "<<"icmp ne i32 0, "<<LeftTempString<<"\n";
-        std::cout<<"%"<<temp2<<" = "<<"icmp ne i32 0, "<<RightTempString<<"\n";
-        ResString += "and i32 %"+std::to_string(temp1)+", %"+std::to_string(temp2);
+        res = TempIdAllocater::GetId();
+        std::cout<<"%"<<temp1<<" = "<<"icmp ne i32 0, "<<LeftValue.LabelToString()<<"\n";
+        std::cout<<"%"<<temp2<<" = "<<"icmp ne i32 0, "<<RightValue.LabelToString()<<"\n";
+        std::cout<<"%"<<std::to_string(res)<<" = "<<"and i32 %"<<std::to_string(temp1)<<", %"<<std::to_string(temp2);
+        ResString = "%" + std::to_string(res);
         break;
     case BinOpKind::LogicOr:
         temp1 = TempIdAllocater::GetId();
         temp2 = TempIdAllocater::GetId();
-        std::cout<<"%"<<temp1<<" = "<<"icmp ne i32 0, "<<LeftTempString<<"\n";
-        std::cout<<"%"<<temp2<<" = "<<"icmp ne i32 0, "<<RightTempString<<"\n";
-        ResString += "or i32 %"+std::to_string(temp1)+", %"+std::to_string(temp2);
+        res = TempIdAllocater::GetId();
+        std::cout<<"%"<<temp1<<" = "<<"icmp ne i32 0, "<<LeftValue.LabelToString()<<"\n";
+        std::cout<<"%"<<temp2<<" = "<<"icmp ne i32 0, "<<RightValue.LabelToString()<<"\n";
+        std::cout<<"%"<<std::to_string(res)<<" = "<<"or i32 %"<<std::to_string(temp1)<<", %"<<std::to_string(temp2);
+        ResString = "%" + std::to_string(res);
         break;
     case BinOpKind::LogicNot:
-        ResString += "icmp eq i32 0, " + LeftTempString;
+        res = TempIdAllocater::GetId();
+        ResString = "%" + std::to_string(res);
+        std::cout<<ResString<<" = "<<"icmp eq i32 0, "<<LeftValue.LabelToString();
         break;
     case BinOpKind::Neg:
-        ResString += "sub i32, 0, "+LeftTempString;
+        res = TempIdAllocater::GetId();
+        ResString = "%" + std::to_string(res);
+        std::cout<<ResString<<" = "<<"sub i32 0, "<<LeftValue.LabelToString();
         break;
     default:
+        res = 0;
         break;
     }
-    return ResString;
+    ResVal.TempId = res;
+    return ResVal;
 }
 
-std::string MemIRT::ExpDump() const
+ExpValue MemIRT::ExpDump() const
 {
-    return AddressExp->ExpDump();
+    auto res =  AddressExp->ExpDump();
+    BitCast(res,IrValType::i32,true);
+    return res;
 }
-std::string TempIRT::ExpDump() const
+ExpValue TempIRT::ExpDump() const
 {
-    return std::to_string(TempVarId);
+    ExpValue res;
+    res.TempId = this->TempVarId;
+    return res;
 }
-std::string ESeqIRT::ExpDump() const
+ExpValue ESeqIRT::ExpDump() const
 {
     SideEffectStm->Dump();
     return EstimatedExp->ExpDump();
 }
-std::string NameIRT::ExpDump() const
+ExpValue NameIRT::ExpDump() const
 {
-    return AsmLableName;
+    ExpValue res;
+    res.VarName = this->AsmLableName;
+    if(this->ArrayDim.size())
+    {
+        res.IsPtr = true;
+        res.ExpDim = this->ArrayDim;
+    }
+    return res;
 }
-std::string ConstIRT::ExpDump() const
+ExpValue ConstIRT::ExpDump() const
 {
-    return std::to_string(ConstVal);
+    ExpValue res;
+    res.IsConst = true;
+    res.ConstValue = this->ConstVal;
+    return res;
  
 }
-std::string CallIRT::ExpDump() const
+ExpValue CallIRT::ExpDump() const
 {
+    ExpValue res;
     std::string ResString("");
     std::string RetTypeString;
-    std::vector<std::string> ArgsStr;
+    std::vector<ExpValue> ArgsVal;
     for(auto &it:this->ArgsExpList){
-        std::string TempStr = it->ExpDump();
-        CheckAndConvertExpToTemp(TempStr);
-        ArgsStr.push_back(TempStr);
+        auto TempVal = it->ExpDump();
+        ArgsVal.push_back(TempVal);
     }
     int TempId = TempIdAllocater::GetId();
     if (RetValType == ValueType::INT32)
-        RetTypeString = "i32";
+        res.ExpType = IrValType::i32;
     else
-        RetTypeString = "void";
+        res.ExpType = IrValType::_void_;
     std::cout<<"%"<<TempId<<" = "<<"call " << RetTypeString << " @" << FuncLable->LableName + "(";
-    ResString += "%"+std::to_string(TempId);
-    for (int i = 0; i < ArgsStr.size(); ++i)
+    res.TempId = TempId;
+    for (int i = 0; i < ArgsVal.size(); ++i)
     {
-        std::cout << "i32 " << ArgsStr[i];
-        if (i != ArgsStr.size() - 1)
+        std::cout <<ArgsVal[i].TypeToString()<<" "<<ArgsVal[i].LabelToString();
+        if (i != ArgsVal.size() - 1)
         {
             std::cout<<", ";
         }
     }
     std::cout<<")\n";
-    return ResString;
+    return res;
 }
-std::string AllocateIRT::ExpDump() const{
+ExpValue AllocateIRT::ExpDump() const{
+    ExpValue res;
     std::cout<<"%"<<this->ident<<" = " <<"alloca i32 ";
-    if(NumOfInt>1){
-        std::cout<< ", i32 " <<std::to_string(NumOfInt);
-    }
+    PrintInitialStruct(this->ArrDim,0);
     if(AlignSize>1){
         std::cout<<", align " <<std::to_string(AlignSize);
     }
     std::cout<<"\n";
-    return "%" + this->ident;
+    res.IsPtr = true;
+    res.ExpDim = this->ArrDim;
+    res.VarName = "%" + this->ident;
+    BitCast(res,IrValType::i64,false);
+    return res;
 }
 void FuncIRT::Dump() const{
     std::string FuncTypeStr("");
@@ -198,7 +266,7 @@ void FuncIRT::Dump() const{
     else if(RetValType==ValueType::VOID){FuncTypeStr="void";}
     std::cout <<"define "<<FuncTypeStr<<" @"<<this->FuncLable->LableName<<"(";
     TempIdAllocater::Rewind();
-    int TempId;
+    // int TempId;
     // for(int i=0;i<this->ArgsCount;++i){
     //     std::cout<<"i32 ";
     //     TempId = TempIdAllocater::GetId();
@@ -223,17 +291,12 @@ void FuncIRT::Dump() const{
     std::cout<<"}\n";
 }
 void RetIRT::Dump() const{
-    std::string ValueStr("");
+    ExpValue Value;
     if(this->RetExp!=NULL){
-        ValueStr = this->RetExp->ExpDump();
-        CheckAndConvertExpToTemp(ValueStr);
+        Value = this->RetExp->ExpDump();
+        // CheckAndConvertExpToTemp(ValueStr);
     }
-    std::cout<<"ret ";
-    if(this->RetValType==ValueType::VOID){
-        std::cout<<"void";
-    }else{
-        std::cout<<" i32 "<<ValueStr;
-    }
+    std::cout<<"ret "<<Value.TypeToString()<<" "<<Value.LabelToString();
     std::cout<<"\n";
 }
 void GlobalVarIRT::Dump() const{
@@ -245,16 +308,16 @@ void GlobalVarIRT::Dump() const{
             }
         }
         int AddressSpace = size << 2;
-        std::cout<<this->GlobalVarName<<" = "<<"addrspace("<<AddressSpace<<") ";
+        std::cout<<"\n"<<this->GlobalVarName<<" = "<<"addrspace("<<AddressSpace<<") ";
         if(this->IsConstant){
             std::cout<<"constant ";
         }else{
             std::cout<<"global ";
         }
-        std::cout<<"i32 ";
-
+        // std::cout<<"i32 ";
+        PrintInitialStruct(this->DimVec,0);
         if(this->InitVal!=NULL){
-            ConvertIntTreeToInitializer(this->InitVal);
+            ConvertIntTreeToInitializer(this->InitVal,this->DimVec,0);
         }
         else{
             std::cout<<this->Int32Val;
@@ -267,16 +330,5 @@ void GlobalVarIRT::Dump() const{
     }
 }
 void ExpIRT::Dump() const{
-    std::string ExpValStr = this->ExpContent->ExpDump();
-    if(ExpValStr[0]!='%'){
-        std::cout<<ExpValStr<<"\n";
-    }
+    
 }
-std::string RetIRT:: ExpDump() const  {return "";};
-std::string FuncIRT:: ExpDump() const  {return "";};
-std::string MoveIRT:: ExpDump() const  { return "";}
-std::string CjumpIRT:: ExpDump() const  {return "";}
-std::string JumpIRT:: ExpDump() const  {return "";}
-std::string LabelIRT:: ExpDump() const  {return "";}
-std::string SequenceIRT:: ExpDump() const  {return "";}
-std::string StatementIRT:: ExpDump() const {return "";}

@@ -1,0 +1,110 @@
+#include"ir/temp_type.h"
+std::ostream & operator<<(std::ostream &o,const ExpValue& val)
+{
+    o<< val.TypeToString()<<" "<<val.LabelToString()<<" ";
+    return o;
+}
+void ConvertPtrToInt(ExpValue& val)
+{
+    if(val.IsPtr==false)
+    {
+        return;
+    }
+    int TempId = TempIdAllocater::GetId();
+    std::cout<<"%"<<std::to_string(TempId)<<" = "<<"ptrtoint "<<val.TypeToString()<<" to i64\n";
+    val.IsPtr = false;
+    val.TempId = TempId;
+    val.ExpType = IrValType::i64;
+}
+void ConvertIntToPtr(ExpValue& val)
+{
+    if(val.IsPtr == true)
+    {
+        return;
+    }
+    int TempId = TempIdAllocater::GetId();
+    std::cout<<"%"<<std::to_string(TempId)<<" = "<<"inttoptr "<<val.TypeToString()<<" to i32*\n";
+    val.IsPtr = true;
+    val.TempId = TempId;
+    val.ExpType = IrValType::i32;
+}
+void BitCast(ExpValue& val,IrValType type,bool IsPtr)
+{
+    if(val.ExpType==type && val.IsPtr == IsPtr)
+    {
+        return;
+    }
+    int TempId = TempIdAllocater::GetId();
+    std::cout<<"%"<<std::to_string(TempId)<<" = "<< "bitcast " << val.TypeToString() << " to "<<EnumToString(type)<< (IsPtr? "*":"")<<"\n";
+    val.IsPtr = IsPtr;
+    val.TempId = TempId;
+    val.ExpType = type;
+}
+IrValType OpBitSignedExtension(ExpValue &val1,ExpValue &val2)
+{
+    int BitWidth1 = int(val1.ExpType),BitWidth2 = int(val2.ExpType);
+    if(val1.ExpType==val2.ExpType)
+    {
+        return val1.ExpType;
+    }
+    if(BitWidth1<BitWidth2)
+    {
+        int TempId = TempIdAllocater::GetId();
+        std::cout<< "%" << std::to_string(TempId) << " = "<< "sext "<<val1.TypeToString()<< " "<<"to "<<val2.TypeToString();
+        val1.ExpType = val2.ExpType;
+        val1.TempId = TempId;
+    }
+    else
+    {
+        int TempId = TempIdAllocater::GetId();
+        std::cout<< "%" << std::to_string(TempId) << " = "<< "sext "<<val2.TypeToString()<< " "<<"to "<<val1.TypeToString();
+        val2.ExpType = val1.ExpType;
+        val2.TempId = TempId;
+    }
+}
+std::string GetArrayStruct(IrValType type,const std::vector<int> &dim)
+{
+    std::string res("");
+    for(int i=0;i<dim.size();++i)
+    {
+        res += "[";
+        res += std::to_string(dim[i]);
+        res += "x";
+    }
+    res += " "+ EnumToString(type) + " ";
+    for(int i=0;i<dim.size();++i)
+    {
+        res += "]";
+    }
+    return res;
+}
+std::string ExpValue::LabelToString() const
+{
+    if(this->TempId)
+    {
+        return "%" + std::to_string(this->TempId);
+    }
+    else if(this->IsConst)
+    {
+        return std::to_string(this->ConstValue);
+    }
+    else
+    {
+        return this->VarName;
+    }
+}
+std::string ExpValue::TypeToString() const
+{
+    if(this->ExpDim.size())
+    {
+        return GetArrayStruct(this->ExpType,this->ExpDim);
+    }
+    else if(this->IsPtr)
+    {
+        return EnumToString(this->ExpType) + "* ";
+    }
+    else
+    {
+        return EnumToString(this->ExpType);
+    }
+}

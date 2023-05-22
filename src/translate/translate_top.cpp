@@ -66,7 +66,6 @@ void Program::func_dealer(FuncDefAST *func_def, BaseIRT *&ir)
     VarType func_type;
     FuncFParamsAST *func_fparams;
     BaseAST *block;
-    int para_cnt = 0;
 
     // Start with FuncDefAST, we translate it to IR
     func_type = func_def->func_type;
@@ -74,18 +73,20 @@ void Program::func_dealer(FuncDefAST *func_def, BaseIRT *&ir)
     func_fparams = dynamic_cast<FuncFParamsAST *>(func_def->func_fparams);
     block = func_def->block;
     // get the count of parameters
-    if (func_fparams != nullptr)
-        para_cnt = func_fparams->func_fparam.size();
+    // if (func_fparams != nullptr)
+    //     para_cnt = func_fparams->func_fparam.size();
 
     // check symbol table
     SymbolTable::EnterScope();
-    std::vector<ArgsType> args;
+    std::vector<std::string> names;
+    std::vector<ArgsType> types;
     if (func_fparams)
     {
         for (auto &it : reinterpret_cast<FuncFParamsAST *>(func_fparams)->func_fparam)
         {
             auto param = reinterpret_cast<FuncFParamAST *>(it);
-            args.push_back(param->tp);
+            types.push_back(param->tp);
+            names.push_back(*param->ident);
             Symbol *sym = SymbolTable::FindSymbol(*param->ident);
             if (sym != NULL)
             {
@@ -103,40 +104,16 @@ void Program::func_dealer(FuncDefAST *func_def, BaseIRT *&ir)
             SymbolTable::AddSymbol(*param->ident, sym);
         }
     }
-    SymbolTable::AddSymbol(ident, new Symbol(ValueType::INT32, args));
-
-    // Symbol* sym = new Symbol(func_type,func_fparams->)
-    // if(SymbolTable::AddSymbol())
-    block_dealer(dynamic_cast<BlockAST *>(block), ir);
-    // construct func_ir tree
-    // notice that para_cnt may not work
-    SymbolTable::ExitScope();
-    auto parameters = reinterpret_cast<FuncFParamsAST *>(func_def->func_fparams);
-    std::vector<std::string> names;
-    std::vector<ArgsType> types;
-    if (parameters != nullptr)
-    {
-        for (auto &it : parameters->func_fparam)
-        {
-            auto param = reinterpret_cast<FuncFParamAST *>(it);
-            names.push_back(*param->ident);
-            types.push_back(param->tp);
-        }
-    }
-
     ValueType ret;
     if (func_type == VarType::INT)
         ret = ValueType::INT32;
     if (func_type == VarType::VOID)
         ret = ValueType::VOID;
 
-    //add symbol table of this function
-    SymbolTable::AddSymbol(ident, new Symbol(ret, types));
-    //add symbols of fparameters
-    
     //deal with block
     block_dealer(dynamic_cast<BlockAST *>(block), ir);
-
+    SymbolTable::ExitScope();
+    SymbolTable::AddSymbol(ident, new Symbol(ret, types));
     //construct func_ir tree
     if (func_type == VarType::INT)
     {

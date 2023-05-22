@@ -30,6 +30,9 @@ void Program::VarDeclTranslater(VarDeclAST *decl, BaseIRT *&ir)
 }
 void Program::ConvertExpInitTreeToIR(InitValTree<BaseAST *> *AstTree, const std::vector<int> &dim, std::vector<int> &trait, ExpIRT *addr, StatementIRT *&ir)
 {
+    if(AstTree == NULL) {
+        return;
+    }
     if (AstTree->childs.size())
     {
         for (int i = 0; i < AstTree->childs.size(); ++i)
@@ -89,19 +92,20 @@ void Program::VarDefTranslater(SymType type, VarDefAST *decl, BaseIRT *&ir)
         else
         {
             // get stack space
-            int size = 1;
+            std::vector<int> dim;
             if (sym->ArrAttributes)
             {
-                for (auto &it : sym->ArrAttributes->ArrayDimVec)
-                {
-                    size *= it;
-                }
+                dim = sym->ArrAttributes->ArrayDimVec;
             }
-            auto addr = new ExpIRT(new AllocateIRT(*decl->VarIdent,size << 2, 4));
+            auto addr = new ExpIRT(new AllocateIRT(*decl->VarIdent,dim, 4));
+            auto res = new StatementIRT(addr);
             StatementIRT *init = NULL;
             std::vector<int> trait;
             this->ConvertExpInitTreeToIR(decl->InitValue, sym->ArrAttributes->ArrayDimVec, trait, addr, init);
-            ir = init;
+            if(init){
+                AddStmToTree(res,init);
+            }
+            ir = res;
         }
     }
     else

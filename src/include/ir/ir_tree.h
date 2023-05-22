@@ -10,6 +10,7 @@
 #include <assert.h>
 #include "glog/logging.h"
 #include"common/initval_tree.h"
+#include"ir/temp_type.h"
 bool isDigit(const std::string &str);
 void CheckAndConvertExpToTemp(std::string &str);
 
@@ -35,7 +36,10 @@ class BaseIRT
 public:
     virtual ~BaseIRT() = default;
     virtual void Dump() const = 0;
-    virtual std::string  ExpDump() const {return "";}
+    virtual ExpValue ExpDump() const {
+        ExpValue val;
+        return val;
+    }
 };
 
 
@@ -55,7 +59,7 @@ public:
     void Dump() const override{
         StmContent->Dump();
     }
-    std::string ExpDump() const override;
+    
 
 };
 class GlobalVarIRT :public BaseIRT
@@ -74,7 +78,7 @@ public:
     GlobalVarIRT(ValueType type,std::string name,bool ConstFlag,int init):GlobalVarType(type),GlobalVarName(name),IsConstant(ConstFlag),IsArray(false),InitVal(NULL),Int32Val(init){
     }
     void Dump() const override;
-    std::string ExpDump() const override{return "";}
+    
 };
 class SequenceIRT : public BaseIRT
 {
@@ -90,7 +94,7 @@ public:
         LeftChild->Dump();
         RightChild->Dump();
     }
-    std::string ExpDump() const override ;
+    
     
 };
 class LabelIRT : public BaseIRT
@@ -121,7 +125,7 @@ public:
     {
         std::cout << LableName << ":\n";
     }
-    std::string ExpDump() const override ;
+    
 };
 class JumpIRT : public BaseIRT
 {
@@ -136,7 +140,7 @@ public:
     {
         std::cout << "br label %" << JumpLable->LableName << "\n";
     }
-    std::string ExpDump() const override ;
+    
 };
 class CjumpIRT : public BaseIRT
 {
@@ -150,7 +154,7 @@ public:
     {
     }
     void Dump() const override;
-    std::string ExpDump() const override;
+    
 };
 
 class MoveIRT : public BaseIRT
@@ -168,7 +172,7 @@ public:
     MoveIRT(TempIRT *temp, ExpIRT *exp) : MoveKind(ToTemp),DstTemp(temp),DstMem(nullptr),SrcExp(exp) {}
     MoveIRT(MemIRT *mem, ExpIRT *exp) : MoveKind(ToMem), DstTemp(nullptr),DstMem(mem),SrcExp(exp) {}
     void Dump() const override;
-    std::string ExpDump() const override;
+    
 };
 class ExpIRT : public BaseIRT
 {
@@ -188,7 +192,7 @@ public:
     
     ExpIRT(AllocateIRT* alloc):ContentKind(ExpKind::Allocate),ExpContent(reinterpret_cast<BaseIRT*>(alloc)) {}
     void Dump() const override;
-    std::string ExpDump() const override ;
+    ExpValue ExpDump() const override ;
 };
 class BinOpIRT : public BaseIRT
 {
@@ -200,7 +204,7 @@ public:
     void Dump() const override
     {
     }
-    std::string ExpDump() const override;
+    ExpValue ExpDump() const override;
 };
 class MemIRT : public BaseIRT
 {
@@ -211,7 +215,7 @@ public:
     void Dump() const override
     {
     }
-    std::string ExpDump() const override;
+    ExpValue ExpDump() const override;
 };
 class TempIRT : public BaseIRT
 {
@@ -224,7 +228,7 @@ public:
     void Dump() const override
     {
     }
-    std::string ExpDump() const override;
+    ExpValue ExpDump() const override;
 };
 class ESeqIRT : public BaseIRT
 {
@@ -236,18 +240,20 @@ public:
     void Dump() const override
     {
     }
-    std::string ExpDump() const override;
+    ExpValue ExpDump() const override;
 };
 class NameIRT : public BaseIRT
 {
 public:
     std::string AsmLableName;
+    std::vector<int> ArrayDim;
     NameIRT(){}
     NameIRT(std::string name) : AsmLableName(name) {}
+    NameIRT(std::string name,std::vector<int> dim) : AsmLableName(name),ArrayDim(dim) {}
     void Dump() const override
     {
     }
-    std::string ExpDump() const override;
+    ExpValue ExpDump() const override;
 };
 class ConstIRT : public BaseIRT
 {
@@ -258,17 +264,18 @@ public:
     void Dump() const override
     {
     }
-    std::string ExpDump() const override;
+    ExpValue ExpDump() const override;
 };
 class AllocateIRT: public BaseIRT{
 public:
-    int NumOfInt;
     int AlignSize;
     std::string ident;
+    std::vector<int> ArrDim;
     AllocateIRT(){}
-    AllocateIRT(std::string name,int num=1,int align=1):NumOfInt(num),AlignSize(align),ident(name){}
+    AllocateIRT(std::string name,int align=1):AlignSize(align),ident(name){}
+    AllocateIRT(std::string name,std::vector<int> dim,int align=1):AlignSize(align),ident(name),ArrDim(dim){}
     void Dump() const override{}
-    std::string ExpDump() const override ;
+    ExpValue ExpDump() const override ;
 };
 /**
  * @author: zhang xin
@@ -287,7 +294,7 @@ public:
     void Dump() const override
     {
     }
-    std::string ExpDump() const override;
+    ExpValue ExpDump() const override;
 
 
 };
@@ -301,7 +308,6 @@ public:
     FuncIRT(){}
     FuncIRT(ValueType type, LabelIRT *call,std::vector<std::string> name,std::vector<ArgsType> vec,StatementIRT* stm,ExpIRT* RetExp=NULL) : RetValType(type), FuncLable(call),ParameterNameVec(name),ArgsVec(vec),FuncStm(stm) {}
     void Dump() const override;
-    std::string ExpDump() const override;
 };
 class RetIRT:public BaseIRT{
 public:
@@ -321,7 +327,7 @@ public:
         }
     }
     void Dump() const override;
-    std::string ExpDump() const override;
+
 };
 /**
  * @auther: zhang xin

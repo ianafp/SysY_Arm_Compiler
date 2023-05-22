@@ -39,6 +39,17 @@ public:
     }
     std::cout<<"}";
   }
+  T FindFirst()
+  {
+    if(this->childs.size())
+    {
+      return this->childs[0]->FindFirst();
+    }
+    else
+    {
+      return this->keys[0];
+    }
+  }
   bool find(const std::vector<int> &index,T& result){
     return internal_find(index,result,0);
   }
@@ -49,7 +60,7 @@ private:
       if(index[level]<0 || index[level]>=size){
         // return true;
         result = 0;
-        return false;
+        return true;
       }
       return internal_find(index,result,level+1);
     }
@@ -57,7 +68,7 @@ private:
       size = this->keys.size();
       if(index[level]<0 || index[level]>=size){
         result = 0;
-        return false;
+        return true;
       }
       result = keys[index[level]];
       return false;
@@ -71,7 +82,9 @@ private:
  * @param IntTree result int tree pointer referrence, will point to the result tree
 */
 bool ConvertTreeToInt(InitValTree<BaseAST*> *AstTree,InitValTree<int>* &IntTree);
-void ConvertIntTreeToInitializer(InitValTree<int>* IntTree);\
+void PrintInitialStruct(const std::vector<int> &dim,int level);
+void ConvertIntTreeToInitializer(InitValTree<int>* IntTree,const std::vector<int> &dim,int level);
 void AdjustTree(InitValTree<BaseAST*>* &tree);
+
 #define _INIT_VAL_TREE_
 #endif
