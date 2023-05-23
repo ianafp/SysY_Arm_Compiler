@@ -2,6 +2,7 @@
 int main() 
 {
   int a = 1000000;
+  putf("sadas");
 
   while(a > 0)
   {

@@ -43,7 +43,7 @@ void yyerror(BaseAST* &ast, const char *s);
 %token <str_val> _identifier _string 
 %token <int_val> _const_val
 %type<type_val> BType
-%type <ast_val> CompUnit Compunit FuncDef  Block block BlockItem Stmt FuncFParam Decl ConstDecl VarDecl Vardecl Vardef VarDef LVal Exp UnaryExp PrimaryExp Number UnaryOp AddExp MulExp RelExp EqExp LAndExp LOrExp FuncFParams  Funcfparam FuncRParams FuncDeclare Cond 
+%type <ast_val> CompUnit Compunit FuncDef  Block block BlockItem Stmt FuncFParam Decl ConstDecl VarDecl Vardecl Vardef VarDef LVal Exp UnaryExp PrimaryExp Number UnaryOp AddExp MulExp RelExp EqExp LAndExp LOrExp FuncFParams  Funcfparam FuncRParams FuncDeclare Cond String
 Constdecl Constdef ConstDef ConstExp
 %type <init_val>  InitVal Initval ConstInitVal Constinitval
 
@@ -692,7 +692,23 @@ Constinitval: ConstInitVal
                 $$ = ast;
             }
             ;
+ String: _string
+        {
+            auto ast = new StringAST();
+            ast->StringLabel = SymbolTable::AddConstString(*$1);
+            delete $1;
+            ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+            $$ = ast;
+        }
  FuncRParams: Exp
+            {
+                auto ast = new FuncRParamsAST();
+                ast->exp.push_back($1);
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
+            |
+            String
             {
                 auto ast = new FuncRParamsAST();
                 ast->exp.push_back($1);

@@ -9,6 +9,7 @@
 #include "glog/logging.h"
 #include "common/visualize.h"
 #include "common/while_frame.h"
+#include"symtable/symbol_table.h"
 // #include "koopa.h"
 // #include "headers/ir_tree.h"
 // the header file can be found at https://github.com/pku-minic/koopa/blob/master/crates/libkoopa/include/koopa.h
@@ -59,6 +60,7 @@ int main(int argc, const char *argv[]) {
   // generate koopa IR
   Program p;
   BaseIRT *ir = NULL;
+
   p.Scan(ast, ir);
   // FILE *IRout;
   // IRout = fopen(output, "w");
@@ -66,7 +68,7 @@ int main(int argc, const char *argv[]) {
   // cout << *ir_str;
   // ExpIRT* e = new ExpIRT();
   if(ir == nullptr) cout << "error";
-  
+  SymbolTable::PrintConstStringDeclare();
   ir->Dump();
   cout << endl;
 
@@ -74,6 +76,7 @@ int main(int argc, const char *argv[]) {
   cout << visual.output();
 
   freopen(output, "w", stdout);
+  SymbolTable::PrintConstStringDeclare();
   ir->Dump();
   // cout.rdbuf(pOld);
   // ConstIRT c1(11),c2(1100), c3(1000);
