@@ -23,7 +23,8 @@ enum class StmtType
   Break,
   Continue,
   ReturnExp,
-  ReturnVoid
+  ReturnVoid,
+  Empty
 };
 enum class StmKind
 {  
