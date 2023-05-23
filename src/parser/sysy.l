@@ -30,6 +30,7 @@ Decimal       [1-9][0-9]*
 Octal         0[0-7]*
 Hexadecimal   0[xX][0-9a-fA-F]+
 
+
 %%
 \n              { col_record = 0; }
 {WhiteSpace}    { /* 忽略, 不做任何操作 */ col_record++; }

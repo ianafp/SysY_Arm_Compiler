@@ -200,6 +200,7 @@ void Program::unary_exp_dealer(BaseAST *exp, BaseIRT *&ir)
     {
         // !!!***need symbol table!
         std::vector<ExpIRT *> args;
+        std::vector<ArgsType> types;
         Symbol *sym = SymbolTable::FindSymbol(*(unary_exp->ident));
         if (sym == NULL)
         {
@@ -215,7 +216,7 @@ void Program::unary_exp_dealer(BaseAST *exp, BaseIRT *&ir)
                 LOG(ERROR) << "Function Call " << *(unary_exp->ident) << " Parameters Do Not Match Declaration Parameters\n";
                 exit(-1);
             }
-            ir = new ExpIRT(ExpKind::Call, new CallIRT(ValueType::INT32, new LabelIRT(*(unary_exp->ident)), args));
+            ir = new ExpIRT(ExpKind::Call, new CallIRT(ValueType::INT32, new LabelIRT(*(unary_exp->ident)), types,args));
         }
         else
         {
@@ -229,13 +230,23 @@ void Program::unary_exp_dealer(BaseAST *exp, BaseIRT *&ir)
                 LOG(ERROR) << "Function Call " << *(unary_exp->ident) << " Parameters Do Not Match Declaration Parameters\n";
                 exit(-1);
             }
+            int i = 0;
             for (auto &it : func_r->exp)
             {
-
+                
                 logic_exp_dealer(it, args_exp);
                 args.push_back(reinterpret_cast<ExpIRT *>(args_exp));
+                if(i<ArgsFVec.size())
+                {
+                    types.push_back(ArgsFVec[i]);
+                }
+                else
+                {
+                    types.push_back(ArgsType::Int32);
+                }
+                i++;
             }
-            ir = new ExpIRT(ExpKind::Call, new CallIRT(ValueType::INT32, new LabelIRT(*unary_exp->ident), args));
+            ir = new ExpIRT(ExpKind::Call, new CallIRT(ValueType::INT32, new LabelIRT(*unary_exp->ident),types,args));
         }
     }
 }

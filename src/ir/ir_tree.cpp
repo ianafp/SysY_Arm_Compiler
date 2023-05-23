@@ -271,10 +271,16 @@ ExpValue CallIRT::ExpDump() const
     std::string ResString("");
     std::string RetTypeString;
     std::vector<ExpValue> ArgsVal;
+    int i = 0;
     for (auto &it : this->ArgsExpList)
     {
         auto TempVal = it->ExpDump();
+        if(this->ArgsTypeList[i]==ArgsType::Int32)
+        {
+            ConvertMemToTemp(TempVal);
+        }
         ArgsVal.push_back(TempVal);
+        i++;
     }
     int TempId = TempIdAllocater::GetId();
     if (RetValType == ValueType::INT32)
@@ -406,4 +412,8 @@ void GlobalVarIRT::Dump() const
 }
 void ExpIRT::Dump() const
 {
+    if(this->ContentKind==ExpKind::Call)
+    {
+        this->ExpContent->ExpDump();
+    }
 }
