@@ -26,28 +26,34 @@ void matrix_multiply() {
 
 int main() {
     // 读取矩阵A的维度
-    scanf("%d %d", &M_A, &N_A);
+    // scanf("%d %d", &M_A, &N_A);
+    M_A = getint();
+    N_A = getint();
 
     // 读取矩阵A的元素
     int i = 0;
     while (i < M_A) {
         int j = 0;
         while (j < N_A) {
-            scanf("%d", &A[i][j]);
+            A[i][j] = getint();
+            // scanf("%d", &A[i][j]);
             j = j+1;
         }
         i = i+1;
     }
 
     // 读取矩阵B的维度
-    scanf("%d %d", &M_B, &N_B);
+    // scanf("%d %d", &M_B, &N_B);
+    M_B = getint();
+    N_B = getint();
 
     // 读取矩阵B的元素
     i = 0;
     while (i < M_B) {
         int j = 0;
         while (j < N_B) {
-            scanf("%d", &B[i][j]);
+            // scanf("%d", &B[i][j]);
+            B[i][j] = getint();
             j = j+1;
         }
         i = i+1;
@@ -55,7 +61,7 @@ int main() {
 
     // 判断维度是否满足乘法要求
     if (N_A != M_B) {
-        printf("Incompatible Dimensions\n");
+        putf("Incompatible Dimensions\n");
         return 0;
     }
     // 调用矩阵乘法函数
@@ -66,10 +72,10 @@ int main() {
     while (i < M_A) {
         int j = 0;
         while (j < N_B) {
-            printf("%10d", C[i][j]);
+            putf("%10d", C[i][j]);
             j = j+1;
         }
-        printf("\n");
+        putf("\n");
         i = i+1;
     }
 

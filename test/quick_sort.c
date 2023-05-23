@@ -35,12 +35,13 @@ void quick_sort(int arr[], int low, int high) {
 }
 
 int main() {
-    int N;
-    scanf("%d", &N);
+    int N = getint();
+    // scanf("%d", &N);
     
     int i = 0;
     while (i < N) {
-        scanf("%d", &nums[i]);
+        nums[i] = getint();
+        // scanf("%d", &nums[i]);
         i = i + 1;
     }
 
@@ -48,7 +49,7 @@ int main() {
 
     i = 0;
     while (i < N) {
-        printf("%d\n", nums[i]);
+        putf("%d\n", nums[i]);
         i = i + 1;
     }
 
