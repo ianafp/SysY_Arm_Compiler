@@ -120,7 +120,7 @@ void Program::BranchConditionJudge(ExpIRT* ir_condition_exp, ExpIRT* &leftExp, E
         }
     } else {
         // condition expresssion with only one side, now we need to add one side
-        assert(ir_condition_exp->ContentKind == ExpKind::Const);
+        // assert(ir_condition_exp->ContentKind == ExpKind::Const);
         ExpIRT* zero_irt = new ExpIRT(new ConstIRT(0));
         opkind = BinOpKind::IsNe;
         leftExp = reinterpret_cast<ExpIRT *>(ir_condition_exp->ExpContent);

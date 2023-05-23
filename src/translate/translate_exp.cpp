@@ -176,6 +176,7 @@ void Program::unary_exp_dealer(BaseAST *exp, BaseIRT *&ir)
                 {
                     auto  lval = dynamic_cast<LValAST *>(primary_exp->lval);
                     this->LValTranslater(lval,ir);
+                    ir = new ExpIRT(reinterpret_cast<MemIRT*>(ir));
                     
                 }
             }
