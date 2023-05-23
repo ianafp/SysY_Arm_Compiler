@@ -74,6 +74,16 @@ int main(int argc, const char *argv[]) {
   cout << visual.output();
 
   freopen(output, "w", stdout);
+  std::cout 
+  << "declare void @putint(i32)\n" 
+  << "declare void @putch(i32)\n" 
+  << "declare void @putarray(i32, i32*)\n" 
+  << "declare i32 @getint()\n" 
+  << "declare i32 @getch()\n"
+  << "declare i32 @getarray(i32*)\n"
+  << "declare void @starttime()\n"
+  << "declare void @stoptime()\n\n";
+
   ir->Dump();
   // cout.rdbuf(pOld);
   // ConstIRT c1(11),c2(1100), c3(1000);

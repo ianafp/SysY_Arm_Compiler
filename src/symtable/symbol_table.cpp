@@ -56,7 +56,8 @@ void SymbolTable::InitTable(){
         sym = new Symbol(ValueType::VOID,args);
         TableVec[0].insert(std::pair<std::string,Symbol*>("putch",sym));
         // putarray
-        args[0] = ArgsType::Int32Array;
+        args[0] = ArgsType::Int32;
+        args.push_back(ArgsType::Int32Array);
         sym = new Symbol(ValueType::VOID,args);
         TableVec[0].insert(std::pair<std::string,Symbol*>("putarray",sym));
         // putf

@@ -282,24 +282,43 @@ ExpValue CallIRT::ExpDump() const
         ArgsVal.push_back(TempVal);
         i++;
     }
-    int TempId = TempIdAllocater::GetId();
     if (RetValType == ValueType::INT32)
-        res.ExpType = IrValType::i32;
-    else
-        res.ExpType = IrValType::_void_;
-    std::cout << "%" << TempId << " = "
-              << "call " << RetTypeString << " @" << FuncLable->LableName + "(";
-    res.TempId = TempId;
-    for (int i = 0; i < ArgsVal.size(); ++i)
     {
-        std::cout << ArgsVal[i].TypeToString() << " " << ArgsVal[i].LabelToString();
-        if (i != ArgsVal.size() - 1)
+        int TempId = TempIdAllocater::GetId();
+        res.ExpType = IrValType::i32;
+        std::cout << "%" << TempId << " = "
+            << "call " << EnumToString(res.ExpType) << " @" << FuncLable->LableName + "(";
+        res.TempId = TempId;
+        for (int i = 0; i < ArgsVal.size(); ++i)
         {
-            std::cout << ", ";
+            std::cout << ArgsVal[i].TypeToString() << " " << ArgsVal[i].LabelToString();
+            if (i != ArgsVal.size() - 1)
+            {
+                std::cout << ", ";
+            }
         }
+        std::cout << ")\n";
+        return res;
     }
-    std::cout << ")\n";
-    return res;
+    else if (RetValType == ValueType::VOID) {
+        res.ExpType = IrValType::_void_;
+        std::cout << "call " << EnumToString(res.ExpType) << " @" << FuncLable->LableName + "(";
+        
+        for (int i = 0; i < ArgsVal.size(); ++i)
+        {
+            std::cout << ArgsVal[i].TypeToString() << " " << ArgsVal[i].LabelToString();
+            
+            if (i != ArgsVal.size() - 1)
+            {
+                std::cout << ", ";
+            }
+        }
+        std::cout << ")\n";
+        return res;
+    } else {
+        DLOG(ERROR) << "Function return type not supported yet!";
+        exit(-1);
+    }
 }
 ExpValue AllocateIRT::ExpDump() const
 {
