@@ -7,7 +7,7 @@ void Program::logic_exp_dealer(BaseAST *exp, BaseIRT *&ir)
     BaseIRT *ir1 = new ExpIRT(), *ir2 = new ExpIRT();
     if (exp->type() == "ExpAST")
     {
-        ExpAST* Exp = dynamic_cast<ExpAST*>(exp);
+        ExpAST *Exp = dynamic_cast<ExpAST *>(exp);
         assert(Exp->lor_exp != nullptr);
         logic_exp_dealer(Exp->lor_exp, ir);
     }
@@ -174,10 +174,9 @@ void Program::unary_exp_dealer(BaseAST *exp, BaseIRT *&ir)
             {
                 if (primary_exp->lval != nullptr)
                 {
-                    auto  lval = dynamic_cast<LValAST *>(primary_exp->lval);
-                    this->LValTranslater(lval,ir);
-                    ir = new ExpIRT(reinterpret_cast<MemIRT*>(ir));
-                    
+                    auto lval = dynamic_cast<LValAST *>(primary_exp->lval);
+                    this->LValTranslater(lval, ir);
+                    ir = new ExpIRT(reinterpret_cast<MemIRT *>(ir));
                 }
             }
         }
@@ -200,26 +199,41 @@ void Program::unary_exp_dealer(BaseAST *exp, BaseIRT *&ir)
     else if (unary_exp->tp == ExpType::Call)
     {
         // !!!***need symbol table!
-        std::vector<ExpIRT*> args;
-        if(SymbolTable::FindSymbol(*(unary_exp->ident)) == NULL)
+        std::vector<ExpIRT *> args;
+        Symbol *sym = SymbolTable::FindSymbol(*(unary_exp->ident));
+        if (sym == NULL)
         {
             std::cout << "Error: function " + *(unary_exp->ident) + " haven't been declared." << std::endl;
             exit(-1);
         }
-        //Further: haven't implement args checking
-        if(unary_exp->func_rparam == nullptr)
+        // Further: haven't implement args checking
+        if (unary_exp->func_rparam == nullptr)
         {
-            //need look up symbol table
+            // need look up symbol table
+            if (sym->FunctionAttributes->ArgsTypeVec.size())
+            {
+                LOG(ERROR) << "Function Call " << *(unary_exp->ident) << " Parameters Do Not Match Declaration Parameters\n";
+                exit(-1);
+            }
             ir = new ExpIRT(ExpKind::Call, new CallIRT(ValueType::INT32, new LabelIRT(*(unary_exp->ident)), args));
         }
         else
-        {   
-            BaseIRT* args_exp = nullptr;
-            FuncRParamsAST* func_r = dynamic_cast<FuncRParamsAST*>(unary_exp->func_rparam);
-            for(auto &it:func_r->exp)
+        {
+            BaseIRT *args_exp = nullptr;
+            FuncRParamsAST *func_r = dynamic_cast<FuncRParamsAST *>(unary_exp->func_rparam);
+            auto &ArgsCall = func_r->exp;
+            auto &ArgsFVec = sym->FunctionAttributes->ArgsTypeVec;
+            if (sym->FunctionAttributes->ArgsTypeVec.size() != func_r->exp.size() && ArgsFVec[ArgsFVec.size()-1]!=ArgsType::VarsPacket)
             {
+
+                LOG(ERROR) << "Function Call " << *(unary_exp->ident) << " Parameters Do Not Match Declaration Parameters\n";
+                exit(-1);
+            }
+            for (auto &it : func_r->exp)
+            {
+
                 logic_exp_dealer(it, args_exp);
-                args.push_back(reinterpret_cast<ExpIRT*>(args_exp));
+                args.push_back(reinterpret_cast<ExpIRT *>(args_exp));
             }
             ir = new ExpIRT(ExpKind::Call, new CallIRT(ValueType::INT32, new LabelIRT(*unary_exp->ident), args));
         }

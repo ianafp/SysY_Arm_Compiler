@@ -36,6 +36,35 @@ void SymbolTable::ExitScope(){
 void SymbolTable::InitTable(){
     if(TableVec.size()==0){
         TableVec.push_back(std::map<std::string,Symbol*>());
+        // add function
+        std::vector<ArgsType> args;
+        // get int
+        Symbol* sym = new Symbol(ValueType::INT32,args);
+        TableVec[0].insert(std::pair<std::string,Symbol*>("getint",sym));
+        // getch
+        sym = new Symbol(ValueType::INT32,args);
+        TableVec[0].insert(std::pair<std::string,Symbol*>("getch",sym));
+        // get array
+        args.push_back(ArgsType::Int32Array);
+        sym = new Symbol(ValueType::INT32,args);
+        TableVec[0].insert(std::pair<std::string,Symbol*>("getarray",sym));
+        // putint
+        args[0] = ArgsType::Int32;
+        sym = new Symbol(ValueType::VOID,args);
+        TableVec[0].insert(std::pair<std::string,Symbol*>("putint",sym));
+        // putch
+        sym = new Symbol(ValueType::VOID,args);
+        TableVec[0].insert(std::pair<std::string,Symbol*>("putch",sym));
+        // putarray
+        args[0] = ArgsType::Int32Array;
+        sym = new Symbol(ValueType::VOID,args);
+        TableVec[0].insert(std::pair<std::string,Symbol*>("putarray",sym));
+        // putf
+        args[0] = ArgsType::String;
+        args.push_back(ArgsType::VarsPacket);
+        sym = new Symbol(ValueType::VOID,args);
+        TableVec[0].insert(std::pair<std::string,Symbol*>("putf",sym));
+
     }
 }
 bool Symbol::GetGlobalFlag() const{

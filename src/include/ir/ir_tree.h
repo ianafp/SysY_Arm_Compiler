@@ -83,7 +83,7 @@ public:
 class SequenceIRT : public BaseIRT
 {
 public:
-    BaseIRT *LeftChild, *RightChild;
+    StatementIRT *LeftChild, *RightChild;
     SequenceIRT(){}
     SequenceIRT(StatementIRT *LeftStm, StatementIRT *RightStm)
         : LeftChild(LeftStm), RightChild(RightStm)
