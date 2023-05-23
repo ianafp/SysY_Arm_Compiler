@@ -24,10 +24,12 @@ int main()
 
   int w = 3+2;
   
-  if (w) {
-    ;
-  } else {
-    ;;;
+  if(w-5) ; if (w); else {
+    w = w+5;
+  }
+
+  while (w) {
+    w = w - 1;
   }
 
   return 0;
