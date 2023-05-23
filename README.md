@@ -15,7 +15,15 @@ The docker image can also be found in the document of PKU.
     make run
 ```
 
+# transfer C language source file into LLVM
+
+```shell
+cd build
+clang -S -emit-llvm ../debug/hello.c -o ../debug/hello_template.ll
+```
+
 # transfer IR file to riscv-assembly code.
+
 ```sh
     cd build
     llc -march=riscv32 ../debug/hello.ll -o ../debug/hello_riscv.s
