@@ -54,6 +54,10 @@ void Program::stmt_dealer(StmtAST* stmt_available, BaseIRT* &ir)
         else if(stmt_available->tp == StmtType::Block){
             block_dealer(reinterpret_cast<BlockAST*>(stmt_available->ret_exp), ir);
         }
+        else if(stmt_available->tp == StmtType::Empty)
+        {
+            return;
+        }
         // more to continue...
     }
     //Further: need to consider: what if no return here in a void function while there are exp or other stmt??

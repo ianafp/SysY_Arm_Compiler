@@ -467,6 +467,12 @@ Constinitval: ConstInitVal
                 $$ = ast;
             }
             | ';'
+            {
+                auto ast = new StmtAST();
+                ast->tp = StmtType::Empty;
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
             | Block
             {
                 auto ast = new StmtAST();
