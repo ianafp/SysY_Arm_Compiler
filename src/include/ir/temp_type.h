@@ -9,6 +9,7 @@ class ExpValue;
 std::ostream& operator<<(std::ostream& o,const ExpValue& val);
 void ConvertPtrToInt(ExpValue& val);
 void ConvertIntToPtr(ExpValue& val);
+void ConvertMemToTemp(ExpValue& val);
 void BitCast(ExpValue& val,IrValType type,bool IsPtr);
 IrValType OpBitSignedExtension(ExpValue &val1,ExpValue &val2);
 std::string GetArrayStruct(IrValType type,const std::vector<int> &dim);

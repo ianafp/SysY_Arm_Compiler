@@ -83,7 +83,7 @@ private:
 */
 bool ConvertTreeToInt(InitValTree<BaseAST*> *AstTree,InitValTree<int>* &IntTree);
 void PrintInitialStruct(const std::vector<int> &dim,int level);
-void ConvertIntTreeToInitializer(InitValTree<int>* IntTree,const std::vector<int> &dim,int level);
+void ConvertIntTreeToInitializer(InitValTree<int>* IntTree,const std::vector<int> &dim);
 void AdjustTree(InitValTree<BaseAST*>* &tree);
 
 #define _INIT_VAL_TREE_
