@@ -271,7 +271,23 @@ public:
     return *rst_ptr;
   }
 };
+// AST for string
+class StringAST:public BaseAST
+{
+  public:
+    std::string StringLabel;
+    
 
+  void Dump() const override
+  {
+    std::cout<<StringLabel;
+  }
+  std::string type(void) const override
+  {
+    std::unique_ptr<std::string> rst_ptr(new std::string("StringAST"));
+    return *rst_ptr;
+  }
+};
 // AST for Funcfparams list(i.e. in the fundef part)
 class FuncRParamsAST : public BaseAST
 {

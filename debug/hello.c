@@ -20,6 +20,7 @@ void HELLO() {
 int main() 
 {
   int a = 5;
+  
   while(a > 0)
   {
     putint(a);

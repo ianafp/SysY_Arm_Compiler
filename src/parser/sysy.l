@@ -30,7 +30,8 @@ Decimal       [1-9][0-9]*
 Octal         0[0-7]*
 Hexadecimal   0[xX][0-9a-fA-F]+
 
-
+/* 字符串 */
+String \"([^\"\\]|\\.)*\"
 %%
 \n              { col_record = 0; }
 {WhiteSpace}    { /* 忽略, 不做任何操作 */ col_record++; }
@@ -52,7 +53,7 @@ Hexadecimal   0[xX][0-9a-fA-F]+
 {Decimal}       { yylval.int_val = strtol(yytext, nullptr, 0); cur_pos.line = yylineno; cur_pos.column = yylineno - yyleng + 1; return _const_val; col_record += yyleng; }
 {Octal}         { yylval.int_val = strtol(yytext, nullptr, 0); cur_pos.line = yylineno; cur_pos.column = yylineno - yyleng + 1; return _const_val; col_record += yyleng; }
 {Hexadecimal}   { yylval.int_val = strtol(yytext, nullptr, 0); cur_pos.line = yylineno; cur_pos.column = yylineno - yyleng + 1; return _const_val; col_record += yyleng; }
-
+{String} { yylval.str_val = new string(yytext); cur_pos.line = yylineno; cur_pos.column = yylineno - yyleng + 1; return _string; col_record += yyleng; }
 ">"             {cur_pos.line = yylineno; cur_pos.column = col_record; return _greater; col_record += 1;}
 "<"             {cur_pos.line = yylineno; cur_pos.column = col_record; return _less; col_record += 1;}
 ">="            {cur_pos.line = yylineno; cur_pos.column = col_record; return _greater_equal; col_record += 2;}

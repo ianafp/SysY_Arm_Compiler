@@ -1,5 +1,14 @@
 #include"symtable/symbol_table.h"
+int SymbolTable::UnNamedStringCounter;
 std::vector<std::map<std::string,Symbol*>> SymbolTable::TableVec;
+std::map<std::string,std::string> SymbolTable::ConstStringMap;
+void SymbolTable::PrintConstStringDeclare()
+{
+    for(auto &it:ConstStringMap)
+    {
+        std::cout<<it.second<<" = private unnamed_addr constant [ "<<it.first.length()+1<<" x i8 ]c\""<<it.first<<"\\00\", align 1\n";
+    }
+}
 bool SymbolTable::AddSymbol(std::string name,Symbol* sym){
     std::string SymName("");
     int LastTableIndex = TableVec.size()-1;
@@ -23,6 +32,26 @@ Symbol* SymbolTable::FindSymbol(std::string name){
         }
     }
     return NULL;
+}
+std::string SymbolTable::AddConstString(std::string str)
+{
+    auto it = ConstStringMap.find(str);
+    if(ConstStringMap.find(str)!=ConstStringMap.end())
+    {
+        return it->second;
+    }
+    int TempId = UnNamedStringCounter++;
+    std::string label("");
+    if(TempId==0)
+    {
+        label = "@.str";
+    }
+    else
+    {
+        label = "@.str."+std::to_string(TempId);
+    }
+    ConstStringMap.insert(std::pair<std::string,std::string>(str,label));
+    return label;
 }
 void SymbolTable::EnterScope(){
     TableVec.push_back(std::map<std::string,Symbol*>());

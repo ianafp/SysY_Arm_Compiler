@@ -6,6 +6,7 @@ declare i32 @getch()
 declare i32 @getarray(i32*)
 declare void @starttime()
 declare void @stoptime()
+declare void @putf(i8*, i32, ...)
 
 define void @HELLO(){
 call void @putch(i32 72)

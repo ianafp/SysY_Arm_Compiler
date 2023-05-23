@@ -241,8 +241,14 @@ void Program::unary_exp_dealer(BaseAST *exp, BaseIRT *&ir)
             int i = 0;
             for (auto &it : func_r->exp)
             {
-                
-                logic_exp_dealer(it, args_exp);
+                if(it->type()=="StringAST")
+                {
+                    args_exp = new ExpIRT(new MemIRT(new ExpIRT(new NameIRT(reinterpret_cast<StringAST*>(it)->StringLabel))));
+                }
+                else
+                {
+                    logic_exp_dealer(it, args_exp);
+                }
                 args.push_back(reinterpret_cast<ExpIRT *>(args_exp));
                 if(i<ArgsFVec.size())
                 {
