@@ -30,6 +30,8 @@ void Program::block_dealer(BlockAST *block, BaseIRT *&ir)
             block_true = block_available->block;
         }
     }
+    if(block_true == nullptr)
+        return;
     // enter scope
     SymbolTable::EnterScope();
     // deal with blocks
@@ -51,10 +53,6 @@ void Program::block_dealer(BlockAST *block, BaseIRT *&ir)
             }
             ir = ir1;
         }
-    }
-    else
-    {
-        ir = new StatementIRT(StmKind::Ret, new RetIRT(ValueType::VOID, NULL));
     }
     // leave scope
     SymbolTable::ExitScope();
