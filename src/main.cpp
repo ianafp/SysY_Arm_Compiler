@@ -8,6 +8,7 @@
 #include "translate/ir_generator.h"
 #include "glog/logging.h"
 #include "common/visualize.h"
+#include "common/while_frame.h"
 // #include "koopa.h"
 // #include "headers/ir_tree.h"
 // the header file can be found at https://github.com/pku-minic/koopa/blob/master/crates/libkoopa/include/koopa.h
@@ -41,6 +42,7 @@ int main(int argc, const char *argv[]) {
   cout << "output file: " << output << endl;
   // init symbol table
   SymbolTable::InitTable();
+  WhileFrame::init_frame();
   // 打开输入文件, 并且指定 lexer 在解析的时候读取这个文件
   yyin = fopen(input, "r");
   assert(yyin);

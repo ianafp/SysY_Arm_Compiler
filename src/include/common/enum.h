@@ -94,8 +94,18 @@ enum class PrimaryType{
     Num,
     LVal
 };
+enum class IrValType
+{
+    i1,
+    i8,
+    i16,
+    i32,
+    i64,
+    _void_
+};
 std::string EnumToString(AstType type);
 std::string EnumToString(VarType type);
 std::string EnumToString(StmtType type);
 std::string EnumToString(ArgsType type);
+std::string EnumToString(IrValType type);
 #endif

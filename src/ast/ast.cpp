@@ -124,11 +124,11 @@ void VarDeclAST::HandleSymbol() const
                             LOG(ERROR) << "global symbol " << *DefAstPtr->VarIdent << " initialized by varieble!\n";
                             exit(-1);
                         }
-                        sym->VarArrtributes.InitVal = IntTree->keys[0];
+                        sym->VarArrtributes.InitVal = IntTree->FindFirst();
                     }
                     else
                     {
-                        sym->VarArrtributes.ExpVal = DefAstPtr->InitValue->keys[0];
+                        sym->VarArrtributes.ExpVal = DefAstPtr->InitValue->FindFirst();
                     }
                 }
                 else
@@ -225,7 +225,7 @@ bool PrimaryExpAST::GetConstVal(int &val) const
     else
     {
         // lval
-        return reinterpret_cast<LValAST *>(this->exp)->GetConstVal(val);
+        return reinterpret_cast<LValAST *>(this->lval)->GetConstVal(val);
     }
 }
 bool UnaryExpAST::GetConstVal(int &val) const

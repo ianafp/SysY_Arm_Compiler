@@ -23,21 +23,55 @@ bool ConvertTreeToInt(InitValTree<BaseAST*> *AstTree,InitValTree<int>* &IntTree)
     }
     return false;
 }
-void ConvertIntTreeToInitializer(InitValTree<int>* IntTree)
+void PrintInitialStruct(const std::vector<int> &dim,int level)
 {
-    if(IntTree->childs.size()>1)
+    if(level==dim.size()){
+        std::cout<<"i32 ";
+        return;
+    }
+    std::cout<<"[ "<<dim[level]<<" x ";
+    PrintInitialStruct(dim,level+1);
+    std::cout<<"]";
+}
+void ConvertIntTreeToInitializer(InitValTree<int>* IntTree,const std::vector<int> &dim,int level)
+{
+    // std::cout<<"[";
+    int len = dim.size()==level? 1 : dim[level];
+    if(IntTree->keys.size()!=1)
     {
         std::cout<<"[";
     }
     if(IntTree->childs.size()){
-        for(auto &it:IntTree->childs){
-            ConvertIntTreeToInitializer(it);
+        int i;
+        for(i=0;i<IntTree->childs.size();++i){
+            ConvertIntTreeToInitializer(IntTree->childs[i],dim,level+1);
+
+            if(i!=len-1){
+                std::cout<<", ";
+            }
+        }
+        for(;i<len;++i){
+            PrintInitialStruct(dim,level);
+            std::cout<<" zeroinitializer";
+            if(i!=len-1){
+                std::cout<<", ";
+            }
         }
     }
     else{
-        for(int i=0;i<IntTree->keys.size();++i){
+        int i;
+        for(i=0;i<IntTree->keys.size();++i){
             std::cout<<"i32 "<<IntTree->keys[i];
-            if(i!=IntTree->keys.size()-1){
+            if(i!=len-1){
+                std::cout<<", ";
+            }
+            else{
+                std::cout<<" ";
+            }
+        }
+        for(;i<len;++i){
+            std::cout<<"i32 "<<0;
+            if(i!=len-1){
                 std::cout<<", ";
             }
             else{
@@ -45,10 +79,11 @@ void ConvertIntTreeToInitializer(InitValTree<int>* IntTree)
             }
         }
     }
-    if(IntTree->childs.size()>1)
+    if(IntTree->keys.size()!=1)
     {
         std::cout<<"]";
     }
+
 }
 
 void AdjustTree(InitValTree<BaseAST*>* &tree)
@@ -59,7 +94,8 @@ void AdjustTree(InitValTree<BaseAST*>* &tree)
     }
     if(tree->childs.size()==1){
         InitValTree<BaseAST*>* temp = tree->childs[0];
-        delete tree;
+        free(tree);
         tree = temp;
     }
+
 }

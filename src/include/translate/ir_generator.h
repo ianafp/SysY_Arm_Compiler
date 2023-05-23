@@ -20,6 +20,7 @@
 #include "ast/ast.h"
 #include "ir/ir_tree.h"
 #include "symtable/symbol_table.h"
+#include "common/while_frame.h"
 class Program {
  private:
   // the global variable hasn't been implemented.

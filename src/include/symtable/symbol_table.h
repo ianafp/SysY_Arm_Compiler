@@ -42,6 +42,7 @@ class Symbol{
 private:
     bool GlobalFlag;
 public:
+    int TempId;
     SymType SymbolType;
     bool ConstFlag;
     VarInfo VarArrtributes;

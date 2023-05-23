@@ -170,6 +170,15 @@ void Program::unary_exp_dealer(BaseAST *exp, BaseIRT *&ir)
                         logic_exp_dealer(exp->lor_exp, ir);
                 }
             }
+            else
+            {
+                if (primary_exp->lval != nullptr)
+                {
+                    auto  lval = dynamic_cast<LValAST *>(primary_exp->lval);
+                    this->LValTranslater(lval,ir);
+                    
+                }
+            }
         }
     }
     else if (unary_exp->tp == ExpType::OpExp)
