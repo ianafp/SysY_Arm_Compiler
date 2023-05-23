@@ -5,7 +5,16 @@ void CjumpIRT::Dump() const
     BinOpIRT CondExp(RelationOp, LeftExp, RightExp);
     auto ConValue = CondExp.ExpDump();
     std::cout << "\n";
-    std::cout << "br " << ConValue.TypeToString() << " " << ConValue.LabelToString() << ", lable %" << LabelTrue->LableName << ", lable %" << LableFalse->LableName << "\n";
+    std::string condition_type = ConValue.TypeToString();
+    std::string condition_label = ConValue.LabelToString();
+    if (ConValue.TypeToString() == std::string("i32")) {
+        // add a statement to convert.
+        condition_type = std::string("i1");
+        condition_label = "%" + std::to_string(TempIdAllocater::GetId());
+        std::cout << condition_label << " = " << "icmp ne i32 " << ConValue.LabelToString() << ", 0" << std::endl;
+    }
+    std::cout << "br "<< condition_type <<" "<< condition_label << ", label %" << LabelTrue->LableName << ", label %" << LableFalse->LableName << "\n";
+    
 }
 void MoveIRT::Dump() const
 {
@@ -371,16 +380,11 @@ void GlobalVarIRT::Dump() const
             }
         }
         int AddressSpace = size << 2;
-        std::cout << "\n"
-                  << this->GlobalVarName << " = "
-                  << "addrspace(" << AddressSpace << ") ";
-        if (this->IsConstant)
-        {
-            std::cout << "constant ";
-        }
-        else
-        {
-            std::cout << "global ";
+        std::cout<<"\n"<<"@"<<this->GlobalVarName<<" = "<<"addrspace("<<AddressSpace<<") ";
+        if(this->IsConstant){
+            std::cout<<"constant ";
+        }else{
+            std::cout<<"global ";
         }
         // std::cout<<"i32 ";
         PrintInitialStruct(this->DimVec, 0);

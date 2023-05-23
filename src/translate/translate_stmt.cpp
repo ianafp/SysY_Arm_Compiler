@@ -160,6 +160,8 @@ void Program::BranchTranslater(StmtAST* stmt_available, BaseIRT* &ir, bool has_e
         stmt_dealer(reinterpret_cast<StmtAST*>(stmt_if_ast), ir_block);
         // attach the if_label to the start of the block
         ir_block = new StatementIRT(StmKind::Sequence, new SequenceIRT(new StatementIRT(if_block), reinterpret_cast<StatementIRT *>(ir_block)));
+        // attach the unconditional jump to the end of if block to construct a basic block
+        ir_block = new StatementIRT(StmKind::Sequence, new SequenceIRT(reinterpret_cast<StatementIRT *>(ir_block), new StatementIRT(StmKind::Jump, new JumpIRT(end_label))));
         // attach the end_label to the end of the block
         ir_block = new StatementIRT(StmKind::Sequence, new SequenceIRT(reinterpret_cast<StatementIRT *>(ir_block), new StatementIRT(end_label)));
         // attach the cjump ir to the block ir
@@ -196,8 +198,12 @@ void Program::BranchTranslater(StmtAST* stmt_available, BaseIRT* &ir, bool has_e
         stmt_dealer(reinterpret_cast<StmtAST*>(stmt_else_ast), else_block);
         // attach the if_label to the start of the block
         ir_block = new StatementIRT(StmKind::Sequence, new SequenceIRT(new StatementIRT(if_block), reinterpret_cast<StatementIRT *>(ir_block)));
+        // attach the unconditional jump to the end of the block
+        ir_block = new StatementIRT(StmKind::Sequence, new SequenceIRT(reinterpret_cast<StatementIRT *>(ir_block), new StatementIRT(StmKind::Jump, new JumpIRT(end_label))));
         // attach the else_label to the start of the else block
         else_block = new StatementIRT(StmKind::Sequence, new SequenceIRT(new StatementIRT(else_label), reinterpret_cast<StatementIRT *>(else_block)));
+        // attach the unconditional jump to the end of the else block
+        else_block = new StatementIRT(StmKind::Sequence, new SequenceIRT(reinterpret_cast<StatementIRT *>(else_block), new StatementIRT(StmKind::Jump, new JumpIRT(end_label))));
         // attach the end_label to the end of else block
         else_block = new StatementIRT(StmKind::Sequence, new SequenceIRT(reinterpret_cast<StatementIRT *>(else_block), new StatementIRT(end_label)));
         // attach the if block to the else block
