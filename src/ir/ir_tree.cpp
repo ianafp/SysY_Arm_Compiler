@@ -23,7 +23,7 @@ void MoveIRT::Dump() const
     {
         // std::cout << "%" << DstTemp->TempVarId << " = " << SrcExpVal.LabelToString();
         // std::cout << "\n";
-        this->DstTemp->TempVarId = SrcExpVal.TempId;
+        this->DstTemp->TempValue = SrcExpVal;
         
     }
     else
@@ -259,9 +259,7 @@ ExpValue MemIRT::ExpDump() const
 }
 ExpValue TempIRT::ExpDump() const
 {
-    ExpValue res;
-    res.TempId = this->TempVarId;
-    return res;
+    return this->TempValue;
 }
 ExpValue ESeqIRT::ExpDump() const
 {

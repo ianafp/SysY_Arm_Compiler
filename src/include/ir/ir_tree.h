@@ -220,11 +220,8 @@ public:
 class TempIRT : public BaseIRT
 {
 public:
-    int TempVarId;
-    TempIRT()
-    {
-    }
-    TempIRT(int id):TempVarId(id){}
+    ExpValue TempValue;
+    TempIRT(){}
     void Dump() const override
     {
     }

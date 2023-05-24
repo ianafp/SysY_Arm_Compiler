@@ -230,7 +230,7 @@ void Program::unary_exp_dealer(BaseAST *exp, BaseIRT *&ir)
             DLOG(WARNING) << "FUNC ID: " << *(unary_exp->ident);
             BaseIRT *args_exp = nullptr;
             FuncRParamsAST *func_r = dynamic_cast<FuncRParamsAST *>(unary_exp->func_rparam);
-            auto &ArgsCall = func_r->exp;
+            // auto &ArgsCall = func_r->exp;
             auto &ArgsFVec = sym->FunctionAttributes->ArgsTypeVec;
             if (sym->FunctionAttributes->ArgsTypeVec.size() != func_r->exp.size() && ArgsFVec[ArgsFVec.size()-1]!=ArgsType::VarsPacket)
             {
