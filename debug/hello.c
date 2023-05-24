@@ -1,10 +1,12 @@
-void Swap(int arr[],int i,int j)
-{
-  int temp = arr[i];
-  arr[i] = arr[j];
-  arr[j] = temp;
-  i = j*4;
+const int MAX_SIZE = 10000;
+int nums[MAX_SIZE];
+
+void swap(int a[], int i, int j) {
+  int temp = a[i];
+  a[i] = a[j];
+  a[j] = temp;
 }
+
 int main() 
 {
   int local[4][4] = {{1},{2,3}};
