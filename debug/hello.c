@@ -7,17 +7,8 @@ void HELLO()
 }
 int main() 
 {
-  int local[4] = {1,2,6};
-  putint(test[0]);
-  putint(test[1]);
-  putint(test[2]);
-  putint(test[3]);
-  putch(10);
-
-  putint(local[0]);
-  putint(local[1]);
-  putint(local[2]);
-  putint(local[3]);
-  putch(10);
+  int local[4][4];
+  local[2][1] = 7;
+  putch(local[2][3]);
   return 0;
 }
