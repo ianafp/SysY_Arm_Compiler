@@ -43,7 +43,7 @@ void ConvertIntToPtr(ExpValue& val)
 }
 void BitCast(ExpValue& val,IrValType type,bool IsPtr)
 {
-    if(val.ExpType==type && val.IsPtr == IsPtr)
+    if(val.ExpType==type && val.IsPtr == IsPtr && val.ExpDim.size()==0)
     {
         return;
     }

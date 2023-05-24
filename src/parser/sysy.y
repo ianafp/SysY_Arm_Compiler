@@ -554,33 +554,15 @@ Constinitval: ConstInitVal
             ;
         LVal: _identifier
             {
-                /*
-                Symbol* sym = SymbolTable::FindSymbol(*$1);
-                if(sym==NULL){
-                    LOG(ERROR)<<"Undefined Varieble"<<*$1<<"\n";
-                    exit(-1);
-                }
-                */
                 auto ast = new LValAST();
                 ast->VarIdent = $1;
-                // ast->LValSym = sym;
                 $$ = ast;
                 ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
             }
             | LVal '[' Exp ']'
             {
                 auto ast = reinterpret_cast<LValAST*>($1);
-                /*
-                if(ast->LValSym->SymbolType!=SymType::Int32Array){
-                    LOG(ERROR)<<"Varieble "<<*(ast->VarIdent)<<" is not array\n";
-                    exit(-1);
-                }
                 ast->IndexVec.push_back($3);
-                if(ast->IndexVec.size()>ast->LValSym->ArrAttributes->ArrayDimVec.size()){
-                    LOG(ERROR)<<"Array "<<*(ast->VarIdent)<<" index dimension mismatch\n";
-                    exit(-1);
-                }
-                */
                 $$ = $1;
                 ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
             }

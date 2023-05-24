@@ -7,18 +7,7 @@ void HELLO()
 }
 int main() 
 {
-  int a = 1000000;
-  putf("sadas");
-  int t[4] = {1,2};
-  while(a > 0)
-  {
-    putint(a);
-    putch(10);
-    HELLO();
-    a = a - 1;
-  }
-  int t = getch();
-  putint(t);
-  putch(10);
+  int local[4] = {1,2,6};
+  putch(test[1]);
   return 0;
 }

@@ -21,8 +21,10 @@ void MoveIRT::Dump() const
     auto SrcExpVal = SrcExp->ExpDump();
     if (MoveKind == ToTemp)
     {
-        std::cout << "%" << DstTemp->TempVarId << " = " << SrcExpVal.LabelToString();
-        std::cout << "\n";
+        // std::cout << "%" << DstTemp->TempVarId << " = " << SrcExpVal.LabelToString();
+        // std::cout << "\n";
+        this->DstTemp->TempVarId = SrcExpVal.TempId;
+        
     }
     else
     {
@@ -69,16 +71,35 @@ ExpValue ExpIRT::ExpDump() const
         return AllocateContent->ExpDump();
     }
 }
+ExpValue ConvertExpToBinOprand(ExpIRT* exp)
+{
+    ExpValue res = exp->ExpDump();
+    if(exp->ContentKind==ExpKind::Mem)
+    {
+        BitCast(res,IrValType::i32,true);
+        int TempId = TempIdAllocater::GetId();
+        std::cout<<"%"<<std::to_string(TempId)<<" = "<<"load i32,i32* "<<res.LabelToString()<<"\n";
+        res.IsPtr = false;
+        res.TempId = TempId;
+    }
+    else if(exp->ContentKind==ExpKind::Name)
+    {
+        ConvertPtrToInt(res);
+    }
+    return res;
+}
 ExpValue BinOpIRT::ExpDump() const
 {
     int temp1, temp2, res, temp;
     std::string ResString(""), TempString;
     // ExpValue ResVal;
-    ExpValue ResVal;
-    auto LeftValue = LeftExp->ExpDump(), RightValue = RightExp->ExpDump();
+    ExpValue ResVal,LeftValue,RightValue;
+    // auto LeftValue = LeftExp->ExpDump(), RightValue = RightExp->ExpDump();
     // OpBitSignedExtension(LeftValue,RightValue);
-    ConvertMemToTemp(LeftValue);
-    ConvertMemToTemp(RightValue);
+    // ConvertMemToTemp(LeftValue);
+    // ConvertMemToTemp(RightValue);
+    LeftValue = ConvertExpToBinOprand(LeftExp);
+    RightValue = ConvertExpToBinOprand(RightExp);
     OpBitSignedExtension(LeftValue, RightValue);
     ResVal.ExpType = LeftValue.ExpType;
     switch (OpKind)

@@ -223,8 +223,8 @@ public:
     int TempVarId;
     TempIRT()
     {
-        TempVarId = TempIdAllocater::GetId();
     }
+    TempIRT(int id):TempVarId(id){}
     void Dump() const override
     {
     }
