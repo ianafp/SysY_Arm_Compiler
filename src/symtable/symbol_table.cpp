@@ -12,7 +12,7 @@ void SymbolTable::PrintConstStringDeclare()
 bool SymbolTable::AddSymbol(std::string name,Symbol* sym){
     std::string SymName("");
     int LastTableIndex = TableVec.size()-1;
-    if(LastTableIndex!=1){
+    if(LastTableIndex!=0){
         sym->GlobalFlag = false;
     }else{
         sym->GlobalFlag = true;

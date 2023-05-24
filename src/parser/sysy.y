@@ -276,7 +276,7 @@ Constinitval: ConstInitVal
                     LOG(ERROR) <<"Multidefinition of function "<<*$2<<"\n";
                     exit(-1);
                 }*/
-                SymbolTable::EnterScope();
+                
                 auto ast = new FuncDefAST();
                 ast->func_type = $1;
                 ast->ident = $2;
