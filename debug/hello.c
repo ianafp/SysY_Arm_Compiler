@@ -9,6 +9,8 @@ void swap(int a[], int i, int j) {
 
 int main() 
 {
-  
+  int local[4][4];
+  local[2][1] = 7;
+  putch(local[2][3]);
   return 0;
 }
