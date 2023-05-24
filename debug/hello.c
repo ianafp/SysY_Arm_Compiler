@@ -14,7 +14,11 @@ int main()
   {
     putint(a);
     putch(10);
+    HELLO();
     a = a - 1;
   }
+  int t = getch();
+  putint(t);
+  putch(10);
   return 0;
 }

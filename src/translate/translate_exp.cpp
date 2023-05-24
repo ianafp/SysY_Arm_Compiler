@@ -216,10 +216,18 @@ void Program::unary_exp_dealer(BaseAST *exp, BaseIRT *&ir)
                 LOG(ERROR) << "Function Call " << *(unary_exp->ident) << " Parameters Do Not Match Declaration Parameters\n";
                 exit(-1);
             }
-            ir = new ExpIRT(ExpKind::Call, new CallIRT(ValueType::INT32, new LabelIRT(*(unary_exp->ident)), types,args));
+            // Here we need to create the IR tree 
+            // by looking up symbol table to check the type of the function
+            if (sym->FunctionAttributes->RetValType == ValueType::INT32) {
+                ir = new ExpIRT(ExpKind::Call, new CallIRT(ValueType::INT32, new LabelIRT(*(unary_exp->ident)), types, args));
+            } else if (sym->FunctionAttributes->RetValType == ValueType::VOID) {
+                ir = new ExpIRT(ExpKind::Call, new CallIRT(ValueType::VOID, new LabelIRT(*(unary_exp->ident)), types, args));
+            }
+            
         }
         else
         {
+            DLOG(WARNING) << "FUNC ID: " << *(unary_exp->ident);
             BaseIRT *args_exp = nullptr;
             FuncRParamsAST *func_r = dynamic_cast<FuncRParamsAST *>(unary_exp->func_rparam);
             auto &ArgsCall = func_r->exp;
@@ -252,7 +260,15 @@ void Program::unary_exp_dealer(BaseAST *exp, BaseIRT *&ir)
                 }
                 i++;
             }
-            ir = new ExpIRT(ExpKind::Call, new CallIRT(ValueType::INT32, new LabelIRT(*unary_exp->ident),types,args));
+            // Here we need to create the IR tree 
+            // by looking up symbol table to check the type of the function
+            if (sym->FunctionAttributes->RetValType == ValueType::INT32) {
+                DLOG(WARNING) << "RETURN TYPE: INT32; " << *(unary_exp->ident);
+                ir = new ExpIRT(ExpKind::Call, new CallIRT(ValueType::INT32, new LabelIRT(*(unary_exp->ident)), types, args));
+            } else if (sym->FunctionAttributes->RetValType == ValueType::VOID) {
+                DLOG(WARNING) << "RETURN TYPE: VOID; " << *(unary_exp->ident);
+                ir = new ExpIRT(ExpKind::Call, new CallIRT(ValueType::VOID, new LabelIRT(*(unary_exp->ident)), types, args));
+            }
         }
     }
 }
