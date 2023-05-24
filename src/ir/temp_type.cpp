@@ -81,9 +81,9 @@ std::string GetArrayStruct(IrValType type,const std::vector<int> &dim)
     std::string res("");
     for(int i=0;i<dim.size();++i)
     {
-        res += "[";
+        res += "[ ";
         res += std::to_string(dim[i]);
-        res += "x";
+        res += " x";
     }
     res += " "+ EnumToString(type) + " ";
     for(int i=0;i<dim.size();++i)

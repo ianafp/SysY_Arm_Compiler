@@ -2,7 +2,7 @@
 const char *AstKindStr[] = {"ConstDecl", "VarDecl"};
 const char *VarTypeStr[] = {"INT"};
 const char *StmtTypeStr[] = {"Assign", "Exp", "Block", "If", "IfElse", "While", "Break", "Continue", "ReturnExp", "ReturnVoid"};
-const char *ArgTypeStr[] = {"i32","ptr"};  
+const char *ArgTypeStr[] = {"i32","i32*"};  
 const char *IrValTypeStr[] = {"i1","i8","i16","i32","i64","void"};               
 std::string EnumToString(AstType type)
 {

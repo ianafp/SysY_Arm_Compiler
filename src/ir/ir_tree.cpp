@@ -382,7 +382,7 @@ void FuncIRT::Dump() const
     for (int i = 0; i < this->ArgsVec.size(); ++i)
     {
         std::cout << EnumToString(ArgsVec[i]);
-        std::cout << " ";
+        std::cout << " %";
         std::cout << this->ParameterNameVec[i];
         if (i != this->ArgsVec.size() - 1)
         {
@@ -445,8 +445,7 @@ void GlobalVarIRT::Dump() const
             if (this->Int32Val == 0) {
                 std::cout << " zeroinitializer";
             } else {
-                // It seems that this case is illegal in LLVM ir representation...
-                DLOG(WARNING) << "The format of the initializer might be wrong";
+                // Might be used for const global variable initialization.
                 std::cout << " " << this->Int32Val;
             }
         }
