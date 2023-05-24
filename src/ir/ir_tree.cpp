@@ -426,7 +426,11 @@ void GlobalVarIRT::Dump() const
             }
         }
         int AddressSpace = size << 2;
-        std::cout<<"\n"<<"@"<<this->GlobalVarName<<" = "<<"addrspace("<<AddressSpace<<") ";
+        // original version with addrspace, 
+        // as a consequence that this is a alternative trait, we do not add this constrain.
+        // If we want to add, we have to change the type whenever reference of this global variable happens, and it'll make code tedious & ugly.
+        // std::cout<<"\n"<<"@"<<this->GlobalVarName<<" = "<<"addrspace("<<AddressSpace<<") ";
+        std::cout<<"\n"<<"@"<<this->GlobalVarName << " = ";
         if(this->IsConstant){
             std::cout<<"constant ";
         }else{

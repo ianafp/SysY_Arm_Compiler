@@ -33,39 +33,34 @@ main:                                   # @main
 	sw	s0, 24(sp)                      # 4-byte Folded Spill
 	.cfi_offset ra, -4
 	.cfi_offset s0, -8
-	addi	s0, sp, 32
-	.cfi_def_cfa s0, 0
-	lui	a0, 244
-	addi	a0, a0, 576
-	sw	a0, -12(s0)
 	addi	a0, zero, 1
-	sw	a0, -28(s0)
+	sw	a0, 8(sp)
 	addi	a0, zero, 2
-	sw	a0, -24(s0)
-	lw	a0, -12(s0)
-	blez	a0, .LBB1_2
-.LBB1_1:                                # %LOOP_BODY_7
-                                        # =>This Inner Loop Header: Depth=1
-	lw	a0, -12(s0)
+	sw	a0, 12(sp)
+	addi	a0, zero, 6
+	sw	a0, 16(sp)
+	lui	s0, %hi(test)
+	lw	a0, %lo(test)(s0)
+	call	putint@plt
+	lw	a0, %lo(test+1)(s0)
+	call	putint@plt
+	lw	a0, %lo(test+2)(s0)
+	call	putint@plt
+	lw	a0, %lo(test+3)(s0)
 	call	putint@plt
 	addi	a0, zero, 10
 	call	putch@plt
-	call	HELLO@plt
-	lw	a0, -12(s0)
-	addi	a0, a0, -1
-	sw	a0, -12(s0)
-	lw	a0, -12(s0)
-	bgtz	a0, .LBB1_1
-.LBB1_2:                                # %LOOP_END_8
-	call	getch@plt
-	mv	a1, sp
-	addi	sp, a1, -16
-	sw	a0, -16(a1)
+	lw	a0, 8(sp)
+	call	putint@plt
+	lw	a0, 9(sp)
+	call	putint@plt
+	lw	a0, 10(sp)
+	call	putint@plt
+	lw	a0, 11(sp)
 	call	putint@plt
 	addi	a0, zero, 10
 	call	putch@plt
 	mv	a0, zero
-	addi	sp, s0, -32
 	lw	s0, 24(sp)                      # 4-byte Folded Reload
 	lw	ra, 28(sp)                      # 4-byte Folded Reload
 	addi	sp, sp, 32
@@ -88,20 +83,6 @@ test:
 	.word	0                               # 0x0
 	.word	0                               # 0x0
 	.size	test, 32
-
-	.type	test2,@object                   # @test2
-	.globl	test2
-	.p2align	2
-test2:
-	.word	1                               # 0x1
-	.word	0                               # 0x0
-	.word	0                               # 0x0
-	.word	0                               # 0x0
-	.word	0                               # 0x0
-	.word	0                               # 0x0
-	.word	0                               # 0x0
-	.word	0                               # 0x0
-	.size	test2, 32
 
 	.type	another,@object                 # @another
 	.bss
