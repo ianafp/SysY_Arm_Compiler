@@ -73,7 +73,7 @@ void  Program::LValTranslater(LValAST* lval,BaseIRT* &ir){
     }
     LvalName = sym->GetLabelStr(LvalName);
     if(sym->SymbolType == SymType::INT32){
-        ir = new MemIRT(new ExpIRT(new NameIRT(LvalName)));
+        ir = new MemIRT(new ExpIRT(new NameIRT(LvalName,sym->MemoryFlag)));
     }
     else if(sym->SymbolType == SymType::Int32Array){
         // get offset

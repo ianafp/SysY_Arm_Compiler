@@ -7,14 +7,15 @@ void CjumpIRT::Dump() const
     std::cout << "\n";
     std::string condition_type = ConValue.TypeToString();
     std::string condition_label = ConValue.LabelToString();
-    if (ConValue.TypeToString() == std::string("i32")) {
+    if (ConValue.TypeToString() == std::string("i32"))
+    {
         // add a statement to convert.
         condition_type = std::string("i1");
         condition_label = "%" + std::to_string(TempIdAllocater::GetId());
-        std::cout << condition_label << " = " << "icmp ne i32 " << ConValue.LabelToString() << ", 0" << std::endl;
+        std::cout << condition_label << " = "
+                  << "icmp ne i32 " << ConValue.LabelToString() << ", 0" << std::endl;
     }
-    std::cout << "br "<< condition_type <<" "<< condition_label << ", label %" << LabelTrue->LableName << ", label %" << LableFalse->LableName << "\n";
-    
+    std::cout << "br " << condition_type << " " << condition_label << ", label %" << LabelTrue->LableName << ", label %" << LableFalse->LableName << "\n";
 }
 void MoveIRT::Dump() const
 {
@@ -24,7 +25,6 @@ void MoveIRT::Dump() const
         // std::cout << "%" << DstTemp->TempVarId << " = " << SrcExpVal.LabelToString();
         // std::cout << "\n";
         this->DstTemp->TempValue = SrcExpVal;
-        
     }
     else
     {
@@ -71,18 +71,22 @@ ExpValue ExpIRT::ExpDump() const
         return AllocateContent->ExpDump();
     }
 }
-ExpValue ConvertExpToBinOprand(ExpIRT* exp)
+ExpValue ConvertExpToBinOprand(ExpIRT *exp)
 {
     ExpValue res = exp->ExpDump();
-    if(exp->ContentKind==ExpKind::Mem)
+    if (exp->ContentKind == ExpKind::Mem)
     {
-        BitCast(res,IrValType::i32,true);
-        int TempId = TempIdAllocater::GetId();
-        std::cout<<"%"<<std::to_string(TempId)<<" = "<<"load i32,i32* "<<res.LabelToString()<<"\n";
-        res.IsPtr = false;
-        res.TempId = TempId;
+        if (res.IsPtr)
+        {
+            BitCast(res, IrValType::i32, true);
+            int TempId = TempIdAllocater::GetId();
+            std::cout << "%" << std::to_string(TempId) << " = "
+                      << "load i32,i32* " << res.LabelToString() << "\n";
+            res.IsPtr = false;
+            res.TempId = TempId;
+        }
     }
-    else if(exp->ContentKind==ExpKind::Name || res.IsPtr )
+    else if (exp->ContentKind == ExpKind::Name || res.IsPtr)
     {
         ConvertPtrToInt(res);
     }
@@ -94,7 +98,7 @@ ExpValue BinOpIRT::ExpDump() const
     int temp1, temp2, res, temp;
     std::string ResString(""), TempString;
     // ExpValue ResVal;
-    ExpValue ResVal,LeftValue,RightValue;
+    ExpValue ResVal, LeftValue, RightValue;
     // auto LeftValue = LeftExp->ExpDump(), RightValue = RightExp->ExpDump();
     // OpBitSignedExtension(LeftValue,RightValue);
     // ConvertMemToTemp(LeftValue);
@@ -255,6 +259,10 @@ ExpValue MemIRT::ExpDump() const
 {
     auto res = AddressExp->ExpDump();
     // BitCast(res,IrValType::i32,true);
+    if(this->AddressExp->ContentKind==ExpKind::Name && reinterpret_cast<NameIRT*>(this->AddressExp->ExpContent)->IsPtr == false)
+    {
+        return res;
+    }
     ConvertIntToPtr(res);
     return res;
 }
@@ -275,7 +283,7 @@ ExpValue NameIRT::ExpDump() const
     {
         res.ExpDim = this->ArrayDim;
     }
-    res.IsPtr = true;
+    res.IsPtr = this->IsPtr;
     return res;
 }
 ExpValue ConstIRT::ExpDump() const
@@ -295,7 +303,7 @@ ExpValue CallIRT::ExpDump() const
     for (auto &it : this->ArgsExpList)
     {
         auto TempVal = it->ExpDump();
-        if(this->ArgsTypeList[i]==ArgsType::Int32)
+        if (this->ArgsTypeList[i] == ArgsType::Int32)
         {
             ConvertMemToTemp(TempVal);
         }
@@ -307,7 +315,7 @@ ExpValue CallIRT::ExpDump() const
         int TempId = TempIdAllocater::GetId();
         res.ExpType = IrValType::i32;
         std::cout << "%" << TempId << " = "
-            << "call " << EnumToString(res.ExpType) << " @" << FuncLable->LableName + "(";
+                  << "call " << EnumToString(res.ExpType) << " @" << FuncLable->LableName + "(";
         res.TempId = TempId;
         for (int i = 0; i < ArgsVal.size(); ++i)
         {
@@ -320,14 +328,15 @@ ExpValue CallIRT::ExpDump() const
         std::cout << ")\n";
         return res;
     }
-    else if (RetValType == ValueType::VOID) {
+    else if (RetValType == ValueType::VOID)
+    {
         res.ExpType = IrValType::_void_;
         std::cout << "call " << EnumToString(res.ExpType) << " @" << FuncLable->LableName + "(";
-        
+
         for (int i = 0; i < ArgsVal.size(); ++i)
         {
             std::cout << ArgsVal[i].TypeToString() << " " << ArgsVal[i].LabelToString();
-            
+
             if (i != ArgsVal.size() - 1)
             {
                 std::cout << ", ";
@@ -335,7 +344,9 @@ ExpValue CallIRT::ExpDump() const
         }
         std::cout << ")\n";
         return res;
-    } else {
+    }
+    else
+    {
         DLOG(ERROR) << "Function return type not supported yet!";
         exit(-1);
     }
@@ -416,24 +427,28 @@ void GlobalVarIRT::Dump() const
 {
     if (this->GlobalVarType == ValueType::INT32)
     {
-        int size = 1;
-        if (this->IsArray)
-        {
-            for (auto &it : this->DimVec)
-            {
-                size *= it;
-            }
-        }
+        // int size = 1;
+        // if (this->IsArray)
+        // {
+        //     for (auto &it : this->DimVec)
+        //     {
+        //         size *= it;
+        //     }
+        // }
         // int AddressSpace = size << 2;
-        // original version with addrspace, 
+        // original version with addrspace,
         // as a consequence that this is a alternative trait, we do not add this constrain.
         // If we want to add, we have to change the type whenever reference of this global variable happens, and it'll make code tedious & ugly.
         // std::cout<<"\n"<<"@"<<this->GlobalVarName<<" = "<<"addrspace("<<AddressSpace<<") ";
-        std::cout<<"\n"<<"@"<<this->GlobalVarName << " = ";
-        if(this->IsConstant){
-            std::cout<<"constant ";
-        }else{
-            std::cout<<"global ";
+        std::cout << "\n"
+                  << "@" << this->GlobalVarName << " = ";
+        if (this->IsConstant)
+        {
+            std::cout << "constant ";
+        }
+        else
+        {
+            std::cout << "global ";
         }
         // std::cout<<"i32 ";
         PrintInitialStruct(this->DimVec, 0);
@@ -443,9 +458,12 @@ void GlobalVarIRT::Dump() const
         }
         else
         {
-            if (this->Int32Val == 0) {
+            if (this->Int32Val == 0)
+            {
                 std::cout << " zeroinitializer";
-            } else {
+            }
+            else
+            {
                 // It seems that this case is illegal in LLVM ir representation...
                 DLOG(WARNING) << "The format of the initializer might be wrong";
                 std::cout << " " << this->Int32Val;
@@ -461,7 +479,7 @@ void GlobalVarIRT::Dump() const
 }
 void ExpIRT::Dump() const
 {
-    if(this->ContentKind==ExpKind::Call)
+    if (this->ContentKind == ExpKind::Call)
     {
         this->ExpContent->ExpDump();
     }

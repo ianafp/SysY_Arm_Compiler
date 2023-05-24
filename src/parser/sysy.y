@@ -1,4 +1,4 @@
-%define parse.error verbose
+
 %code requires {
   #include <memory>
   #include <string>
@@ -43,7 +43,7 @@ void yyerror(BaseAST* &ast, const char *s);
 %token <str_val> _identifier _string 
 %token <int_val> _const_val
 %type<type_val> BType
-%type <ast_val> CompUnit Compunit FuncDef  Block block BlockItem Stmt FuncFParam Decl ConstDecl VarDecl Vardecl Vardef VarDef LVal Exp UnaryExp PrimaryExp Number UnaryOp AddExp MulExp RelExp EqExp LAndExp LOrExp FuncFParams  Funcfparam FuncRParams FuncDeclare Cond String
+%type <ast_val> CompUnit Compunit FuncDef  Block block BlockItem Stmt FuncFParam Decl ConstDecl VarDecl Vardecl Vardef VarDef LVal Exp UnaryExp PrimaryExp Number UnaryOp AddExp MulExp RelExp EqExp LAndExp LOrExp FuncFParams  Funcfparam FuncRParams  Cond String
 Constdecl Constdef ConstDef ConstExp
 %type <init_val>  InitVal Initval ConstInitVal Constinitval
 

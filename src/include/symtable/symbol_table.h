@@ -45,13 +45,14 @@ public:
     int TempId;
     SymType SymbolType;
     bool ConstFlag;
+    bool MemoryFlag;
     VarInfo VarArrtributes;
     ArrayInfo* ArrAttributes;
     FunctionInfo* FunctionAttributes;
     /**
      * @brief var ctor
     */
-   Symbol(bool IsConst,int val = 0):SymbolType(SymType::INT32),ConstFlag(IsConst),VarArrtributes(val){
+   Symbol(bool IsConst,bool IsInMemory,int val = 0):SymbolType(SymType::INT32),ConstFlag(IsConst),MemoryFlag(IsInMemory),VarArrtributes(val){
         ArrAttributes = NULL;
         FunctionAttributes = NULL;
    }
@@ -71,7 +72,7 @@ public:
    /**
     * @brief arr symbol ctor
    */
-   Symbol(bool IsConst,std::vector<int> dim,InitValTree<int>* initval = NULL,InitValTree<BaseAST*>* initexp = NULL):SymbolType(SymType::Int32Array),ConstFlag(IsConst)
+   Symbol(bool IsConst,std::vector<int> dim,InitValTree<int>* initval = NULL,InitValTree<BaseAST*>* initexp = NULL):SymbolType(SymType::Int32Array),ConstFlag(IsConst),MemoryFlag(true)
    {
         if(initexp != NULL){
             ArrAttributes = new ArrayInfo(dim,initexp);

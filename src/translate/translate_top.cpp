@@ -93,10 +93,11 @@ void Program::func_dealer(FuncDefAST *func_def, BaseIRT *&ir)
             }
             if (param->tp == ArgsType::Int32)
             {
-                sym = new Symbol(false);
+                sym = new Symbol(false,false);
             }
             else if (param->tp == ArgsType::Int32Array)
             {
+                
                 sym = new Symbol(false, param->dimension);
             }
             SymbolTable::AddSymbol(*param->ident, sym);
