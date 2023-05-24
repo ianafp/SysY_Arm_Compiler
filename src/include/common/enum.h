@@ -76,7 +76,9 @@ enum  class ExpKind
 } ;
 enum class ArgsType{
     Int32,
-    Int32Array
+    Int32Array,
+    String,
+    VarsPacket 
 };
 enum class SymType
 {

@@ -64,7 +64,7 @@ void Program::ConvertExpInitTreeToIR(InitValTree<BaseAST *> *AstTree, const std:
                                  new MemIRT(
                                      new ExpIRT(
                                          new BinOpIRT(
-                                             BinOpKind::plus, addr, new ExpIRT(new ConstIRT((Offset++) << 2))))),
+                                             BinOpKind::plus,addr, new ExpIRT(new ConstIRT((Offset++) << 2))))),
                                  reinterpret_cast<ExpIRT *>(initexp))));
         }
     }
@@ -97,11 +97,12 @@ void Program::VarDefTranslater(SymType type, VarDefAST *decl, BaseIRT *&ir)
             {
                 dim = sym->ArrAttributes->ArrayDimVec;
             }
-            auto addr = new ExpIRT(new AllocateIRT(*decl->VarIdent,dim, 4));
-            auto res = new StatementIRT(addr);
+            auto alloc = new ExpIRT(new AllocateIRT(*decl->VarIdent,dim, 4));
+            auto addr = new TempIRT();
+            auto res = new StatementIRT(new MoveIRT(addr,alloc));
             StatementIRT *init = NULL;
             std::vector<int> trait;
-            this->ConvertExpInitTreeToIR(decl->InitValue, sym->ArrAttributes->ArrayDimVec, trait, addr, init);
+            this->ConvertExpInitTreeToIR(decl->InitValue, sym->ArrAttributes->ArrayDimVec, trait, new ExpIRT(addr), init);
             if(init){
                 AddStmToTree(res,init);
             }

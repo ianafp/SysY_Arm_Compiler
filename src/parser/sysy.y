@@ -43,7 +43,7 @@ void yyerror(BaseAST* &ast, const char *s);
 %token <str_val> _identifier _string 
 %token <int_val> _const_val
 %type<type_val> BType
-%type <ast_val> CompUnit Compunit FuncDef  Block block BlockItem Stmt FuncFParam Decl ConstDecl VarDecl Vardecl Vardef VarDef LVal Exp UnaryExp PrimaryExp Number UnaryOp AddExp MulExp RelExp EqExp LAndExp LOrExp FuncFParams  Funcfparam FuncRParams FuncDeclare Cond 
+%type <ast_val> CompUnit Compunit FuncDef  Block block BlockItem Stmt FuncFParam Decl ConstDecl VarDecl Vardecl Vardef VarDef LVal Exp UnaryExp PrimaryExp Number UnaryOp AddExp MulExp RelExp EqExp LAndExp LOrExp FuncFParams  Funcfparam FuncRParams FuncDeclare Cond String
 Constdecl Constdef ConstDef ConstExp
 %type <init_val>  InitVal Initval ConstInitVal Constinitval
 
@@ -276,7 +276,7 @@ Constinitval: ConstInitVal
                     LOG(ERROR) <<"Multidefinition of function "<<*$2<<"\n";
                     exit(-1);
                 }*/
-                SymbolTable::EnterScope();
+                
                 auto ast = new FuncDefAST();
                 ast->func_type = $1;
                 ast->ident = $2;
@@ -554,33 +554,15 @@ Constinitval: ConstInitVal
             ;
         LVal: _identifier
             {
-                /*
-                Symbol* sym = SymbolTable::FindSymbol(*$1);
-                if(sym==NULL){
-                    LOG(ERROR)<<"Undefined Varieble"<<*$1<<"\n";
-                    exit(-1);
-                }
-                */
                 auto ast = new LValAST();
                 ast->VarIdent = $1;
-                // ast->LValSym = sym;
                 $$ = ast;
                 ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
             }
             | LVal '[' Exp ']'
             {
                 auto ast = reinterpret_cast<LValAST*>($1);
-                /*
-                if(ast->LValSym->SymbolType!=SymType::Int32Array){
-                    LOG(ERROR)<<"Varieble "<<*(ast->VarIdent)<<" is not array\n";
-                    exit(-1);
-                }
                 ast->IndexVec.push_back($3);
-                if(ast->IndexVec.size()>ast->LValSym->ArrAttributes->ArrayDimVec.size()){
-                    LOG(ERROR)<<"Array "<<*(ast->VarIdent)<<" index dimension mismatch\n";
-                    exit(-1);
-                }
-                */
                 $$ = $1;
                 ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
             }
@@ -692,7 +674,23 @@ Constinitval: ConstInitVal
                 $$ = ast;
             }
             ;
+ String: _string
+        {
+            auto ast = new StringAST();
+            ast->StringLabel = SymbolTable::AddConstString(*$1);
+            delete $1;
+            ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+            $$ = ast;
+        }
  FuncRParams: Exp
+            {
+                auto ast = new FuncRParamsAST();
+                ast->exp.push_back($1);
+                ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
+                $$ = ast;
+            }
+            |
+            String
             {
                 auto ast = new FuncRParamsAST();
                 ast->exp.push_back($1);

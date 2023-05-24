@@ -142,8 +142,20 @@ public:
      * @brief Call only once in main, then you can use symbol table
     */
     static void InitTable();
+    /**
+     * @brief add const string for putf
+     * @param str: const string
+     * @return : lable points to the string
+    */
+    static std::string AddConstString(std::string str);
+    /**
+     * @brief print const string declare in llvm style
+    */
+    static void PrintConstStringDeclare();
 
 private:
     static std::vector<std::map<std::string,Symbol*>> TableVec;
+    static std::map<std::string,std::string> ConstStringMap;
+    static int UnNamedStringCounter;
 };
 #endif

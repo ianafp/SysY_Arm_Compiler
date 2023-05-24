@@ -95,7 +95,7 @@ void  Program::LValTranslater(LValAST* lval,BaseIRT* &ir){
             additem = new ExpIRT(new BinOpIRT(BinOpKind::mul,additem,reinterpret_cast<ExpIRT*>(indexExp)));
             offset = new ExpIRT(new BinOpIRT(BinOpKind::plus,additem,offset));
         }
-        NameIRT* ident = new NameIRT(sym->GetLabelStr(*lval->VarIdent));
+        NameIRT* ident = new NameIRT(sym->GetLabelStr(*lval->VarIdent),sym->ArrAttributes->ArrayDimVec);
         ir = new MemIRT(new ExpIRT(new BinOpIRT(BinOpKind::plus,new ExpIRT(ident),offset)));
             }
     // may add more lval type
@@ -249,7 +249,8 @@ void Program::WhileTranslater(StmtAST* stmt_available, BaseIRT* &ir){
     LabelIRT* entry_label = new LabelIRT(std::string("loop_entry"));
     LabelIRT* body_label = new LabelIRT(std::string("loop_body"));
     LabelIRT* end_label = new LabelIRT(std::string("loop_end"));
-    ir = new StatementIRT(StmKind::Sequence, new SequenceIRT(new StatementIRT(StmKind::Lable, entry_label), new StatementIRT(StmKind::Cjump, new CjumpIRT(opkind, leftExp, rightExp, body_label, end_label))));
+    ir = new StatementIRT(StmKind::Sequence, new SequenceIRT(new StatementIRT(new JumpIRT(entry_label)), new StatementIRT(entry_label)));
+    ir = new StatementIRT(StmKind::Sequence, new SequenceIRT(reinterpret_cast<StatementIRT*>(ir), new StatementIRT(StmKind::Cjump, new CjumpIRT(opkind, leftExp, rightExp, body_label, end_label))));
     ir = new StatementIRT(StmKind::Sequence, new SequenceIRT(reinterpret_cast<StatementIRT*>(ir), new StatementIRT(StmKind::Lable, body_label)));
     
     //add label in while frame

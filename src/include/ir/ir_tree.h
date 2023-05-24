@@ -83,7 +83,7 @@ public:
 class SequenceIRT : public BaseIRT
 {
 public:
-    BaseIRT *LeftChild, *RightChild;
+    StatementIRT *LeftChild, *RightChild;
     SequenceIRT(){}
     SequenceIRT(StatementIRT *LeftStm, StatementIRT *RightStm)
         : LeftChild(LeftStm), RightChild(RightStm)
@@ -220,11 +220,8 @@ public:
 class TempIRT : public BaseIRT
 {
 public:
-    int TempVarId;
-    TempIRT()
-    {
-        TempVarId = TempIdAllocater::GetId();
-    }
+    ExpValue TempValue;
+    TempIRT(){}
     void Dump() const override
     {
     }
@@ -288,9 +285,10 @@ class CallIRT : public BaseIRT
 public:
     ValueType RetValType;
     LabelIRT *FuncLable;
+    std::vector<ArgsType> ArgsTypeList;
     std::vector<ExpIRT *> ArgsExpList;
     CallIRT(){}
-    CallIRT(ValueType type, LabelIRT *call, std::vector<ExpIRT *> args) : RetValType(type), FuncLable(call), ArgsExpList(args) {}
+    CallIRT(ValueType type, LabelIRT *call,std::vector<ArgsType> types,std::vector<ExpIRT *> args) : RetValType(type), FuncLable(call),ArgsTypeList(types), ArgsExpList(args) {}
     void Dump() const override
     {
     }
