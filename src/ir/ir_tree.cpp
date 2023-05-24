@@ -82,10 +82,11 @@ ExpValue ConvertExpToBinOprand(ExpIRT* exp)
         res.IsPtr = false;
         res.TempId = TempId;
     }
-    else if(exp->ContentKind==ExpKind::Name)
+    else if(exp->ContentKind==ExpKind::Name || res.IsPtr )
     {
         ConvertPtrToInt(res);
     }
+
     return res;
 }
 ExpValue BinOpIRT::ExpDump() const
@@ -354,7 +355,7 @@ ExpValue AllocateIRT::ExpDump() const
     res.ExpDim = this->ArrDim;
     res.VarName = "%" + this->ident;
     // BitCast(res,IrValType::i64,false);
-    ConvertPtrToInt(res);
+    // ConvertPtrToInt(res);
     return res;
 }
 void FuncIRT::Dump() const
@@ -423,7 +424,7 @@ void GlobalVarIRT::Dump() const
                 size *= it;
             }
         }
-        int AddressSpace = size << 2;
+        // int AddressSpace = size << 2;
         // original version with addrspace, 
         // as a consequence that this is a alternative trait, we do not add this constrain.
         // If we want to add, we have to change the type whenever reference of this global variable happens, and it'll make code tedious & ugly.

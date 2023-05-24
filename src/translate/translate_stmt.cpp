@@ -86,7 +86,7 @@ void  Program::LValTranslater(LValAST* lval,BaseIRT* &ir){
         int base = 1;
         BaseIRT* LastIndex;
         this->logic_exp_dealer(lval->IndexVec[lval->IndexVec.size()-1],LastIndex);
-        ExpIRT* offset = reinterpret_cast<ExpIRT*>(LastIndex);
+        ExpIRT* offset = new ExpIRT(new BinOpIRT(BinOpKind::mul,reinterpret_cast<ExpIRT*>(LastIndex),new ExpIRT(new ConstIRT(4))));
         for(int i = lval->IndexVec.size()-2;i>-1;i--){
             base *= dim[i];
             BaseIRT* indexExp;
