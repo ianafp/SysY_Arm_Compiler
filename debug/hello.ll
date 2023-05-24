@@ -1,10 +1,19 @@
-@.str = private unnamed_addr constant [ 8 x i8 ]c""sadas"\00", align 1
+declare void @putint(i32)
+declare void @putch(i32)
+declare void @putarray(i32, i32*)
+declare i32 @getint()
+declare i32 @getch()
+declare i32 @getarray(i32*)
+declare void @starttime()
+declare void @stoptime()
+declare void @putf(i8*, i32, ...)
+
 
 @test = addrspace(32) global [ 8 x i32 ][i32 1, i32 0, i32 0, i32 0, i32 0, i32 0, i32 0, i32 0], align 4
-
-@another = addrspace(32) global [ 8 x i32 ]0, align 4
+@test2 = addrspace(32) global [ 8 x i32 ][i32 1, i32 0, i32 0, i32 0, i32 0, i32 0, i32 0, i32 0], align 4
+@another = addrspace(32) global [ 8 x i32 ] zeroinitializer, align 4
 define void @HELLO(){
-%1 = call  @putch(i32 72)
+call void @putch(i32 72)
 ret void
 }
 define i32 @main(){
@@ -13,66 +22,46 @@ define i32 @main(){
 %2 = sext i32 0 to i64
 %3 = add i64 %1, %2
 %4 = inttoptr i64 %3 to i32*
-<<<<<<< HEAD
 store i32 1000000, i32*  %4
-%5 = call  @putf(i32*  @.str)
 %t = alloca [ 4 x i32 ], align 4
-%6 = ptrtoint [4x i32 ]* %t to i64
-%7 = sext i32 0 to i64
-%8 = add i64 %6, %7
-%9 = inttoptr i64 %8 to i32*
-store i32 1, i32*  %9
-%t = alloca [ 4 x i32 ], align 4
-%10 = ptrtoint [4x i32 ]* %t to i64
-%11 = sext i32 4 to i64
-%12 = add i64 %10, %11
-%13 = inttoptr i64 %12 to i32*
-store i32 2, i32*  %13
+%5 = ptrtoint [4x i32 ]* %t to i64
+%6 = sext i32 0 to i64
+%7 = add i64 %5, %6
+%8 = inttoptr i64 %7 to i32*
+store i32 1, i32*  %8
+;%t = alloca [ 4 x i32 ], align 4
+%9 = ptrtoint [4x i32 ]* %t to i64
+%10 = sext i32 4 to i64
+%11 = add i64 %9, %10
+%12 = inttoptr i64 %11 to i32*
+store i32 2, i32*  %12
 br label %LOOP_ENTRY_6
 LOOP_ENTRY_6:
-%14 = load i32,i32* %a
-%15 = icmp sgt i32 %14, 0
-%16 = zext i1 %15 to i32
+%13 = load i32,i32* %a
+%14 = icmp sgt i32 %13, 0
+%15 = zext i1 %14 to i32
 
-%17 = icmp ne i32 %16, 0
-br i1 %17, label %LOOP_BODY_7, label %LOOP_END_8
+%16 = icmp ne i32 %15, 0
+br i1 %16, label %LOOP_BODY_7, label %LOOP_END_8
 LOOP_BODY_7:
-%18 = load i32,i32* %a
-%19 = call  @putint(i32 %18)
-%20 = call  @putch(i32 10)
-%21 = load i32,i32* %a
-%22 = sub i32 %21, 1
-store i32 %22, i32*  %a
-=======
-store i32 5, i32*  %4
-br label %LOOP_ENTRY_6
-LOOP_ENTRY_6:
-%5 = load i32,i32* %a
-%6 = icmp sgt i32 %5, 0
-%7 = zext i1 %6 to i32
-
-%8 = icmp ne i32 %7, 0
-br i1 %8, label %LOOP_BODY_7, label %LOOP_END_8
-LOOP_BODY_7:
-%9 = load i32,i32* %a
-call void @putint(i32 %9)
+%17 = load i32,i32* %a
+call void @putint(i32 %17)
 call void @putch(i32 10)
 call void @HELLO()
-%10 = load i32,i32* %a
-%11 = sub i32 %10, 1
-store i32 %11, i32*  %a
->>>>>>> a304bf2d5a2dc0fbab5d328205a8e7723c50df6b
+%18 = load i32,i32* %a
+%19 = sub i32 %18, 1
+store i32 %19, i32*  %a
 br label %LOOP_ENTRY_6
 LOOP_END_8:
-%12 = call i32 @getch()
-%t = alloca i32 , align 4
-%13 = ptrtoint i32*  %t to i64
-%14 = sext i32 0 to i64
-%15 = add i64 %13, %14
-%16 = inttoptr i64 %15 to i32*
-store i32 %12, i32*  %16
-%17 = load i32,i32* %t
-call void @putint(i32 %17)
+%20 = call i32 @getch()
+%k = alloca i32 , align 4
+%21 = ptrtoint i32*  %k to i64
+%22 = sext i32 0 to i64
+%23 = add i64 %21, %22
+%24 = inttoptr i64 %23 to i32*
+store i32 %20, i32*  %24
+%25 = load i32,i32* %k
+call void @putint(i32 %25)
 call void @putch(i32 10)
 ret i32 0
 }

@@ -35,7 +35,15 @@ Symbol* SymbolTable::FindSymbol(std::string name){
 }
 std::string SymbolTable::AddConstString(std::string str)
 {
+    // remove the '"' at the head and tail of the str.
+    if (str.front() == '"') {
+        str.erase(0, 1);
+    }
+    if (str.back() == '"') {
+        str.pop_back();
+    }
     auto it = ConstStringMap.find(str);
+    DLOG(WARNING) << "CONST STR: " << str;
     if(ConstStringMap.find(str)!=ConstStringMap.end())
     {
         return it->second;

@@ -8,7 +8,7 @@ void HELLO()
 int main() 
 {
   int a = 1000000;
-  putf("sadas");
+  // putf("sadas");
   int t[4] = {1,2};
   while(a > 0)
   {
@@ -17,8 +17,8 @@ int main()
     HELLO();
     a = a - 1;
   }
-  int t = getch();
-  putint(t);
+  int k = getch();
+  putint(k);
   putch(10);
   return 0;
 }
