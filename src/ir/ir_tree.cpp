@@ -440,7 +440,13 @@ void GlobalVarIRT::Dump() const
         }
         else
         {
-            std::cout << this->Int32Val;
+            if (this->Int32Val == 0) {
+                std::cout << " zeroinitializer";
+            } else {
+                // It seems that this case is illegal in LLVM ir representation...
+                DLOG(WARNING) << "The format of the initializer might be wrong";
+                std::cout << " " << this->Int32Val;
+            }
         }
         std::cout << ", align 4\n";
     }
