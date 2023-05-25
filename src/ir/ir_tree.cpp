@@ -473,6 +473,7 @@ void RetIRT::Dump() const
     {
         std::cout << "ret void\n";
     }
+    TempIdAllocater::Increase();
 }
 void GlobalVarIRT::Dump() const
 {
