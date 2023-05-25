@@ -218,7 +218,16 @@ void Program::unary_exp_dealer(BaseAST *exp, BaseIRT *&ir)
             }
             // Here we need to create the IR tree 
             // by looking up symbol table to check the type of the function
-            bool IsVarParaCount = (sym->FunctionAttributes->ArgsTypeVec[sym->FunctionAttributes->ArgsTypeVec.size()-1] == ArgsType::VarsPacket);
+
+            bool IsVarParaCount;
+            if(sym->FunctionAttributes->ArgsTypeVec.size() && sym->FunctionAttributes->ArgsTypeVec[sym->FunctionAttributes->ArgsTypeVec.size()-1] == ArgsType::VarsPacket)
+            {
+                IsVarParaCount = true;
+            }
+            else
+            {
+                IsVarParaCount = false;
+            }
             if (sym->FunctionAttributes->RetValType == ValueType::INT32) {
                 ir = new ExpIRT(ExpKind::Call, new CallIRT(ValueType::INT32, new LabelIRT(*(unary_exp->ident)), types, args,IsVarParaCount));
             } else if (sym->FunctionAttributes->RetValType == ValueType::VOID) {
@@ -266,7 +275,15 @@ void Program::unary_exp_dealer(BaseAST *exp, BaseIRT *&ir)
             }
             // Here we need to create the IR tree 
             // by looking up symbol table to check the type of the function
-            bool IsVarCountPara =(ArgsFVec[ArgsFVec.size()-1]==ArgsType::VarsPacket);
+            bool IsVarCountPara;
+            if( ArgsFVec.size() && ArgsFVec[ArgsFVec.size()-1]==ArgsType::VarsPacket)
+            {
+                IsVarCountPara = true;
+            }
+            else 
+            {
+                IsVarCountPara = false;
+            }
             if (sym->FunctionAttributes->RetValType == ValueType::INT32) {
                 DLOG(WARNING) << "RETURN TYPE: INT32; " << *(unary_exp->ident);
                 ir = new ExpIRT(ExpKind::Call, new CallIRT(ValueType::INT32, new LabelIRT(*(unary_exp->ident)), types, args,IsVarCountPara));
