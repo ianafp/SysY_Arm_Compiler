@@ -11,7 +11,6 @@ else()
 endif()
 message(STATUS "Flex/Bison generated source file extension: ${FB_EXT}")
 add_compile_options(-g)
-add_compile_options(-march=znver3)
 # enable all warnings
 if(MSVC)
   add_compile_options(/W3)
@@ -81,7 +80,7 @@ add_custom_target(
 )
 add_custom_target(
   zx_test 
-  ${CMAKE_BINARY_DIR}/${PROJECT_NAME} test ${CMAKE_SOURCE_DIR}/debug/zx_test.c -o ${CMAKE_SOURCE_DIR}/debug/zx_test.ll
+  ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.exe test ${CMAKE_SOURCE_DIR}/debug/zx_test.c -o ${CMAKE_SOURCE_DIR}/debug/zx_test.ll
 
 )
 

@@ -243,10 +243,11 @@ class NameIRT : public BaseIRT
 {
 public:
     std::string AsmLableName;
+    bool IsPtr;
     std::vector<int> ArrayDim;
     NameIRT(){}
-    NameIRT(std::string name) : AsmLableName(name) {}
-    NameIRT(std::string name,std::vector<int> dim) : AsmLableName(name),ArrayDim(dim) {}
+    NameIRT(std::string name,bool flag) : AsmLableName(name),IsPtr(flag) {}
+    NameIRT(std::string name,std::vector<int> dim) : AsmLableName(name),IsPtr(true),ArrayDim(dim) {}
     void Dump() const override
     {
     }

@@ -243,7 +243,7 @@ void Program::unary_exp_dealer(BaseAST *exp, BaseIRT *&ir)
             {
                 if(it->type()=="StringAST")
                 {
-                    args_exp = new ExpIRT(new MemIRT(new ExpIRT(new NameIRT(reinterpret_cast<StringAST*>(it)->StringLabel))));
+                    args_exp = new ExpIRT(new MemIRT(new ExpIRT(new NameIRT(reinterpret_cast<StringAST*>(it)->StringLabel,true))));
                 }
                 else
                 {

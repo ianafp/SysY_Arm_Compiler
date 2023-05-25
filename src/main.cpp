@@ -1,4 +1,4 @@
-#include <cassert>
+// #include <cassert>
 #include <cstdio>
 #include <iostream>
 #include<fstream>
@@ -30,6 +30,7 @@ void InitGoogleLog(const char *argv) {
 
 int main(int argc, const char *argv[]) {
   // initialization
+  std::cout<<"hello world\n";
   visual.init_visualize();
 
   // compiler 模式 输入文件 -o 输出文件

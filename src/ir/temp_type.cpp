@@ -79,6 +79,10 @@ IrValType OpBitSignedExtension(ExpValue &val1,ExpValue &val2)
 std::string GetArrayStruct(IrValType type,const std::vector<int> &dim)
 {
     std::string res("");
+    if(dim[0] == 0)
+    {
+        return EnumToString(type);
+    }
     for(int i=0;i<dim.size();++i)
     {
         res += "[ ";
