@@ -326,7 +326,7 @@ ExpValue CallIRT::ExpDump() const
 {
     ExpValue res;
     std::string ResString("");
-    std::string RetTypeString;
+    std::string RetTypeString("");
     std::vector<ExpValue> ArgsVal;
     int i = 0;
     for (auto &it : this->ArgsExpList)
@@ -348,12 +348,20 @@ ExpValue CallIRT::ExpDump() const
         ArgsVal.push_back(TempVal);
         i++;
     }
+    if(this->IsVarParaCount)
+    {
+        RetTypeString = EnumToString(this->RetValType) + "(" + EnumToString(this->ArgsTypeList[0]) + ",...) "; 
+    }
+    else
+    {
+        RetTypeString = EnumToString(this->RetValType);
+    }
     if (RetValType == ValueType::INT32)
     {
         int TempId = TempIdAllocater::GetId();
         res.ExpType = IrValType::i32;
         std::cout << "%" << TempId << " = "
-                  << "call " << EnumToString(res.ExpType) << " @" << FuncLable->LableName + "(";
+                  << "call " << RetTypeString << " @" << FuncLable->LableName + "(";
         res.TempId = TempId;
         for (int i = 0; i < ArgsVal.size(); ++i)
         {
@@ -369,7 +377,7 @@ ExpValue CallIRT::ExpDump() const
     else if (RetValType == ValueType::VOID)
     {
         res.ExpType = IrValType::_void_;
-        std::cout << "call " << EnumToString(res.ExpType) << " @" << FuncLable->LableName + "(";
+        std::cout << "call " << RetTypeString << " @" << FuncLable->LableName + "(";
 
         for (int i = 0; i < ArgsVal.size(); ++i)
         {

@@ -85,32 +85,46 @@ void SymbolTable::InitTable(){
         // add function
         std::vector<ArgsType> args;
         // get int
+        args.clear();
         Symbol* sym = new Symbol(ValueType::INT32,args);
         TableVec[0].insert(std::pair<std::string,Symbol*>("getint",sym));
         // getch
+        args.clear();
         sym = new Symbol(ValueType::INT32,args);
         TableVec[0].insert(std::pair<std::string,Symbol*>("getch",sym));
         // get array
+        args.clear();
         args.push_back(ArgsType::Int32Array);
         sym = new Symbol(ValueType::INT32,args);
         TableVec[0].insert(std::pair<std::string,Symbol*>("getarray",sym));
         // putint
-        args[0] = ArgsType::Int32;
+        args.clear();
+        args.push_back( ArgsType::Int32 );
         sym = new Symbol(ValueType::VOID,args);
         TableVec[0].insert(std::pair<std::string,Symbol*>("putint",sym));
         // putch
+        args.clear();
+        args.push_back( ArgsType::Int32 );
         sym = new Symbol(ValueType::VOID,args);
         TableVec[0].insert(std::pair<std::string,Symbol*>("putch",sym));
         // putarray
-        args[0] = ArgsType::Int32;
+        args.clear();
+        args.push_back( ArgsType::Int32 );
         args.push_back(ArgsType::Int32Array);
         sym = new Symbol(ValueType::VOID,args);
         TableVec[0].insert(std::pair<std::string,Symbol*>("putarray",sym));
         // putf
-        args[0] = ArgsType::String;
+        args.clear();
+        args.push_back( ArgsType::String );
         args.push_back(ArgsType::VarsPacket);
         sym = new Symbol(ValueType::VOID,args);
         TableVec[0].insert(std::pair<std::string,Symbol*>("putf",sym));
+        // printf
+        args.clear();
+        args.push_back( ArgsType::String );
+        args.push_back(ArgsType::VarsPacket);
+        sym = new Symbol(ValueType::INT32,args);
+        TableVec[0].insert(std::pair<std::string,Symbol*>("printf",sym));
 
     }
 }

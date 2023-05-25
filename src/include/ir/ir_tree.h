@@ -285,12 +285,14 @@ public:
 class CallIRT : public BaseIRT
 {
 public:
+
     ValueType RetValType;
     LabelIRT *FuncLable;
     std::vector<ArgsType> ArgsTypeList;
     std::vector<ExpIRT *> ArgsExpList;
+    bool IsVarParaCount;
     CallIRT(){}
-    CallIRT(ValueType type, LabelIRT *call,std::vector<ArgsType> types,std::vector<ExpIRT *> args) : RetValType(type), FuncLable(call),ArgsTypeList(types), ArgsExpList(args) {}
+    CallIRT(ValueType type, LabelIRT *call,std::vector<ArgsType> types,std::vector<ExpIRT *> args,bool flag) : RetValType(type), FuncLable(call),ArgsTypeList(types), ArgsExpList(args),IsVarParaCount(flag) {}
     void Dump() const override
     {
     }

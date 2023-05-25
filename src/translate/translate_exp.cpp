@@ -218,10 +218,11 @@ void Program::unary_exp_dealer(BaseAST *exp, BaseIRT *&ir)
             }
             // Here we need to create the IR tree 
             // by looking up symbol table to check the type of the function
+            bool IsVarParaCount = (sym->FunctionAttributes->ArgsTypeVec[sym->FunctionAttributes->ArgsTypeVec.size()-1] == ArgsType::VarsPacket);
             if (sym->FunctionAttributes->RetValType == ValueType::INT32) {
-                ir = new ExpIRT(ExpKind::Call, new CallIRT(ValueType::INT32, new LabelIRT(*(unary_exp->ident)), types, args));
+                ir = new ExpIRT(ExpKind::Call, new CallIRT(ValueType::INT32, new LabelIRT(*(unary_exp->ident)), types, args,IsVarParaCount));
             } else if (sym->FunctionAttributes->RetValType == ValueType::VOID) {
-                ir = new ExpIRT(ExpKind::Call, new CallIRT(ValueType::VOID, new LabelIRT(*(unary_exp->ident)), types, args));
+                ir = new ExpIRT(ExpKind::Call, new CallIRT(ValueType::VOID, new LabelIRT(*(unary_exp->ident)), types, args,IsVarParaCount));
             }
             
         }
@@ -231,7 +232,7 @@ void Program::unary_exp_dealer(BaseAST *exp, BaseIRT *&ir)
             BaseIRT *args_exp = nullptr;
             FuncRParamsAST *func_r = dynamic_cast<FuncRParamsAST *>(unary_exp->func_rparam);
             // auto &ArgsCall = func_r->exp;
-            auto &ArgsFVec = sym->FunctionAttributes->ArgsTypeVec;
+            std::vector<ArgsType> &ArgsFVec = sym->FunctionAttributes->ArgsTypeVec;
             if (sym->FunctionAttributes->ArgsTypeVec.size() != func_r->exp.size() && ArgsFVec[ArgsFVec.size()-1]!=ArgsType::VarsPacket)
             {
 
@@ -265,12 +266,13 @@ void Program::unary_exp_dealer(BaseAST *exp, BaseIRT *&ir)
             }
             // Here we need to create the IR tree 
             // by looking up symbol table to check the type of the function
+            bool IsVarCountPara =(ArgsFVec[ArgsFVec.size()-1]==ArgsType::VarsPacket);
             if (sym->FunctionAttributes->RetValType == ValueType::INT32) {
                 DLOG(WARNING) << "RETURN TYPE: INT32; " << *(unary_exp->ident);
-                ir = new ExpIRT(ExpKind::Call, new CallIRT(ValueType::INT32, new LabelIRT(*(unary_exp->ident)), types, args));
+                ir = new ExpIRT(ExpKind::Call, new CallIRT(ValueType::INT32, new LabelIRT(*(unary_exp->ident)), types, args,IsVarCountPara));
             } else if (sym->FunctionAttributes->RetValType == ValueType::VOID) {
                 DLOG(WARNING) << "RETURN TYPE: VOID; " << *(unary_exp->ident);
-                ir = new ExpIRT(ExpKind::Call, new CallIRT(ValueType::VOID, new LabelIRT(*(unary_exp->ident)), types, args));
+                ir = new ExpIRT(ExpKind::Call, new CallIRT(ValueType::VOID, new LabelIRT(*(unary_exp->ident)), types, args,IsVarCountPara));
             }
         }
     }
