@@ -2,6 +2,9 @@
 This repo.'s resource comes from PKU, URL: https://pku-minic.github.io/online-doc/#/
 And Our development environment is Docker in Windows. If you want to test the program, please follow instructions in the URL mentioned above.
 The docker image can also be found in the document of PKU.
+
+Our project report in Feishu: https://sqchh8cke3.feishu.cn/docx/P2NKdjo3doivDoxuYuGcS3pqnty
+
 # build
 ```sh
 mkdir build
