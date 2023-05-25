@@ -409,24 +409,154 @@ int main() {
 	init();
 	// 计算并输出GPA
 	int gpa = calculateGPA(courseCount);
-	printf("GPA: %d.%d\n", gpa / 10, gpa % 10);
+	// printf("GPA: %d.%d\n", gpa / 10, gpa % 10);
+	putchar(71); // 'G'
+	putchar(80); // 'P'
+	putchar(65); // 'A'
+	putchar(58); // ':'
+	putchar(32); // ' '
+	putint(gpa / 10);
+	putchar(46); // '.'
+	putint(gpa % 10);
+	putchar(10); // '\n'
+
 
 	// 输出总学分
 	int attempt = calculateAtemptCredits(courseCount);
-	printf("Hours Attempted: %d\n", attempt);
+	// printf("Hours Attempted: %d\n", attempt);
+	putchar(72); // 'H'
+	putchar(111); // 'o'
+	putchar(117); // 'u'
+	putchar(114); // 'r'
+	putchar(115); // 's'
+	putchar(32); // ' '
+	putchar(65); // 'A'
+	putchar(116); // 't'
+	putchar(116); // 't'
+	putchar(101); // 'e'
+	putchar(109); // 'm'
+	putchar(112); // 'p'
+	putchar(116); // 't'
+	putchar(101); // 'e'
+	putchar(100); // 'd'
+	putchar(58); // ':'
+	putchar(32); // ' '
+	putint(attempt);
+	putchar(10); // '\n'
+
 
 	int completed = calculateCompletedCredits(courseCount);
-	printf("Hours Completed: %d\n", completed);
+	// printf("Hours Completed: %d\n", completed);
+	putchar(72); // 'H'
+	putchar(111); // 'o'
+	putchar(117); // 'u'
+	putchar(114); // 'r'
+	putchar(115); // 's'
+	putchar(32); // ' '
+	putchar(67); // 'C'
+	putchar(111); // 'o'
+	putchar(109); // 'm'
+	putchar(112); // 'p'
+	putchar(108); // 'l'
+	putchar(101); // 'e'
+	putchar(116); // 't'
+	putchar(101); // 'e'
+	putchar(100); // 'd'
+	putchar(58); // ':'
+	putchar(32); // ' '
+	putint(completed);
+	putchar(10); // '\n'
+
 
 	int remaining = calculateTotalCredits(courseCount) - calculateCompletedCredits(courseCount);
-	printf("Credits Remaining: %d\n", remaining);
+	// printf("Credits Remaining: %d\n", remaining);
+	putchar(67); // 'C'
+	putchar(114); // 'r'
+	putchar(101); // 'e'
+	putchar(100); // 'd'
+	putchar(105); // 'i'
+	putchar(116); // 't'
+	putchar(115); // 's'
+	putchar(32); // ' '
+	putchar(82); // 'R'
+	putchar(101); // 'e'
+	putchar(109); // 'm'
+	putchar(97); // 'a'
+	putchar(105); // 'i'
+	putchar(110); // 'n'
+	putchar(105); // 'i'
+	putchar(110); // 'n'
+	putchar(103); // 'g'
+	putchar(58); // ':'
+	putchar(32); // ' '
+	putint(remaining);
+	putchar(10); // '\n'
+
 
 	//打印课程推荐
-	printf("\nPossible Courses to Take Next\n");
+	// printf("\nPossible Courses to Take Next\n");
+	putchar(10); // '\n'
+	putchar(80); // 'P'
+	putchar(111); // 'o'
+	putchar(115); // 's'
+	putchar(115); // 's'
+	putchar(105); // 'i'
+	putchar(98); // 'b'
+	putchar(108); // 'l'
+	putchar(101); // 'e'
+	putchar(32); // ' '
+	putchar(67); // 'C'
+	putchar(111); // 'o'
+	putchar(117); // 'u'
+	putchar(114); // 'r'
+	putchar(115); // 's'
+	putchar(101); // 'e'
+	putchar(115); // 's'
+	putchar(32); // ' '
+	putchar(116); // 't'
+	putchar(111); // 'o'
+	putchar(32); // ' '
+	putchar(84); // 'T'
+	putchar(97); // 'a'
+	putchar(107); // 'k'
+	putchar(101); // 'e'
+	putchar(32); // ' '
+	putchar(78); // 'N'
+	putchar(101); // 'e'
+	putchar(120); // 'x'
+	putchar(116); // 't'
+	putchar(10); // '\n'
 	if (remaining != 0)
 		printCourseRecommendation(courseCount);
 	else
-		printf("  None - Congratulations!\n");
+		// printf("  None - Congratulations!\n");
+	{
+		putchar(32); // ' '
+		putchar(32); // ' '
+		putchar(78); // 'N'
+		putchar(111); // 'o'
+		putchar(110); // 'n'
+		putchar(101); // 'e'
+		putchar(32); // ' '
+		putchar(45); // '-'
+		putchar(32); // ' '
+		putchar(67); // 'C'
+		putchar(111); // 'o'
+		putchar(110); // 'n'
+		putchar(103); // 'g'
+		putchar(114); // 'r'
+		putchar(97); // 'a'
+		putchar(116); // 't'
+		putchar(117); // 'u'
+		putchar(108); // 'l'
+		putchar(97); // 'a'
+		putchar(116); // 't'
+		putchar(105) ;//i
+		putchar(111) ;//o
+		putchar(110) ;//n
+		putchar(115) ;//s
+		putchar(10) ;//'\n'
+	}
 
 	return 0;
 }
