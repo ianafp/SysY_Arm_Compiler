@@ -104,7 +104,7 @@ void  Program::LValTranslater(LValAST* lval,BaseIRT* &ir){
         }
         NameIRT* ident = new NameIRT(sym->GetLabelStr(*lval->VarIdent),sym->ArrAttributes->ArrayDimVec);
         ir = new MemIRT(new ExpIRT(new BinOpIRT(BinOpKind::plus,new ExpIRT(ident),offset)));
-            }
+    }
     // may add more lval type
     else{
         DLOG(ERROR)<<"Illegal Left Value \n";
