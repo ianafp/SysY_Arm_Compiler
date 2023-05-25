@@ -1,0 +1,46 @@
+.
+|-- ast
+|   `-- ast.cpp
+|-- common
+|   |-- enum.cpp
+|   |-- initval_tree.cpp
+|   |-- temp_allocate.cpp
+|   `-- while_frame.cpp
+|-- include
+|   |-- ast
+|   |   `-- ast.h
+|   |-- common
+|   |   |-- base_ast.h
+|   |   |-- enum.h
+|   |   |-- initval_tree.h
+|   |   |-- position.h
+|   |   |-- temp_allocate.h
+|   |   |-- type_traits.h
+|   |   |-- visualize.h
+|   |   `-- while_frame.h
+|   |-- ir
+|   |   |-- ir_tree.h
+|   |   `-- temp_type.h
+|   |-- symtable
+|   |   `-- symbol_table.h
+|   `-- translate
+|       `-- ir_generator.h
+|-- ir
+|   |-- ir_tools.cpp
+|   |-- ir_tree.cpp
+|   `-- temp_type.cpp
+|-- main.cpp
+|-- parser
+|   |-- sysy.l
+|   `-- sysy.y
+|-- symtable
+|   `-- symbol_table.cpp
+|-- test.ll
+|-- translate
+|   |-- translate_decl.cpp
+|   |-- translate_exp.cpp
+|   |-- translate_stmt.cpp
+|   `-- translate_top.cpp
+`-- tree.log
+
+12 directories, 31 files

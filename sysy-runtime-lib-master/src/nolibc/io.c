@@ -1,6 +1,6 @@
-#include "nolibc/io.h"
+#include "io.h"
 
-#include "nolibc/sys.h"
+#include "sys.h"
 
 ssize_t read(int fd, void *buf, size_t nbytes) {
   return SYSCALL3(SYS_READ, fd, buf, nbytes);
