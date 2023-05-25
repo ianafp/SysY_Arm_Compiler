@@ -6,11 +6,13 @@ int C[MAX_SIZE][MAX_SIZE];
 
 void matrix_multiply(int M_A, int N_B, int N_A) {
     int i = 0;
+    int j;
+    int k;
     while (i < M_A) {
-        int j = 0;
+        j = 0;
         while (j < N_B) {
             C[i][j] = 0;
-            int k = 0;
+            k = 0;
             while (k < N_A) {
                 C[i][j] = C[i][j] + A[i][k] * B[k][j];
                 k = k+1;
@@ -35,8 +37,9 @@ int main() {
 
     // 读取矩阵A的元素
     int i = 0;
+    int j;
     while (i < M_A) {
-        int j = 0;
+        j = 0;
         while (j < N_A) {
             A[i][j] = getint();
             // scanf("%d", &A[i][j]);
@@ -53,11 +56,11 @@ int main() {
     // 读取矩阵B的元素
     i = 0;
     while (i < M_B) {
-        int k = 0;
-        while (k < N_B) {
+        j = 0;
+        while (j < N_B) {
             // scanf("%d", &B[i][j]);
-            B[i][k] = getint();
-            k = k+1;
+            B[i][j] = getint();
+            j = j+1;
         }
         i = i+1;
     }
@@ -94,12 +97,12 @@ int main() {
     // 输出结果
     i = 0;
     while (i < M_A) {
-        int j = 0;
+        j = 0;
         while (j < N_B) {
-            putint(C[i][j]);
+            printf("%10d", C[i][j]);
             j = j+1;
         }
-        putch(10);
+        printf("\n");
         i = i+1;
     }
 

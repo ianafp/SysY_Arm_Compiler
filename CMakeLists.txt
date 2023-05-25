@@ -127,6 +127,11 @@ add_custom_target(
 
 add_custom_target(
   test_quicksort
+  ${CMAKE_BINARY_DIR}/${PROJECT_NAME} test ${CMAKE_SOURCE_DIR}/debug/matrix_mul.c -o ${CMAKE_SOURCE_DIR}/debug/matrix_mul.ll
+  COMMAND llc -march=x86-64 ${CMAKE_SOURCE_DIR}/debug/quick_sort.ll -o ${CMAKE_SOURCE_DIR}/debug/quick_sort.s
+  COMMAND as ${CMAKE_SOURCE_DIR}/debug/quick_sort.s -o ${CMAKE_SOURCE_DIR}/debug/quick_sort.o
+  COMMAND clang -Wall -Werror ${CMAKE_SOURCE_DIR}/debug/quick_sort.o -o ${CMAKE_SOURCE_DIR}/debug/quick_sort -I/root/compiler/sysy-runtime-lib-master/src -L/root/compiler/sysy-runtime-lib-master/build -lsysy -O1
+  COMMENT "quicksort Linked"
   COMMAND ${CMAKE_SOURCE_DIR}/tester/quicksort/quicksort-linux-amd64 ${CMAKE_SOURCE_DIR}/debug/quick_sort
   COMMENT "quicksort Tested"
 )
