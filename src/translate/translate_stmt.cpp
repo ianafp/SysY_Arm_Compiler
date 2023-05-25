@@ -225,7 +225,9 @@ void Program::BranchTranslater(StmtAST* stmt_available, BaseIRT* &ir, bool has_e
             // attach the else_label to the start of the else block
             else_block = new StatementIRT(StmKind::Sequence, new SequenceIRT(new StatementIRT(else_label), reinterpret_cast<StatementIRT *>(else_block)));
         }
-        ir_block = new StatementIRT(if_block); else_block = new StatementIRT(else_label);
+        else{
+            ir_block = new StatementIRT(if_block); else_block = new StatementIRT(else_label);
+        }
         // attach the unconditional jump to the end of the block
         ir_block = new StatementIRT(StmKind::Sequence, new SequenceIRT(reinterpret_cast<StatementIRT *>(ir_block), new StatementIRT(StmKind::Jump, new JumpIRT(end_label))));
         // attach the unconditional jump to the end of the else block
