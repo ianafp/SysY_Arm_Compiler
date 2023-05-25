@@ -52,6 +52,7 @@ void Program::stmt_dealer(StmtAST* stmt_available, BaseIRT* &ir)
             AssignTranslater(reinterpret_cast<AssignAST*>(stmt_available->ret_exp), ir);
         }
         else if(stmt_available->tp == StmtType::Block){
+            DLOG(WARNING) << "BLOCK_DEALER CATCHED";
             block_dealer(reinterpret_cast<BlockAST*>(stmt_available->ret_exp), ir);
         }
         else if(stmt_available->tp == StmtType::Empty)

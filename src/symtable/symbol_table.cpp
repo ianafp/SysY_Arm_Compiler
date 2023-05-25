@@ -102,7 +102,11 @@ void SymbolTable::InitTable(){
         args.push_back(ArgsType::VarsPacket);
         sym = new Symbol(ValueType::VOID,args);
         TableVec[0].insert(std::pair<std::string,Symbol*>("putf",sym));
-
+        // printf
+        args[0] = ArgsType::String;
+        args.push_back(ArgsType::VarsPacket);
+        sym = new Symbol(ValueType::INT32,args);
+        TableVec[0].insert(std::pair<std::string,Symbol*>("printf",sym));
     }
 }
 bool Symbol::GetGlobalFlag() const{
