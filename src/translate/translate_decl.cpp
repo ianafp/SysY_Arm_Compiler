@@ -70,6 +70,20 @@ void Program::InternalConvertExpInitTreeToIR(InitValTree<BaseAST *> *AstTree, co
 void Program::ConvertExpInitTreeToIR(InitValTree<BaseAST *> *AstTree, const std::vector<int> &dim, ExpIRT *addr, StatementIRT *&ir)
 {
     ir = NULL;
+    if(AstTree==NULL) return;
+    if(dim.size()==0)
+    {
+        if (AstTree&&AstTree->keys.size())
+        {
+            BaseIRT* initexp;
+            this->logic_exp_dealer(AstTree->keys[0],initexp);
+            AddStmToTree(ir,
+                         new StatementIRT(
+                             new MoveIRT(
+                                 new MemIRT(addr),reinterpret_cast<ExpIRT *>(initexp))));
+        }
+    }
+
     return;
     // get init value tree depth
     unsigned int depth = 0;
@@ -153,7 +167,7 @@ void Program::VarDefTranslater(SymType type, VarDefAST *decl, BaseIRT *&ir)
             auto res = new StatementIRT(new MoveIRT(addr, alloc));
             StatementIRT *init = NULL;
             // std::vector<int> trait;
-            this->ConvertExpInitTreeToIR(decl->InitValue, sym->ArrAttributes->ArrayDimVec, new ExpIRT(addr), init);
+            this->ConvertExpInitTreeToIR(decl->InitValue, dim, new ExpIRT(addr), init);
             if (init)
             {
                 AddStmToTree(res, init);
