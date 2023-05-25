@@ -50,6 +50,7 @@ void BitCast(ExpValue& val,IrValType type,bool IsPtr)
     {
         return;
     }
+    if(val.ExpDim.size()&& val.ExpDim[0] == 0) return;
     int TempId = TempIdAllocater::GetId();
     std::cout<<"%"<<std::to_string(TempId)<<" = "<< "bitcast " << val.TypeToString()<<" "<<val.LabelToString() << " to "<<EnumToString(type)<< (IsPtr? "*":"")<<"\n";
     val.IsPtr = IsPtr;

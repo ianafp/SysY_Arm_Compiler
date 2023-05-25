@@ -241,6 +241,8 @@ Constinitval: ConstInitVal
                 $$->position.line = cur_pos.line; $$->position.column = cur_pos.column;
             }
             ;
+
+
      InitVal: Exp 
             {
                 $$ = new InitValTree<BaseAST*>();
@@ -259,10 +261,10 @@ Constinitval: ConstInitVal
 
             }
             ;
+
      Initval: InitVal
             {
-                $$ = new InitValTree<BaseAST*>();
-                $$->childs.push_back($1);
+                $$ = $1;
             }
             | Initval ',' InitVal
             {
