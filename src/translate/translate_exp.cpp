@@ -239,11 +239,14 @@ void Program::unary_exp_dealer(BaseAST *exp, BaseIRT *&ir)
                 exit(-1);
             }
             int i = 0;
+            std::vector<int> dim;
             for (auto &it : func_r->exp)
             {
                 if(it->type()=="StringAST")
                 {
-                    args_exp = new ExpIRT(new MemIRT(new ExpIRT(new NameIRT(reinterpret_cast<StringAST*>(it)->StringLabel,true))));
+                    dim.clear();
+                    dim.push_back(reinterpret_cast<StringAST*>(it)->StringLabel.length());
+                    args_exp = new ExpIRT(new MemIRT(new ExpIRT(new NameIRT(reinterpret_cast<StringAST*>(it)->StringLabel,dim))));
                 }
                 else
                 {

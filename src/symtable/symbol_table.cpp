@@ -6,7 +6,7 @@ void SymbolTable::PrintConstStringDeclare()
 {
     for(auto &it:ConstStringMap)
     {
-        std::cout<<it.second<<" = private unnamed_addr constant [ "<<it.first.length()+1<<" x i8 ]c\""<<it.first<<"\\00\", align 1\n";
+        std::cout<<it.second<<" = private unnamed_addr constant [ "<<it.first.length()<<" x i8 ]c\""<<it.first<<"\\00\", align 1\n";
     }
 }
 bool SymbolTable::AddSymbol(std::string name,Symbol* sym){
@@ -30,6 +30,15 @@ Symbol* SymbolTable::FindSymbol(std::string name){
         if(FindIt!=it->end()){
             return FindIt->second;
         }
+    }
+    return NULL;
+}
+Symbol* SymbolTable::FindLocalScopeSymbol(std::string name)
+{
+    auto FindIt = TableVec[TableVec.size()-1].find(name);
+    if(FindIt != TableVec[TableVec.size()-1].end())
+    {
+        return FindIt->second;
     }
     return NULL;
 }

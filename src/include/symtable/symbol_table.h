@@ -107,6 +107,7 @@ public:
    }
 
 };
+
 class SymbolTable{
 public:
     /**
@@ -131,6 +132,13 @@ public:
      * @example Symbol* sym = FindSymbol("name");
     */
     static Symbol* FindSymbol(std::string name);
+    /**
+     * @brief this function find symbol from local scope
+     * 
+     * @param name 
+     * @return Symbol* 
+     */
+    static Symbol* FindLocalScopeSymbol(std::string name);
     /**
      * @brief call when you enter a new scope
     */
@@ -163,7 +171,7 @@ public:
 
 private:
     static std::vector<std::map<std::string,Symbol*>> TableVec;
-    static std::map<std::string,std::string> ConstStringMap;
+    static std::map<std::string, std::string> ConstStringMap;
     static int UnNamedStringCounter;
 };
 #endif
