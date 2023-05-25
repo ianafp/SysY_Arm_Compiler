@@ -1,7 +1,7 @@
 #ifndef LIBSYSY_TYPE_H_
 #define LIBSYSY_TYPE_H_
 
-#include "nolibc/sys.h"
+#include "sys.h"
 
 #ifdef SYS_32
 typedef int ssize_t;

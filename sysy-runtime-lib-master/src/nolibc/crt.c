@@ -1,5 +1,5 @@
-#include "nolibc/sys.h"
-#include "nolibc/types.h"
+#include "sys.h"
+#include "types.h"
 
 extern int main();
 extern void after_main();

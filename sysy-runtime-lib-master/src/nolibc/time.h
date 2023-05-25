@@ -1,8 +1,8 @@
 #ifndef LIBSYSY_TIME_H_
 #define LIBSYSY_TIME_H_
 
-#include "nolibc/sys.h"
-#include "nolibc/types.h"
+#include "sys.h"
+#include "types.h"
 
 struct timeval {
   long tv_sec;
