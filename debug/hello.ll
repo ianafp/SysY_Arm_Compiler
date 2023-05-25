@@ -12,10 +12,10 @@ declare void @putf(i8*, i32, ...)
 @MAX_SIZE = constant i32  10000, align 4
 
 @nums = global [ 10000 x i32 ] zeroinitializer, align 4
-define void @swap(i32* %1, i32 %2, i32 %3){
+define void @swap(i32* %0, i32 %1, i32 %2){
 %4 = alloca i32 , align 4
-%5 = ptrtoint i32* %1 to i64
-%6 = mul i32 %2, 4
+%5 = ptrtoint i32* %0 to i64
+%6 = mul i32 %1, 4
 %7 = sext i32 %6 to i64
 %8 = add i64 %5, %7
 %9 = inttoptr i64 %8 to i32*
@@ -25,20 +25,20 @@ define void @swap(i32* %1, i32 %2, i32 %3){
 %13 = inttoptr i64 %12 to i32*
 %14 = load i32,i32* %9
 store i32 %14, i32*  %13
-%15 = ptrtoint i32* %1 to i64
-%16 = mul i32 %3, 4
+%15 = ptrtoint i32* %0 to i64
+%16 = mul i32 %2, 4
 %17 = sext i32 %16 to i64
 %18 = add i64 %15, %17
 %19 = inttoptr i64 %18 to i32*
-%20 = ptrtoint i32* %1 to i64
-%21 = mul i32 %2, 4
+%20 = ptrtoint i32* %0 to i64
+%21 = mul i32 %1, 4
 %22 = sext i32 %21 to i64
 %23 = add i64 %20, %22
 %24 = inttoptr i64 %23 to i32*
 %25 = load i32,i32* %19
 store i32 %25, i32*  %24
-%26 = ptrtoint i32* %1 to i64
-%27 = mul i32 %3, 4
+%26 = ptrtoint i32* %0 to i64
+%27 = mul i32 %2, 4
 %28 = sext i32 %27 to i64
 %29 = add i64 %26, %28
 %30 = inttoptr i64 %29 to i32*
