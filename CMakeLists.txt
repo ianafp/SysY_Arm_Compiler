@@ -104,6 +104,13 @@ add_custom_target(
 )
 
 add_custom_target(
+  advisor
+
+  ${CMAKE_BINARY_DIR}/${PROJECT_NAME} test ${CMAKE_SOURCE_DIR}/debug/advisor.c -o ${CMAKE_SOURCE_DIR}/debug/advisor.ll
+
+)
+
+add_custom_target(
   matrix_mul
 
   ${CMAKE_BINARY_DIR}/${PROJECT_NAME} test ${CMAKE_SOURCE_DIR}/debug/matrix_mul.c -o ${CMAKE_SOURCE_DIR}/debug/matrix_mul.ll
@@ -115,6 +122,14 @@ add_custom_target(
   COMMAND as ${CMAKE_SOURCE_DIR}/debug/quick_sort.s -o ${CMAKE_SOURCE_DIR}/debug/quick_sort.o
   COMMAND clang -Wall -Werror ${CMAKE_SOURCE_DIR}/debug/quick_sort.o -o ${CMAKE_SOURCE_DIR}/debug/quick_sort -I/root/compiler/sysy-runtime-lib-master/src -L/root/compiler/sysy-runtime-lib-master/build -lsysy -O1
   COMMENT "quicksort Linked"
+)
+
+add_custom_target(
+  build_advisor
+  COMMAND llc -march=x86-64 ${CMAKE_SOURCE_DIR}/debug/advisor.ll -o ${CMAKE_SOURCE_DIR}/debug/advisor.s
+  COMMAND as ${CMAKE_SOURCE_DIR}/debug/advisor.s -o ${CMAKE_SOURCE_DIR}/debug/advisor.o
+  COMMAND clang -Wall -Werror ${CMAKE_SOURCE_DIR}/debug/advisor.o -o ${CMAKE_SOURCE_DIR}/debug/advisor -I/root/compiler/sysy-runtime-lib-master/src -L/root/compiler/sysy-runtime-lib-master/build -lsysy -O1
+  COMMENT "advisor Linked"
 )
 
 add_custom_target(
@@ -140,6 +155,12 @@ add_custom_target(
   test_matrix_mul
   COMMAND ${CMAKE_SOURCE_DIR}/tester/matrix/matrix-linux-amd64 ${CMAKE_SOURCE_DIR}/debug/matrix_mul
   COMMENT "matrix_mul Tested"
+)
+
+add_custom_target(
+  test_advisor
+  COMMAND ${CMAKE_SOURCE_DIR}/tester/advisor/advisor-linux-amd64 ${CMAKE_SOURCE_DIR}/debug/advisor
+  COMMENT "advisor Tested"
 )
 # add_dependencies(run ${PROJECT_NAME})
 
