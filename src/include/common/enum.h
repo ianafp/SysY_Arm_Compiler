@@ -111,4 +111,5 @@ std::string EnumToString(VarType type);
 std::string EnumToString(StmtType type);
 std::string EnumToString(ArgsType type);
 std::string EnumToString(IrValType type);
+std::string EnumToString(ValueType type);
 #endif
