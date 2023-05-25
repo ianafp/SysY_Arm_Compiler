@@ -1,6 +1,6 @@
-#include "nolibc/time.h"
+#include "time.h"
 
-#include "nolibc/sys.h"
+#include "sys.h"
 
 int gettimeofday(struct timeval *tv, void *tz) {
   return SYSCALL2(SYS_GETTIMEOFDAY, tv, tz);

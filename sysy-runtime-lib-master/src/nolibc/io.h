@@ -1,8 +1,8 @@
 #ifndef LIBSYSY_IO_H_
 #define LIBSYSY_IO_H_
 
-#include "nolibc/sys.h"
-#include "nolibc/types.h"
+#include "sys.h"
+#include "types.h"
 
 #define STDIN_FILENO 0
 #define STDOUT_FILENO 1
