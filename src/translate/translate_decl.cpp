@@ -28,17 +28,15 @@ void Program::VarDeclTranslater(VarDeclAST *decl, BaseIRT *&ir)
     }
     return;
 }
-void Program::ConvertExpInitTreeToIR(InitValTree<BaseAST *> *AstTree, const std::vector<int> &dim, std::vector<int> &trait, ExpIRT *addr, StatementIRT *&ir)
+
+void Program::InternalConvertExpInitTreeToIR(InitValTree<BaseAST *> *AstTree, const std::vector<int> &dim, std::vector<unsigned int> &trait, ExpIRT *addr, StatementIRT *&ir)
 {
-    if(AstTree == NULL) {
-        return;
-    }
     if (AstTree->childs.size())
     {
-        for (int i = 0; i < AstTree->childs.size(); ++i)
+        for (unsigned int i = 0; i < AstTree->childs.size(); ++i)
         {
             trait.push_back(i);
-            ConvertExpInitTreeToIR(AstTree->childs[i], dim, trait, addr, ir);
+            InternalConvertExpInitTreeToIR(AstTree->childs[i], dim, trait, addr, ir);
             trait.pop_back();
         }
     }
@@ -47,7 +45,7 @@ void Program::ConvertExpInitTreeToIR(InitValTree<BaseAST *> *AstTree, const std:
         int Base = 1, Offset = 0;
         if (trait.size())
         {
-            Offset += trait[trait.size()-1];
+            Offset += trait[trait.size() - 1];
             for (int i = trait.size() - 2; i > -1; --i)
             {
                 Base *= dim[i + 1];
@@ -64,10 +62,63 @@ void Program::ConvertExpInitTreeToIR(InitValTree<BaseAST *> *AstTree, const std:
                                  new MemIRT(
                                      new ExpIRT(
                                          new BinOpIRT(
-                                             BinOpKind::plus,addr, new ExpIRT(new ConstIRT((Offset++) << 2))))),
+                                             BinOpKind::plus, addr, new ExpIRT(new ConstIRT((Offset++) << 2))))),
                                  reinterpret_cast<ExpIRT *>(initexp))));
         }
     }
+}
+void Program::ConvertExpInitTreeToIR(InitValTree<BaseAST *> *AstTree, const std::vector<int> &dim, ExpIRT *addr, StatementIRT *&ir)
+{
+    ir = NULL;
+    return;
+    // get init value tree depth
+    unsigned int depth = 0;
+    BaseIRT* initexp;
+    if (AstTree)
+    {
+        if (AstTree->childs.size() == 0)
+        {
+            this->logic_exp_dealer(AstTree->keys[0],initexp);
+            AddStmToTree(ir,
+                         new StatementIRT(
+                             new MoveIRT(
+                                 new MemIRT(addr),reinterpret_cast<ExpIRT *>(initexp))));
+            return;
+        }
+        auto p = AstTree;
+        while (1)
+        {
+            if (p->childs.size())
+            {
+                depth++;
+                p = p->childs[0];
+            }
+            else
+            {
+                break;
+            }
+        }
+
+    }
+    // if no array
+    if (depth == 0)
+    {
+        // this->logic_exp_dealer(AstTree->FindFirst(), ir);
+        ir = NULL;
+        return;
+    }
+
+    // handle init value
+    std::vector<unsigned int> trait;
+
+    // handle if init value depth less than array dimension
+    for (unsigned int i = depth; i < dim.size(); ++i)
+    {
+        trait.push_back(0);
+    }
+
+    // handle matched dimension
+    this->InternalConvertExpInitTreeToIR(AstTree->childs[0], dim, trait, addr, ir);
 }
 void Program::VarDefTranslater(SymType type, VarDefAST *decl, BaseIRT *&ir)
 {
@@ -97,14 +148,15 @@ void Program::VarDefTranslater(SymType type, VarDefAST *decl, BaseIRT *&ir)
             {
                 dim = sym->ArrAttributes->ArrayDimVec;
             }
-            auto alloc = new ExpIRT(new AllocateIRT(*decl->VarIdent,dim, 4));
+            auto alloc = new ExpIRT(new AllocateIRT(*decl->VarIdent, dim, 4));
             auto addr = new TempIRT();
-            auto res = new StatementIRT(new MoveIRT(addr,alloc));
+            auto res = new StatementIRT(new MoveIRT(addr, alloc));
             StatementIRT *init = NULL;
-            std::vector<int> trait;
-            this->ConvertExpInitTreeToIR(decl->InitValue, sym->ArrAttributes->ArrayDimVec, trait, new ExpIRT(addr), init);
-            if(init){
-                AddStmToTree(res,init);
+            // std::vector<int> trait;
+            this->ConvertExpInitTreeToIR(decl->InitValue, sym->ArrAttributes->ArrayDimVec, new ExpIRT(addr), init);
+            if (init)
+            {
+                AddStmToTree(res, init);
             }
             ir = res;
         }

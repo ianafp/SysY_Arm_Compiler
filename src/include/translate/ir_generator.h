@@ -139,7 +139,25 @@ class Program {
    * @return Mem IRT
   */
   void LValTranslater(LValAST* lval,BaseIRT* &ir);
-  void ConvertExpInitTreeToIR(InitValTree<BaseAST*> *AstTree,const std::vector<int> &dim,std::vector<int> &trait,ExpIRT* addr,StatementIRT* &ir);
+  /**
+   * @brief this method is for internal usage for method ConvertExpInitTreeToIR
+   * 
+   * @param AstTree 
+   * @param dim 
+   * @param trait 
+   * @param addr 
+   * @param ir 
+   */
+  void InternalConvertExpInitTreeToIR(InitValTree<BaseAST*> *AstTree,const std::vector<int> &dim,std::vector<unsigned int> &trait,ExpIRT* addr,StatementIRT* &ir);
+  /**
+   * @brief this function is for internal usage for method VarDefTranslater
+   * 
+   * @param AstTree 
+   * @param dim 
+   * @param addr 
+   * @param ir 
+   */
+  void ConvertExpInitTreeToIR(InitValTree<BaseAST*> *AstTree,const std::vector<int> &dim,ExpIRT* addr,StatementIRT* &ir);
   /**
    * @brief this method handle the if statement, translate if statement to IR (CJUMP as central block)
    * @param stmt_available StmtAST ptr as scanner's source.

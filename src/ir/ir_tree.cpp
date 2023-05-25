@@ -17,7 +17,12 @@ int IrTreeStackVarTable::AddVarieble(std::string ident)
 }
 int IrTreeStackVarTable::FindVarieble(std::string ident)
 {
+
     auto it = StackTable.find(ident);
+    if(it==StackTable.end())
+    {
+        DLOG(ERROR)<<"ERROR LOCAL VAR\n";
+    }
     return it->second;
 }
 void CjumpIRT::Dump() const
@@ -335,7 +340,10 @@ ExpValue CallIRT::ExpDump() const
         {
             BitCast(TempVal,IrValType::i32,true);
         }
-
+        else if(this->ArgsTypeList[i] == ArgsType::String)
+        {
+            BitCast(TempVal,IrValType::i8,true);
+        }
         ArgsVal.push_back(TempVal);
         i++;
     }
