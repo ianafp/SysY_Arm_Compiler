@@ -30,7 +30,7 @@ bool ConvertTreeToInt(InitValTree<BaseAST *> *AstTree, InitValTree<int> *&IntTre
 }
 void PrintInitialStruct(const std::vector<int> &dim, int level)
 {
-    if (level == dim.size())
+    if (level == dim.size() || dim[0] == 0)
     {
         std::cout << "i32 ";
         return;

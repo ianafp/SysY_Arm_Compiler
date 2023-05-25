@@ -80,6 +80,13 @@ void  Program::LValTranslater(LValAST* lval,BaseIRT* &ir){
         // depends on const exp implement
         std::vector<int> &dim = sym->ArrAttributes->ArrayDimVec;
         if(lval->IndexVec.size()!=sym->ArrAttributes->ArrayDimVec.size()){
+            if(lval->IndexVec.size()==0)
+            {
+                NameIRT* ident = new NameIRT(sym->GetLabelStr(*lval->VarIdent),sym->ArrAttributes->ArrayDimVec);
+                ir = new MemIRT(new ExpIRT(ident));
+                return;
+            }
+            }
             LOG(ERROR)<<"Array Index of "<<*lval->VarIdent <<" mismatch dimension\n";
             exit(-1);
         }

@@ -7,6 +7,7 @@
 #include <vector>
 #include <iostream>
 #include <ctype.h>
+#include<map>
 #include <assert.h>
 #include "glog/logging.h"
 #include"common/initval_tree.h"
@@ -335,4 +336,29 @@ public:
  * @param stm: new statementIRT pointer
 */
 void AddStmToTree(StatementIRT* &root,StatementIRT* stm);
+
+
+class IrTreeStackVarTable
+{
+public:
+    /**
+     * @brief init stack variable map when you handle a new function in ir
+     * 
+     */
+    static void Init();
+    /**
+     * @brief this function convert stack varieble with string identifier to a temp int
+     * @param ident: var ident string
+     * @return int: temp id
+     */
+    static int AddVarieble(std::string ident);
+    /**
+     * @brief this function find temporary int by identifier string
+     * @param ident: var ident string
+     * @return int: temp id
+     */
+    static int FindVarieble(std::string ident);
+public:
+    static std::map<std::string,int> StackTable;
+};
 #endif

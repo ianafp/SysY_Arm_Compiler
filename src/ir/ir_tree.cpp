@@ -1,5 +1,25 @@
 #include "ir/ir_tree.h"
-
+std::map<std::string,int> IrTreeStackVarTable::StackTable;
+void IrTreeStackVarTable::Init()
+{
+    StackTable.clear();
+}
+int IrTreeStackVarTable::AddVarieble(std::string ident)
+{
+    auto it = StackTable.find(ident);
+    if(it!=StackTable.end())
+    {
+        return it->second;
+    }
+    int TempId = TempIdAllocater::GetId();
+    StackTable.insert(std::pair<std::string,int>(ident,TempId));
+    return TempId;
+}
+int IrTreeStackVarTable::FindVarieble(std::string ident)
+{
+    auto it = StackTable.find(ident);
+    return it->second;
+}
 void CjumpIRT::Dump() const
 {
     BinOpIRT CondExp(RelationOp, LeftExp, RightExp);
@@ -279,6 +299,10 @@ ExpValue NameIRT::ExpDump() const
 {
     ExpValue res;
     res.VarName = this->AsmLableName;
+    if(this->AsmLableName[0] != '@')
+    {
+        res.TempId = IrTreeStackVarTable::FindVarieble(&this->AsmLableName[1]);
+    }
     if (this->ArrayDim.size())
     {
         res.ExpDim = this->ArrayDim;
@@ -354,7 +378,8 @@ ExpValue CallIRT::ExpDump() const
 ExpValue AllocateIRT::ExpDump() const
 {
     ExpValue res;
-    std::cout << "%" << this->ident << " = "
+    res.TempId = IrTreeStackVarTable::AddVarieble(this->ident);
+    std::cout << "%" << res.TempId << " = "
               << "alloca ";
     PrintInitialStruct(this->ArrDim, 0);
     if (AlignSize > 1)
@@ -371,6 +396,8 @@ ExpValue AllocateIRT::ExpDump() const
 }
 void FuncIRT::Dump() const
 {
+    IrTreeStackVarTable::Init();
+
     std::string FuncTypeStr("");
     if (RetValType == ValueType::INT32)
     {
@@ -395,7 +422,8 @@ void FuncIRT::Dump() const
     {
         std::cout << EnumToString(ArgsVec[i]);
         std::cout << " %";
-        std::cout << this->ParameterNameVec[i];
+        int TempId =  IrTreeStackVarTable::AddVarieble(this->ParameterNameVec[i]);
+        std::cout << TempId;
         if (i != this->ArgsVec.size() - 1)
         {
             std::cout << ", ";
@@ -403,6 +431,9 @@ void FuncIRT::Dump() const
     }
     std::cout << ")";
     std::cout << "{\n";
+    if(TempIdAllocater::counter==0){
+        TempIdAllocater::counter = 1; 
+    }
     if (this->FuncStm != NULL)
         this->FuncStm->Dump();
 

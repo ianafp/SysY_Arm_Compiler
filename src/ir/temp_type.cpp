@@ -11,6 +11,7 @@ void ConvertMemToTemp(ExpValue& val)
     std::cout<<"%"<<std::to_string(TempId)<<" = "<<"load i32,i32* "<<val.LabelToString()<<"\n";
     val.IsPtr = false;
     val.TempId = TempId;
+    val.VarName = "";
 }
 std::ostream & operator<<(std::ostream &o,const ExpValue& val)
 {
@@ -28,6 +29,8 @@ void ConvertPtrToInt(ExpValue& val)
     val.IsPtr = false;
     val.TempId = TempId;
     val.ExpType = IrValType::i64;
+    val.VarName = "";
+    
 }
 void ConvertIntToPtr(ExpValue& val)
 {
@@ -52,6 +55,7 @@ void BitCast(ExpValue& val,IrValType type,bool IsPtr)
     val.IsPtr = IsPtr;
     val.TempId = TempId;
     val.ExpType = type;
+    val.VarName = "";
 }
 IrValType OpBitSignedExtension(ExpValue &val1,ExpValue &val2)
 {
@@ -66,6 +70,7 @@ IrValType OpBitSignedExtension(ExpValue &val1,ExpValue &val2)
         std::cout<< "%" << std::to_string(TempId) << " = "<< "sext "<<val1.TypeToString()<<" "<<val1.LabelToString()<< " "<<"to "<<val2.TypeToString()<<"\n";
         val1.ExpType = val2.ExpType;
         val1.TempId = TempId;
+        val1.VarName = "";
     }
     else
     {
@@ -73,6 +78,7 @@ IrValType OpBitSignedExtension(ExpValue &val1,ExpValue &val2)
         std::cout<< "%" << std::to_string(TempId) << " = "<< "sext "<<val2.TypeToString()<< " "<<val2.LabelToString()<<" to "<<val1.TypeToString()<<"\n";
         val2.ExpType = val1.ExpType;
         val2.TempId = TempId;
+        val2.VarName = "";
     }
     return val1.ExpType;
 }
@@ -98,17 +104,20 @@ std::string GetArrayStruct(IrValType type,const std::vector<int> &dim)
 }
 std::string ExpValue::LabelToString() const
 {
-    if(this->TempId)
-    {
-        return "%" + std::to_string(this->TempId);
-    }
-    else if(this->IsConst)
+    // if(this->TempId)
+    // {
+    //     return "%" + std::to_string(this->TempId);
+    // }
+    if(this->IsConst)
     {
         return std::to_string(this->ConstValue);
     }
-    else
+    else if(this->VarName[0] == '@')
     {
         return this->VarName;
+    }
+    else{
+        return "%" + std::to_string(this->TempId);
     }
 }
 std::string ExpValue::TypeToString() const

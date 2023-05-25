@@ -52,7 +52,7 @@ public:
     /**
      * @brief var ctor
     */
-   Symbol(bool IsConst,bool IsInMemory,int val = 0):SymbolType(SymType::INT32),ConstFlag(IsConst),MemoryFlag(IsInMemory),VarArrtributes(val){
+   Symbol(bool IsConst,bool IsInMemory,int val):SymbolType(SymType::INT32),ConstFlag(IsConst),MemoryFlag(IsInMemory),VarArrtributes(val){
         ArrAttributes = NULL;
         FunctionAttributes = NULL;
    }
