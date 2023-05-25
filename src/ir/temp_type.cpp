@@ -56,6 +56,7 @@ void BitCast(ExpValue& val,IrValType type,bool IsPtr)
     val.TempId = TempId;
     val.ExpType = type;
     val.VarName = "";
+    val.ExpDim = std::vector<int>();
 }
 IrValType OpBitSignedExtension(ExpValue &val1,ExpValue &val2)
 {

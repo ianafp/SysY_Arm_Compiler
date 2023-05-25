@@ -331,6 +331,11 @@ ExpValue CallIRT::ExpDump() const
         {
             ConvertMemToTemp(TempVal);
         }
+        else if(this->ArgsTypeList[i] == ArgsType::Int32Array)
+        {
+            BitCast(TempVal,IrValType::i32,true);
+        }
+
         ArgsVal.push_back(TempVal);
         i++;
     }
