@@ -42,7 +42,7 @@ Symbol* SymbolTable::FindLocalScopeSymbol(std::string name)
     }
     return NULL;
 }
-std::string SymbolTable::AddConstString(std::string str)
+std::string SymbolTable::AddConstString(std::string &str)
 {
     // remove the '"' at the head and tail of the str.
     if (str.front() == '"') {

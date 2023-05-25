@@ -156,7 +156,7 @@ public:
      * @param str: const string
      * @return : lable points to the string
     */
-    static std::string AddConstString(std::string str);
+    static std::string AddConstString(std::string &str);
     /**
      * @brief print const string declare in llvm style
     */

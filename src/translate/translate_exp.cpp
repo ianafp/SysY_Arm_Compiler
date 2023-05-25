@@ -256,7 +256,7 @@ void Program::unary_exp_dealer(BaseAST *exp, BaseIRT *&ir)
                 {
                     dim.clear();
                     dim.push_back(reinterpret_cast<StringAST*>(it)->StringLabel.length()+1);
-                    args_exp = new ExpIRT(new MemIRT(new ExpIRT(new NameIRT(reinterpret_cast<StringAST*>(it)->StringLabel,dim))));
+                    args_exp = new ExpIRT(new MemIRT(new ExpIRT(new NameIRT(SymbolTable::AddConstString(reinterpret_cast<StringAST*>(it)->StringLabel),dim))));
                 }
                 else
                 {

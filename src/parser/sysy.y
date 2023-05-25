@@ -679,7 +679,8 @@ Constinitval: ConstInitVal
  String: _string
         {
             auto ast = new StringAST();
-            ast->StringLabel = SymbolTable::AddConstString(*$1);
+            ast->StringLabel = *$1;
+            SymbolTable::AddConstString(ast->StringLabel);
             delete $1;
             ast->position.line = cur_pos.line; ast->position.column = cur_pos.column;
             $$ = ast;
