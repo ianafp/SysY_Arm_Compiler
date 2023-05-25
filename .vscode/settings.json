@@ -59,5 +59,9 @@
         "set": "cpp",
         "unordered_set": "cpp",
         "iomanip": "cpp"
-    }
+    },
+    "outline.showMethods": true,
+    "outline.showFunctions":  true ,
+    "outline.showClasses": true,
+    "outline.showNamespaces": true
 }
