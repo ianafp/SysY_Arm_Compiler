@@ -33,7 +33,7 @@ void ConstDeclAST::HandleSymbol() const
                     // return true;
                     exit(-1);
                 }
-                Symbol *sym = new Symbol(true, initval);
+                Symbol *sym = new Symbol(true, false, initval);
                 SymbolTable::AddSymbol(*DefAstPtr->VarIdent, sym);
                 DefAstPtr->VarSym = sym;
 
@@ -106,7 +106,7 @@ void VarDeclAST::HandleSymbol() const
                     // return true;
                     exit(-1);
                 }
-                Symbol *sym = new Symbol(false,true);
+                Symbol *sym = new Symbol(false,true,0);
                 SymbolTable::AddSymbol(*DefAstPtr->VarIdent, sym);
                 DefAstPtr->VarSym = sym;
                 bool IsInit = !!DefAstPtr->InitValue;
