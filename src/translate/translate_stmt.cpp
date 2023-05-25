@@ -86,7 +86,7 @@ void  Program::LValTranslater(LValAST* lval,BaseIRT* &ir){
                 ir = new MemIRT(new ExpIRT(ident));
                 return;
             }
-            }
+            
             LOG(ERROR)<<"Array Index of "<<*lval->VarIdent <<" mismatch dimension\n";
             exit(-1);
         }

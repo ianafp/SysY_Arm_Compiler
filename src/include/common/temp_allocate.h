@@ -8,6 +8,7 @@ private:
 public:
     static int GetId();
     static void Rewind();
+    static void Increase();
 };
 
 #endif

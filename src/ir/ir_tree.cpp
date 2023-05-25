@@ -431,9 +431,7 @@ void FuncIRT::Dump() const
     }
     std::cout << ")";
     std::cout << "{\n";
-    if(TempIdAllocater::counter==0){
-        TempIdAllocater::counter = 1; 
-    }
+    TempIdAllocater::Increase();
     if (this->FuncStm != NULL)
         this->FuncStm->Dump();
 
