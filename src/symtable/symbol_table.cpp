@@ -33,6 +33,15 @@ Symbol* SymbolTable::FindSymbol(std::string name){
     }
     return NULL;
 }
+Symbol* SymbolTable::FindLocalScopeSymbol(std::string name)
+{
+    auto FindIt = TableVec[TableVec.size()-1].find(name);
+    if(FindIt != TableVec[TableVec.size()-1].end())
+    {
+        return FindIt->second;
+    }
+    return NULL;
+}
 std::string SymbolTable::AddConstString(std::string str)
 {
     // remove the '"' at the head and tail of the str.

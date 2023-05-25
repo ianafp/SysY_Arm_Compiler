@@ -85,7 +85,7 @@ void Program::func_dealer(FuncDefAST *func_def, BaseIRT *&ir)
             auto param = reinterpret_cast<FuncFParamAST *>(it);
             types.push_back(param->tp);
             names.push_back(*param->ident);
-            Symbol *sym = SymbolTable::FindSymbol(*param->ident);
+            Symbol *sym = SymbolTable::FindLocalScopeSymbol(*param->ident);
             if (sym != NULL)
             {
                 LOG(ERROR) << "Multidefinition of function" << ident << " parameter" << *param->ident << "\n";

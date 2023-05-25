@@ -20,7 +20,7 @@ void ConstDeclAST::HandleSymbol() const
             if (DefAstPtr->DimSizeVec.size() == 0)
             {
                 // int type
-                if (SymbolTable::FindSymbol(*DefAstPtr->VarIdent))
+                if (SymbolTable::FindLocalScopeSymbol(*DefAstPtr->VarIdent))
                 {
                     LOG(ERROR) << "Multidefinition of symbol " << *DefAstPtr->VarIdent << "\n";
                     // return true;
@@ -48,7 +48,7 @@ void ConstDeclAST::HandleSymbol() const
                 {
                     auto ConstDefPtr = reinterpret_cast<VarDefAST *>(it);
                     // check ident
-                    if (SymbolTable::FindSymbol(*ConstDefPtr->VarIdent))
+                    if (SymbolTable::FindLocalScopeSymbol(*ConstDefPtr->VarIdent))
                     {
                         LOG(ERROR) << "Multidefinition of symbol " << *ConstDefPtr->VarIdent << "\n";
                         // return true;
@@ -100,7 +100,7 @@ void VarDeclAST::HandleSymbol() const
             if (DefAstPtr->DimSizeVec.size() == 0)
             {
                 // int type
-                if (SymbolTable::FindSymbol(*DefAstPtr->VarIdent))
+                if (SymbolTable::FindLocalScopeSymbol(*DefAstPtr->VarIdent))
                 {
                     LOG(ERROR) << "Multidefinition of symbol " << *DefAstPtr->VarIdent << "\n";
                     // return true;

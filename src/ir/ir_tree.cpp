@@ -342,6 +342,7 @@ ExpValue CallIRT::ExpDump() const
         }
         else if(this->ArgsTypeList[i] == ArgsType::String)
         {
+            TempVal.ExpType = IrValType::i8;
             BitCast(TempVal,IrValType::i8,true);
         }
         ArgsVal.push_back(TempVal);
