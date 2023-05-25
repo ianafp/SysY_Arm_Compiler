@@ -153,6 +153,13 @@ public:
      * @brief print const string declare in llvm style
     */
     static void PrintConstStringDeclare();
+    /**
+     * @brief this function add global symbol to the map, for function use, and this function is not responsible for check duplicate symbol or symbol is inited or not
+     * 
+     * @param name :function name
+     * @param sym :function symbol
+     */
+    static void AddGlobalSym(std::string name,Symbol* sym);
 
 private:
     static std::vector<std::map<std::string,Symbol*>> TableVec;

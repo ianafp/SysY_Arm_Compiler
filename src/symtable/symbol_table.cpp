@@ -115,3 +115,8 @@ std::string Symbol:: GetLabelStr(std::string SymName) const{
         return "%" + SymName;
     }
 }
+
+void SymbolTable::AddGlobalSym (std::string name,Symbol* sym)
+{
+    TableVec[0].insert(std::pair<std::string,Symbol*>(name,sym));
+}

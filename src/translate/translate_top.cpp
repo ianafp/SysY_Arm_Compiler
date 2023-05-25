@@ -110,9 +110,10 @@ void Program::func_dealer(FuncDefAST *func_def, BaseIRT *&ir)
         ret = ValueType::VOID;
 
     //deal with block
+    SymbolTable::AddGlobalSym (ident, new Symbol(ret, types));
     block_dealer(dynamic_cast<BlockAST *>(block), ir);
     SymbolTable::ExitScope();
-    SymbolTable::AddSymbol(ident, new Symbol(ret, types));
+    
     //construct func_ir tree
     if (func_type == VarType::INT)
     {
