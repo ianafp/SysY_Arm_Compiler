@@ -28,9 +28,10 @@ int mystrcmp(int a[], int b[])
 int gethash(int temp[])
 {
 	int i = 0;
+	int flag;
 	while (coursename[i][0] != 0)
 	{
-		int flag = mystrcmp(coursename[i], temp);
+		flag = mystrcmp(coursename[i], temp);
 		if (flag == 1)
 			return i;
 		i = i + 1;
@@ -162,13 +163,13 @@ void init()
 		if (c == 124) //|
         { 
 			// 遇到竖线，表示当前字段结束
-			if (readingCourseName)
+			if (readingCourseName == 1)
 			{
 				// 处理课程名称字段
 				fieldValue = gethash(temp); // 将课程名称长度存储在字段值中
 				readingCourseName = 0;
 			}
-			if (readingPrecourse)
+			if (readingPrecourse == 1)
 			{
 				if (temp[0] != 0)
 					fieldValue = gethash(temp);
@@ -198,7 +199,7 @@ void init()
 			continue;
 		}
 
-		if (c == 44)  
+		if (c == 44)  //,
 		{
 			fieldValue = gethash(temp);
 			group[courseIndex][orindex][andindex] = fieldValue;
@@ -403,7 +404,7 @@ void printCourseRecommendation(int courseCount) {
 						}
 						andindex = andindex + 1;
 					}
-					if (flag)
+					if (flag == 1)
 					{
 						putchar(32);
 						putchar(32); //space
@@ -423,14 +424,14 @@ void printCourseRecommendation(int courseCount) {
 int main() {
 
 	init();
-	int LogCount = 0;
-	while(LogCount<courseCount)
-	{
-		printname(coursename[LogCount]);
-		printf("|%d|%d|%d|%d\n",courseData[LogCount][0],courseData[LogCount][1],courseData[LogCount][2],courseData[LogCount][3]);
-		LogCount = LogCount + 1;
-	}
-	printf("\n");
+	// int LogCount = 0;
+	// while(LogCount<courseCount)
+	// {
+	// 	printname(coursename[LogCount]);
+	// 	printf("|%d|%d|%d|%d\n",courseData[LogCount][0],courseData[LogCount][1],courseData[LogCount][2],courseData[LogCount][3]);
+	// 	LogCount = LogCount + 1;
+	// }
+	// printf("\n");
 	// 计算并输出GPA
 	int gpa = calculateGPA(courseCount);
 	printf("GPA: %d.%d\n", gpa / 10, gpa % 10);
