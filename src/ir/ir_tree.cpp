@@ -531,7 +531,10 @@ void GlobalVarIRT::Dump() const
         }
         else
         {
-            std::cout << " zeroinitializer";
+            if(this->IsConstant){
+                std::cout << " " << this->Int32Val;
+            }
+            else std::cout << " zeroinitializer";
             // if (this->Int32Val == 0)
             // {
             //     std::cout << " zeroinitializer";

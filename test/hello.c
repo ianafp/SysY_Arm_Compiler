@@ -1,10 +1,10 @@
-const int MAX_COURSES = 100;
-const int MAX_NAME_LENGTH = 5;
+const int 100 = 100;
+const int 5 = 5;
 const int MAX_GROUPS = 7;
-int coursename[MAX_COURSES][MAX_NAME_LENGTH];
-int courseData[MAX_COURSES][4];
-int courseread[MAX_COURSES];
-int group[MAX_COURSES][MAX_GROUPS][MAX_GROUPS];
+int coursename[100][5];
+int courseData[100][4];
+int courseread[100];
+int group[100][MAX_GROUPS][MAX_GROUPS];
 int courseCount = 0;
 int mystrcmp(int a[], int b[])
 {
@@ -80,9 +80,9 @@ void init()
     int k = 0;
     int x = 0;
     int y = 0;
-    int temp[MAX_NAME_LENGTH];
+    int temp[5];
     // 初始化数组
-    while (i < MAX_COURSES)
+    while (i < 100)
     {
         j = 0;
         while (j < 4)
@@ -91,7 +91,7 @@ void init()
             j = j + 1;
         }
         k = 0;
-        while (k < MAX_NAME_LENGTH)
+        while (k < 5)
         {
             // 初始化课程数据数组
             coursename[i][k] = 0;
@@ -111,7 +111,7 @@ void init()
         i = i + 1;
     }
     i = 0;
-    while (i < MAX_NAME_LENGTH)
+    while (i < 5)
     {
         temp[i] = 0;
         i = i + 1;
@@ -143,7 +143,7 @@ void init()
             courseIndex = courseIndex + 1;
             courseCount = courseCount + 1;
             int i = 0;
-            while (i < MAX_NAME_LENGTH)
+            while (i < 5)
             {
                 temp[i] = 0;
                 i = i + 1;
@@ -180,7 +180,7 @@ void init()
             {
                 readingPrecourse = 1;
                 int i = 0;
-                while (i < MAX_NAME_LENGTH)
+                while (i < 5)
                 {
                     temp[i] = 0;
                     i = i + 1;
@@ -197,7 +197,7 @@ void init()
             groupmember = groupmember + 1;
             nameIndex = 0;
             int i = 0;
-            while (i < MAX_NAME_LENGTH)
+            while (i < 5)
             {
                 temp[i] = 0;
                 i = i + 1;
@@ -213,7 +213,7 @@ void init()
             groupmember = groupmember + 1;
             nameIndex = 0;
             int i = 0;
-            while (i < MAX_NAME_LENGTH)
+            while (i < 5)
             {
                 temp[i] = 0;
                 i = i + 1;
@@ -224,7 +224,7 @@ void init()
         if (readingCourseName || readingPrecourse)
         {
             // 处理课程名称字段
-            if (nameIndex < MAX_NAME_LENGTH - 1)
+            if (nameIndex < 5 - 1)
             {
                 // 将字符存储在课程名称数组中
                 temp[nameIndex] = c;
@@ -344,7 +344,7 @@ int calculateGPA(int courseCount) {
 // 打印课程推荐
 void printCourseRecommendation(int courseCount) {
 	int i = 0;
-	while (i < MAX_COURSES)
+	while (i < 100)
 	{
 		courseread[i] = 0;
 		i = i + 1;

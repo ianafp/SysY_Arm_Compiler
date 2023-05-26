@@ -1,10 +1,10 @@
-#include<stdio.h>
-#define MAX_COURSES 100
-#define MAX_NAME_LENGTH 5
-#define MAX_GROUPS 7
-// const int MAX_COURSES = 100;
-// const int MAX_NAME_LENGTH = 5;
-// const int MAX_GROUPS = 7;
+// #include<stdio.h>
+// #define MAX_COURSES 100
+// #define MAX_NAME_LENGTH 5
+// #define MAX_GROUPS 7
+const int MAX_COURSES = 100;
+const int MAX_NAME_LENGTH = 5;
+const int MAX_GROUPS = 7;
 int coursename[MAX_COURSES][MAX_NAME_LENGTH];
 int courseData[MAX_COURSES][4];
 int courseread[MAX_COURSES];
@@ -155,6 +155,7 @@ void init()
 				temp[i] = 0;
 				i = i + 1;
 			}
+			c = getchar();
 			continue;
 		}
 
@@ -193,6 +194,7 @@ void init()
 					i = i + 1;
 				}
 			}
+			c = getchar();
 			continue;
 		}
 
@@ -209,6 +211,7 @@ void init()
 				temp[i] = 0;
 				i = i + 1;
 			}
+			c = getchar();
 			continue;
 		}
 		if (c == 59) //;
@@ -225,6 +228,7 @@ void init()
 				temp[i] = 0;
 				i = i + 1;
 			}
+			c = getchar();
 			continue;
 		}
 
@@ -240,8 +244,11 @@ void init()
 			// 处理其他字段
 			if (fieldIndex == 1)
 				fieldValue = fieldValue * 10 + (c - 48);
-			else if (fieldIndex == 3)
-				fieldValue = c;
+			else
+			{
+				if(fieldIndex == 3)
+					fieldValue = c;
+			}
 		}
 		c = getchar();
 	}
@@ -373,10 +380,12 @@ void printCourseRecommendation(int courseCount) {
 		{
 			if (group[i][0][0] == -1)
 			{
-				putchar(32);
-				putchar(32); //space
+				// putchar(32);
+				// putchar(32); //space
+				printf("  ");
 				printname(coursename[num]);
-				putchar(10); //\n
+				// putchar(10); //\n
+				printf("\n");
 			}
 			else
 			{
@@ -414,6 +423,14 @@ void printCourseRecommendation(int courseCount) {
 int main() {
 
 	init();
+	int LogCount = 0;
+	while(LogCount<courseCount)
+	{
+		printname(coursename[LogCount]);
+		printf("|%d|%d|%d|%d\n",courseData[LogCount][0],courseData[LogCount][1],courseData[LogCount][2],courseData[LogCount][3]);
+		LogCount = LogCount + 1;
+	}
+	printf("\n");
 	// 计算并输出GPA
 	int gpa = calculateGPA(courseCount);
 	printf("GPA: %d.%d\n", gpa / 10, gpa % 10);
@@ -475,7 +492,8 @@ int main() {
 	// putchar(10); // '\n'
 
 
-	int remaining = calculateTotalCredits(courseCount) - calculateCompletedCredits(courseCount);
+	int remaining = calculateTotalCredits(courseCount);
+	remaining = remaining - calculateCompletedCredits(courseCount);
 	printf("Credits Remaining: %d\n", remaining);
 	// putchar(67); // 'C'
 	// putchar(114); // 'r'
