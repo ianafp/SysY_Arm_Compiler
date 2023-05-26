@@ -244,6 +244,8 @@ ExpValue BinOpIRT::ExpDump() const
         std::cout << "%" << std::to_string(res) << " = "
                   << "and i32 %" << std::to_string(temp1) << ", %" << std::to_string(temp2);
         ResString = "%" + std::to_string(res);
+        res = TempIdAllocater::GetId();
+        std::cout<<"%"<<res<<" = sext i1 "<<ResString<<" to i32\n";
         ResVal.ExpType = IrValType::i32;
         break;
     case BinOpKind::LogicOr:
@@ -255,8 +257,10 @@ ExpValue BinOpIRT::ExpDump() const
         std::cout << "%" << temp2 << " = "
                   << "icmp ne i32 0, " << RightValue.LabelToString() << "\n";
         std::cout << "%" << std::to_string(res) << " = "
-                  << "or i32 %" << std::to_string(temp1) << ", %" << std::to_string(temp2);
+                  << "or i1 %" << std::to_string(temp1) << ", %" << std::to_string(temp2);
         ResString = "%" + std::to_string(res);
+        res = TempIdAllocater::GetId();
+        std::cout<<"%"<<res<<" = sext i1 "<<ResString<<" to i32\n";
         ResVal.ExpType = IrValType::i32;
         break;
     case BinOpKind::LogicNot:
@@ -264,6 +268,9 @@ ExpValue BinOpIRT::ExpDump() const
         ResString = "%" + std::to_string(res);
         std::cout << ResString << " = "
                   << "icmp eq i32 0, " << LeftValue.LabelToString();
+        ResString = "%" + std::to_string(res);
+        res = TempIdAllocater::GetId();
+        std::cout<<"%"<<res<<" = sext i1 "<<ResString<<" to i32\n";
         ResVal.ExpType = IrValType::i32;
         break;
     case BinOpKind::Neg:

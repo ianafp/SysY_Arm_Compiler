@@ -75,7 +75,7 @@ target_link_libraries(compiler glog)
 add_custom_target(
   run 
 
-  ${CMAKE_BINARY_DIR}/${PROJECT_NAME} test ${CMAKE_SOURCE_DIR}/debug/hello.c -o ${CMAKE_SOURCE_DIR}/debug/hello.ll
+  ${CMAKE_BINARY_DIR}/${PROJECT_NAME} test ${CMAKE_SOURCE_DIR}/test/hello.c -o ${CMAKE_SOURCE_DIR}/debug/hello.ll
 
 )
 add_custom_target(
@@ -98,22 +98,21 @@ add_custom_target(
 
 add_custom_target(
   quicksort
-
-  ${CMAKE_BINARY_DIR}/${PROJECT_NAME} test ${CMAKE_SOURCE_DIR}/debug/quick_sort.c -o ${CMAKE_SOURCE_DIR}/debug/quick_sort.ll
+  COMMAND ${CMAKE_BINARY_DIR}/${PROJECT_NAME} test ${CMAKE_SOURCE_DIR}/test/quick_sort.c -o ${CMAKE_SOURCE_DIR}/debug/quick_sort.ll
 
 )
 
 add_custom_target(
   advisor
 
-  ${CMAKE_BINARY_DIR}/${PROJECT_NAME} test ${CMAKE_SOURCE_DIR}/debug/advisor.c -o ${CMAKE_SOURCE_DIR}/debug/advisor.ll
+  COMMAND ${CMAKE_BINARY_DIR}/${PROJECT_NAME} test ${CMAKE_SOURCE_DIR}/test/advisor.c -o ${CMAKE_SOURCE_DIR}/debug/advisor.ll
 
 )
 
 add_custom_target(
   matrix_mul
 
-  ${CMAKE_BINARY_DIR}/${PROJECT_NAME} test ${CMAKE_SOURCE_DIR}/debug/matrix_mul.c -o ${CMAKE_SOURCE_DIR}/debug/matrix_mul.ll
+  COMMAND ${CMAKE_BINARY_DIR}/${PROJECT_NAME} test ${CMAKE_SOURCE_DIR}/test/matrix_multiply.c -o ${CMAKE_SOURCE_DIR}/debug/matrix_mul.ll
 )
 
 add_custom_target(
@@ -143,29 +142,28 @@ add_custom_target(
 
 add_custom_target(
   test_quicksort
-  COMMAND quicksort
-  COMMAND build_quicksort
-  COMMAND ${CMAKE_BINARY_DIR}/${PROJECT_NAME} test ${CMAKE_SOURCE_DIR}/debug/matrix_mul.c -o ${CMAKE_SOURCE_DIR}/debug/matrix_mul.ll
-  COMMAND llc -march=x86-64 ${CMAKE_SOURCE_DIR}/debug/quick_sort.ll -o ${CMAKE_SOURCE_DIR}/debug/quick_sort.s
-  COMMAND as ${CMAKE_SOURCE_DIR}/debug/quick_sort.s -o ${CMAKE_SOURCE_DIR}/debug/quick_sort.o
-  COMMAND clang -Wall -Werror ${CMAKE_SOURCE_DIR}/debug/quick_sort.o -o ${CMAKE_SOURCE_DIR}/debug/quick_sort -I${CMAKE_SOURCE_DIR}/sysy-runtime-lib-master/src -L${CMAKE_SOURCE_DIR}/sysy-runtime-lib-master/build -lsysy -O1
+  COMMAND make quicksort
+  COMMAND make build_quicksort
   COMMENT "quicksort Linked"
+  COMMAND chmod a+x ${CMAKE_SOURCE_DIR}/tester/quicksort/quicksort-linux-amd64
   COMMAND ${CMAKE_SOURCE_DIR}/tester/quicksort/quicksort-linux-amd64 ${CMAKE_SOURCE_DIR}/debug/quick_sort
   COMMENT "quicksort Tested"
 )
 
 add_custom_target(
   test_matrix_mul
-  COMMAND matrix_mul
-  COMMAND build_matrix_mul
+  COMMAND make matrix_mul
+  COMMAND make build_matrix_mul
+  COMMAND chmod a+x ${CMAKE_SOURCE_DIR}/tester/matrix/matrix-linux-amd64
   COMMAND ${CMAKE_SOURCE_DIR}/tester/matrix/matrix-linux-amd64 ${CMAKE_SOURCE_DIR}/debug/matrix_mul
   COMMENT "matrix_mul Tested"
 )
 
 add_custom_target(
   test_advisor
-  COMMAND advisor
-  COMMAND build_advisor
+  COMMAND make advisor
+  COMMAND make build_advisor
+  COMMAND chmod a+x ${CMAKE_SOURCE_DIR}/tester/advisor/advisor-linux-amd64
   COMMAND ${CMAKE_SOURCE_DIR}/tester/advisor/advisor-linux-amd64 ${CMAKE_SOURCE_DIR}/debug/advisor
   COMMENT "advisor Tested"
 )
