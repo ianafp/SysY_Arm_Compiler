@@ -120,7 +120,7 @@ add_custom_target(
   build_quicksort
   COMMAND llc -march=x86-64 ${CMAKE_SOURCE_DIR}/debug/quick_sort.ll -o ${CMAKE_SOURCE_DIR}/debug/quick_sort.s
   COMMAND as ${CMAKE_SOURCE_DIR}/debug/quick_sort.s -o ${CMAKE_SOURCE_DIR}/debug/quick_sort.o
-  COMMAND clang -Wall -Werror ${CMAKE_SOURCE_DIR}/debug/quick_sort.o -o ${CMAKE_SOURCE_DIR}/debug/quick_sort -I/root/compiler/sysy-runtime-lib-master/src -L/root/compiler/sysy-runtime-lib-master/build -lsysy -O1
+  COMMAND clang -Wall -Werror ${CMAKE_SOURCE_DIR}/debug/quick_sort.o -o ${CMAKE_SOURCE_DIR}/debug/quick_sort -I/root/compiler/sysy-runtime-lib-master/src -L${CMAKE_SOURCE_DIR}/sysy-runtime-lib-master/build -lsysy -O1
   COMMENT "quicksort Linked"
 )
 
@@ -136,7 +136,7 @@ add_custom_target(
   build_matrix_mul
   COMMAND llc -march=x86-64 ${CMAKE_SOURCE_DIR}/debug/matrix_mul.ll -o ${CMAKE_SOURCE_DIR}/debug/matrix_mul.s
   COMMAND as ${CMAKE_SOURCE_DIR}/debug/matrix_mul.s -o ${CMAKE_SOURCE_DIR}/debug/matrix_mul.o
-  COMMAND clang -Wall -Werror ${CMAKE_SOURCE_DIR}/debug/matrix_mul.o -o ${CMAKE_SOURCE_DIR}/debug/matrix_mul -I/root/compiler/sysy-runtime-lib-master/src -L/root/compiler/sysy-runtime-lib-master/build -lsysy -O1
+  COMMAND clang -Wall -Werror ${CMAKE_SOURCE_DIR}/debug/matrix_mul.o -o ${CMAKE_SOURCE_DIR}/debug/matrix_mul -I/root/compiler/sysy-runtime-lib-master/src -L${CMAKE_SOURCE_DIR}/sysy-runtime-lib-master/build -lsysy -O1
   COMMENT "matrix_mul Linked"
 )
 
@@ -145,7 +145,7 @@ add_custom_target(
   ${CMAKE_BINARY_DIR}/${PROJECT_NAME} test ${CMAKE_SOURCE_DIR}/debug/matrix_mul.c -o ${CMAKE_SOURCE_DIR}/debug/matrix_mul.ll
   COMMAND llc -march=x86-64 ${CMAKE_SOURCE_DIR}/debug/quick_sort.ll -o ${CMAKE_SOURCE_DIR}/debug/quick_sort.s
   COMMAND as ${CMAKE_SOURCE_DIR}/debug/quick_sort.s -o ${CMAKE_SOURCE_DIR}/debug/quick_sort.o
-  COMMAND clang -Wall -Werror ${CMAKE_SOURCE_DIR}/debug/quick_sort.o -o ${CMAKE_SOURCE_DIR}/debug/quick_sort -I/root/compiler/sysy-runtime-lib-master/src -L/root/compiler/sysy-runtime-lib-master/build -lsysy -O1
+  COMMAND clang -Wall -Werror ${CMAKE_SOURCE_DIR}/debug/quick_sort.o -o ${CMAKE_SOURCE_DIR}/debug/quick_sort -I/root/compiler/sysy-runtime-lib-master/src -L${CMAKE_SOURCE_DIR}/sysy-runtime-lib-master/build -lsysy -O1
   COMMENT "quicksort Linked"
   COMMAND ${CMAKE_SOURCE_DIR}/tester/quicksort/quicksort-linux-amd64 ${CMAKE_SOURCE_DIR}/debug/quick_sort
   COMMENT "quicksort Tested"

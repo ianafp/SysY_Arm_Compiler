@@ -351,6 +351,10 @@ ExpValue CallIRT::ExpDump() const
     if(this->IsVarParaCount)
     {
         RetTypeString = EnumToString(this->RetValType) + "(" + EnumToString(this->ArgsTypeList[0]) + ",...) "; 
+        for(unsigned int i = 1;i < ArgsVal.size();++i)
+        {
+            ConvertMemToTemp(ArgsVal[i]);
+        }
     }
     else
     {
