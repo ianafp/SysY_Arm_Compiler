@@ -114,7 +114,7 @@ std::string ExpValue::LabelToString() const
     {
         return std::to_string(this->ConstValue);
     }
-    else if(this->VarName[0] == '@')
+    else if(this->VarName[0] == '@' )
     {
         return this->VarName;
     }

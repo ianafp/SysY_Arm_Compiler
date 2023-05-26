@@ -88,7 +88,9 @@ int main(int argc, const char *argv[]) {
   << "declare void @starttime()\n"
   << "declare void @stoptime()\n"
   << "declare void @putf(i8*, ...)\n"
-  << "declare i32 @printf(i8*, ...)\n\n";
+  << "declare i32 @printf(i8*, ...)\n\n"
+  << "declare void @putchar(i32)\n"
+  << "declare i32 @getchar()\n";
   ir->Dump();
   // cout.rdbuf(pOld);
   // ConstIRT c1(11),c2(1100), c3(1000);

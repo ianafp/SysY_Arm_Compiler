@@ -33,7 +33,7 @@ void ConstDeclAST::HandleSymbol() const
                     // return true;
                     exit(-1);
                 }
-                Symbol *sym = new Symbol(true,false, initval);
+                Symbol *sym = new Symbol(true,true, initval);
                 SymbolTable::AddSymbol(*DefAstPtr->VarIdent, sym);
                 DefAstPtr->VarSym = sym;
 

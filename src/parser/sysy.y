@@ -869,5 +869,5 @@ Constinitval: ConstInitVal
 // 定义错误处理函数, 其中第二个参数是错误信息
 // parser 如果发生错误 (例如输入的程序出现了语法错误), 就会调用这个函数
 void yyerror(BaseAST* &ast, const char *s) {
-  cerr << "error: " << s << endl;
+  cerr << "error: line " <<ast->position.line <<" column: "<<ast->position.column<< endl;
 }

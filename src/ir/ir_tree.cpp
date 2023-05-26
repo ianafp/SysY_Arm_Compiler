@@ -1,5 +1,14 @@
 #include "ir/ir_tree.h"
+static StmKind LastKind = StmKind::Cjump;
 std::map<std::string,int> IrTreeStackVarTable::StackTable;
+void StatementIRT::Dump() const{
+    if(LastKind==StmKind::Jump && this->ContentKind == StmKind::Jump)
+    {
+        return;
+    }
+    LastKind = this->ContentKind;
+    StmContent->Dump();
+}
 void IrTreeStackVarTable::Init()
 {
     StackTable.clear();
@@ -109,6 +118,7 @@ ExpValue ConvertExpToBinOprand(ExpIRT *exp)
                       << "load i32,i32* " << res.LabelToString() << "\n";
             res.IsPtr = false;
             res.TempId = TempId;
+            res.VarName = "%%%%";
         }
     }
     else if (exp->ContentKind == ExpKind::Name || res.IsPtr)
@@ -242,7 +252,7 @@ ExpValue BinOpIRT::ExpDump() const
         std::cout << "%" << temp2 << " = "
                   << "icmp ne i32 0, " << RightValue.LabelToString() << "\n";
         std::cout << "%" << std::to_string(res) << " = "
-                  << "and i32 %" << std::to_string(temp1) << ", %" << std::to_string(temp2);
+                  << "and i1 %" << std::to_string(temp1) << ", %" << std::to_string(temp2)<<"\n";
         ResString = "%" + std::to_string(res);
         res = TempIdAllocater::GetId();
         std::cout<<"%"<<res<<" = sext i1 "<<ResString<<" to i32\n";
@@ -257,7 +267,7 @@ ExpValue BinOpIRT::ExpDump() const
         std::cout << "%" << temp2 << " = "
                   << "icmp ne i32 0, " << RightValue.LabelToString() << "\n";
         std::cout << "%" << std::to_string(res) << " = "
-                  << "or i1 %" << std::to_string(temp1) << ", %" << std::to_string(temp2);
+                  << "or i1 %" << std::to_string(temp1) << ", %" << std::to_string(temp2)<<"\n";
         ResString = "%" + std::to_string(res);
         res = TempIdAllocater::GetId();
         std::cout<<"%"<<res<<" = sext i1 "<<ResString<<" to i32\n";
@@ -521,13 +531,14 @@ void GlobalVarIRT::Dump() const
         }
         else
         {
-            if (this->Int32Val == 0)
-            {
-                std::cout << " zeroinitializer";
-            } else {
-                // Might be used for const global variable initialization.
-                std::cout << " " << this->Int32Val;
-            }
+            std::cout << " zeroinitializer";
+            // if (this->Int32Val == 0)
+            // {
+            //     std::cout << " zeroinitializer";
+            // } else {
+            //     // Might be used for const global variable initialization.
+            //     std::cout << " " << this->Int32Val;
+            // }
         }
         std::cout << ", align 4\n";
     }

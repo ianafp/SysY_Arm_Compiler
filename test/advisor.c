@@ -1,8 +1,10 @@
-#include <stdio.h>
-
-const int MAX_COURSES = 100;
-const int MAX_NAME_LENGTH = 5;
-const int MAX_GROUPS = 7;
+#include<stdio.h>
+#define MAX_COURSES 100
+#define MAX_NAME_LENGTH 5
+#define MAX_GROUPS 7
+// const int MAX_COURSES = 100;
+// const int MAX_NAME_LENGTH = 5;
+// const int MAX_GROUPS = 7;
 int coursename[MAX_COURSES][MAX_NAME_LENGTH];
 int courseData[MAX_COURSES][4];
 int courseread[MAX_COURSES];
@@ -62,7 +64,7 @@ void printname(int name[])
 		putchar(name[i]);
 		i = i + 1;
 	}
-	return;
+	return ;
 }
 
 //输入
@@ -117,6 +119,7 @@ void init()
 		}
 		i = i + 1;
 	}
+	
 	i = 0;
 	while (i < MAX_NAME_LENGTH)
 	{
@@ -124,7 +127,8 @@ void init()
 		i = i + 1;
 	}
 	i = 0;
-	while ((c = getchar()) != EOF) 
+	c = getchar();
+	while (c != -1) 
     {
 		if (c == 10) //\n
         {
@@ -145,7 +149,7 @@ void init()
 			groupmember = 0;
 			courseIndex = courseIndex + 1;
 			courseCount = courseCount + 1;
-			int i = 0;
+			i = 0;
 			while (i < MAX_NAME_LENGTH)
 			{
 				temp[i] = 0;
@@ -182,7 +186,7 @@ void init()
 			if (fieldIndex == 2)
 			{
 				readingPrecourse = 1;
-				int i = 0;
+				i = 0;
 				while (i < MAX_NAME_LENGTH)
 				{
 					temp[i] = 0;
@@ -192,14 +196,14 @@ void init()
 			continue;
 		}
 
-		if (c == 44)  //,
+		if (c == 44)  
 		{
 			fieldValue = gethash(temp);
 			group[courseIndex][orindex][andindex] = fieldValue;
 			andindex = andindex + 1;
 			groupmember = groupmember + 1;
 			nameIndex = 0;
-			int i = 0;
+			i = 0;
 			while (i < MAX_NAME_LENGTH)
 			{
 				temp[i] = 0;
@@ -215,7 +219,7 @@ void init()
 			orindex = orindex + 1;
 			groupmember = groupmember + 1;
 			nameIndex = 0;
-			int i = 0;
+			i = 0;
 			while (i < MAX_NAME_LENGTH)
 			{
 				temp[i] = 0;
@@ -239,7 +243,9 @@ void init()
 			else if (fieldIndex == 3)
 				fieldValue = c;
 		}
+		c = getchar();
 	}
+	return ;
 }
 // 计算总学分
 int calculateTotalCredits(int courseCount) {
@@ -248,7 +254,7 @@ int calculateTotalCredits(int courseCount) {
 	while (i < courseCount)
 	{
 		int credit = courseData[i][1];
-		totalCredits += credit;
+		totalCredits = totalCredits + credit;
 		i = i + 1;
 	}
 
@@ -265,7 +271,7 @@ int calculateAtemptCredits(int courseCount) {
 		if (courseData[i][3] != 0)
 		{
 			int credit = courseData[i][1];
-			attemptCredits += credit;
+			attemptCredits = attemptCredits + credit;
 		}
 		i = i + 1;
 	}
@@ -283,7 +289,7 @@ int calculateCompletedCredits(int courseCount) {
 		if (courseData[i][3] != 0 && courseData[i][3] != 70)
 		{
 			int credit = courseData[i][1];
-			completedCredits += credit;
+			completedCredits = completedCredits +  credit;
 		}
 		i = i + 1;
 	}
@@ -316,7 +322,7 @@ int calculateGPA(int courseCount) {
 		else if (score == 65) //A
 			score = 40;
 
-		totalScore += score * credit;
+		totalScore = totalScore + score * credit;
 		i = i + 1;
 	}
 
@@ -327,11 +333,11 @@ int calculateGPA(int courseCount) {
 	int decimalPart = roundedGPA % 10;
 	if (decimalPart >= 5)
 	{
-		roundedGPA += 10 - decimalPart;
+		roundedGPA = roundedGPA + 10 - decimalPart;
 	}
 	else
 	{
-		roundedGPA -= decimalPart;
+		roundedGPA = roundedGPA - decimalPart;
 	}
 
 	return roundedGPA / 10;
@@ -402,6 +408,7 @@ void printCourseRecommendation(int courseCount) {
 		}
 		i = i + 1;
 	}
+	return;
 }
 
 int main() {
@@ -409,153 +416,156 @@ int main() {
 	init();
 	// 计算并输出GPA
 	int gpa = calculateGPA(courseCount);
-	// printf("GPA: %d.%d\n", gpa / 10, gpa % 10);
-	putchar(71); // 'G'
-	putchar(80); // 'P'
-	putchar(65); // 'A'
-	putchar(58); // ':'
-	putchar(32); // ' '
-	putint(gpa / 10);
-	putchar(46); // '.'
-	putint(gpa % 10);
-	putchar(10); // '\n'
+	printf("GPA: %d.%d\n", gpa / 10, gpa % 10);
+	// putchar(71); // 'G'
+	// putchar(80); // 'P'
+	// putchar(65); // 'A'
+	// putchar(58); // ':'
+	// putchar(32); // ' '
+	// putint(gpa / 10);
+	// putchar(46); // '.'
+	// putint(gpa % 10);
+	// putchar(10); // '\n'
 
 
 	// 输出总学分
 	int attempt = calculateAtemptCredits(courseCount);
-	// printf("Hours Attempted: %d\n", attempt);
-	putchar(72); // 'H'
-	putchar(111); // 'o'
-	putchar(117); // 'u'
-	putchar(114); // 'r'
-	putchar(115); // 's'
-	putchar(32); // ' '
-	putchar(65); // 'A'
-	putchar(116); // 't'
-	putchar(116); // 't'
-	putchar(101); // 'e'
-	putchar(109); // 'm'
-	putchar(112); // 'p'
-	putchar(116); // 't'
-	putchar(101); // 'e'
-	putchar(100); // 'd'
-	putchar(58); // ':'
-	putchar(32); // ' '
-	putint(attempt);
-	putchar(10); // '\n'
+	printf("Hours Attempted: %d\n", attempt);
+	// putchar(72); // 'H'
+	// putchar(111); // 'o'
+	// putchar(117); // 'u'
+	// putchar(114); // 'r'
+	// putchar(115); // 's'
+	// putchar(32); // ' '
+	// putchar(65); // 'A'
+	// putchar(116); // 't'
+	// putchar(116); // 't'
+	// putchar(101); // 'e'
+	// putchar(109); // 'm'
+	// putchar(112); // 'p'
+	// putchar(116); // 't'
+	// putchar(101); // 'e'
+	// putchar(100); // 'd'
+	// putchar(58); // ':'
+	// putchar(32); // ' '
+	// putint(attempt);
+	// putchar(10); // '\n'
 
 
 	int completed = calculateCompletedCredits(courseCount);
-	// printf("Hours Completed: %d\n", completed);
-	putchar(72); // 'H'
-	putchar(111); // 'o'
-	putchar(117); // 'u'
-	putchar(114); // 'r'
-	putchar(115); // 's'
-	putchar(32); // ' '
-	putchar(67); // 'C'
-	putchar(111); // 'o'
-	putchar(109); // 'm'
-	putchar(112); // 'p'
-	putchar(108); // 'l'
-	putchar(101); // 'e'
-	putchar(116); // 't'
-	putchar(101); // 'e'
-	putchar(100); // 'd'
-	putchar(58); // ':'
-	putchar(32); // ' '
-	putint(completed);
-	putchar(10); // '\n'
+	printf("Hours Completed: %d\n", completed);
+	// putchar(72); // 'H'
+	// putchar(111); // 'o'
+	// putchar(117); // 'u'
+	// putchar(114); // 'r'
+	// putchar(115); // 's'
+	// putchar(32); // ' '
+	// putchar(67); // 'C'
+	// putchar(111); // 'o'
+	// putchar(109); // 'm'
+	// putchar(112); // 'p'
+	// putchar(108); // 'l'
+	// putchar(101); // 'e'
+	// putchar(116); // 't'
+	// putchar(101); // 'e'
+	// putchar(100); // 'd'
+	// putchar(58); // ':'
+	// putchar(32); // ' '
+	// putint(completed);
+	// putchar(10); // '\n'
 
 
 	int remaining = calculateTotalCredits(courseCount) - calculateCompletedCredits(courseCount);
-	// printf("Credits Remaining: %d\n", remaining);
-	putchar(67); // 'C'
-	putchar(114); // 'r'
-	putchar(101); // 'e'
-	putchar(100); // 'd'
-	putchar(105); // 'i'
-	putchar(116); // 't'
-	putchar(115); // 's'
-	putchar(32); // ' '
-	putchar(82); // 'R'
-	putchar(101); // 'e'
-	putchar(109); // 'm'
-	putchar(97); // 'a'
-	putchar(105); // 'i'
-	putchar(110); // 'n'
-	putchar(105); // 'i'
-	putchar(110); // 'n'
-	putchar(103); // 'g'
-	putchar(58); // ':'
-	putchar(32); // ' '
-	putint(remaining);
-	putchar(10); // '\n'
+	printf("Credits Remaining: %d\n", remaining);
+	// putchar(67); // 'C'
+	// putchar(114); // 'r'
+	// putchar(101); // 'e'
+	// putchar(100); // 'd'
+	// putchar(105); // 'i'
+	// putchar(116); // 't'
+	// putchar(115); // 's'
+	// putchar(32); // ' '
+	// putchar(82); // 'R'
+	// putchar(101); // 'e'
+	// putchar(109); // 'm'
+	// putchar(97); // 'a'
+	// putchar(105); // 'i'
+	// putchar(110); // 'n'
+	// putchar(105); // 'i'
+	// putchar(110); // 'n'
+	// putchar(103); // 'g'
+	// putchar(58); // ':'
+	// putchar(32); // ' '
+	// putint(remaining);
+	// putchar(10); // '\n'
 
 
 	//打印课程推荐
-	// printf("\nPossible Courses to Take Next\n");
-	putchar(10); // '\n'
-	putchar(80); // 'P'
-	putchar(111); // 'o'
-	putchar(115); // 's'
-	putchar(115); // 's'
-	putchar(105); // 'i'
-	putchar(98); // 'b'
-	putchar(108); // 'l'
-	putchar(101); // 'e'
-	putchar(32); // ' '
-	putchar(67); // 'C'
-	putchar(111); // 'o'
-	putchar(117); // 'u'
-	putchar(114); // 'r'
-	putchar(115); // 's'
-	putchar(101); // 'e'
-	putchar(115); // 's'
-	putchar(32); // ' '
-	putchar(116); // 't'
-	putchar(111); // 'o'
-	putchar(32); // ' '
-	putchar(84); // 'T'
-	putchar(97); // 'a'
-	putchar(107); // 'k'
-	putchar(101); // 'e'
-	putchar(32); // ' '
-	putchar(78); // 'N'
-	putchar(101); // 'e'
-	putchar(120); // 'x'
-	putchar(116); // 't'
-	putchar(10); // '\n'
+	printf("\nPossible Courses to Take Next\n");
+	// putchar(10); // '\n'
+	// putchar(80); // 'P'
+	// putchar(111); // 'o'
+	// putchar(115); // 's'
+	// putchar(115); // 's'
+	// putchar(105); // 'i'
+	// putchar(98); // 'b'
+	// putchar(108); // 'l'
+	// putchar(101); // 'e'
+	// putchar(32); // ' '
+	// putchar(67); // 'C'
+	// putchar(111); // 'o'
+	// putchar(117); // 'u'
+	// putchar(114); // 'r'
+	// putchar(115); // 's'
+	// putchar(101); // 'e'
+	// putchar(115); // 's'
+	// putchar(32); // ' '
+	// putchar(116); // 't'
+	// putchar(111); // 'o'
+	// putchar(32); // ' '
+	// putchar(84); // 'T'
+	// putchar(97); // 'a'
+	// putchar(107); // 'k'
+	// putchar(101); // 'e'
+	// putchar(32); // ' '
+	// putchar(78); // 'N'
+	// putchar(101); // 'e'
+	// putchar(120); // 'x'
+	// putchar(116); // 't'
+	// putchar(10); // '\n'
 	if (remaining != 0)
+	{
 		printCourseRecommendation(courseCount);
+	}
 	else
 		// printf("  None - Congratulations!\n");
 	{
-		putchar(32); // ' '
-		putchar(32); // ' '
-		putchar(78); // 'N'
-		putchar(111); // 'o'
-		putchar(110); // 'n'
-		putchar(101); // 'e'
-		putchar(32); // ' '
-		putchar(45); // '-'
-		putchar(32); // ' '
-		putchar(67); // 'C'
-		putchar(111); // 'o'
-		putchar(110); // 'n'
-		putchar(103); // 'g'
-		putchar(114); // 'r'
-		putchar(97); // 'a'
-		putchar(116); // 't'
-		putchar(117); // 'u'
-		putchar(108); // 'l'
-		putchar(97); // 'a'
-		putchar(116); // 't'
-		putchar(105) ;//i
-		putchar(111) ;//o
-		putchar(110) ;//n
-		putchar(115) ;//s
-		putchar(10) ;//'\n'
+		printf("  None - Congratulations!\n");
+		// putchar(32); // ' '
+		// putchar(32); // ' '
+		// putchar(78); // 'N'
+		// putchar(111); // 'o'
+		// putchar(110); // 'n'
+		// putchar(101); // 'e'
+		// putchar(32); // ' '
+		// putchar(45); // '-'
+		// putchar(32); // ' '
+		// putchar(67); // 'C'
+		// putchar(111); // 'o'
+		// putchar(110); // 'n'
+		// putchar(103); // 'g'
+		// putchar(114); // 'r'
+		// putchar(97); // 'a'
+		// putchar(116); // 't'
+		// putchar(117); // 'u'
+		// putchar(108); // 'l'
+		// putchar(97); // 'a'
+		// putchar(116); // 't'
+		// putchar(105) ;//i
+		// putchar(111) ;//o
+		// putchar(110) ;//n
+		// putchar(115) ;//s
+		// putchar(10) ;//'\n'
 	}
 
 	return 0;

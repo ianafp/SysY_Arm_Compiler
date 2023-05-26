@@ -107,6 +107,9 @@ void SymbolTable::InitTable(){
         args.clear();
         sym = new Symbol(ValueType::INT32,args);
         TableVec[0].insert(std::pair<std::string,Symbol*>("getch",sym));
+        // getchar
+        sym = new Symbol(ValueType::INT32,args);
+        TableVec[0].insert(std::pair<std::string,Symbol*>("getchar",sym));
         // get array
         args.clear();
         args.push_back(ArgsType::Int32Array);
@@ -122,6 +125,8 @@ void SymbolTable::InitTable(){
         args.push_back( ArgsType::Int32 );
         sym = new Symbol(ValueType::VOID,args);
         TableVec[0].insert(std::pair<std::string,Symbol*>("putch",sym));
+        // putchar
+        TableVec[0].insert(std::pair<std::string,Symbol*>("putchar",sym));
         // putarray
         args.clear();
         args.push_back( ArgsType::Int32 );

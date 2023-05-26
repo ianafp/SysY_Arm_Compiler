@@ -1,6 +1,6 @@
-#include"translate/ir_generator.h"
-//deal with statement
-void Program::stmt_dealer(StmtAST* stmt_available, BaseIRT* &ir)
+#include "translate/ir_generator.h"
+// deal with statement
+void Program::stmt_dealer(StmtAST *stmt_available, BaseIRT *&ir)
 {
     // Deal with Stmt
     if (stmt_available != nullptr)
@@ -48,100 +48,138 @@ void Program::stmt_dealer(StmtAST* stmt_available, BaseIRT* &ir)
             ir = new StatementIRT(StmKind::Exp, ir_exp);
         }
         // to be implemented
-        else if(stmt_available->tp == StmtType::Assign){
-            AssignTranslater(reinterpret_cast<AssignAST*>(stmt_available->ret_exp), ir);
+        else if (stmt_available->tp == StmtType::Assign)
+        {
+            AssignTranslater(reinterpret_cast<AssignAST *>(stmt_available->ret_exp), ir);
         }
-        else if(stmt_available->tp == StmtType::Block){
+        else if (stmt_available->tp == StmtType::Block)
+        {
             DLOG(WARNING) << "BLOCK_DEALER CATCHED";
-            block_dealer(reinterpret_cast<BlockAST*>(stmt_available->ret_exp), ir);
+            block_dealer(reinterpret_cast<BlockAST *>(stmt_available->ret_exp), ir);
         }
-        else if(stmt_available->tp == StmtType::Empty)
+        else if (stmt_available->tp == StmtType::Empty)
         {
             return;
         }
         // more to continue...
     }
-    //Further: need to consider: what if no return here in a void function while there are exp or other stmt??
+    // Further: need to consider: what if no return here in a void function while there are exp or other stmt??
 }
 
-void  Program::LValTranslater(LValAST* lval,BaseIRT* &ir){
+void Program::LValTranslater(LValAST *lval, BaseIRT *&ir)
+{
     std::string LvalName = *lval->VarIdent;
     // get var ir label name
-    Symbol* sym = SymbolTable::FindSymbol(*lval->VarIdent);
-    if(sym==NULL){
-        LOG(ERROR)<<"Undefined Lval "<<*lval->VarIdent<<"\n";
+    Symbol *sym = SymbolTable::FindSymbol(*lval->VarIdent);
+    if (sym == NULL)
+    {
+        LOG(ERROR) << "Undefined Lval " << *lval->VarIdent << "\n";
         exit(-1);
     }
+
+    // handle the const var
+
+    // if (sym->ConstFlag && sym->SymbolType == SymType::INT32)
+    // {
+    //     ir = new ConstIRT(sym->VarArrtributes.InitVal);
+    //     return;
+    // }
+
     LvalName = sym->GetLabelStr(LvalName);
-    if(sym->SymbolType == SymType::INT32){
-        ir = new MemIRT(new ExpIRT(new NameIRT(LvalName,sym->MemoryFlag)));
+    if (sym->SymbolType == SymType::INT32)
+    {
+        ir = new MemIRT(new ExpIRT(new NameIRT(LvalName, sym->MemoryFlag)));
     }
-    else if(sym->SymbolType == SymType::Int32Array){
+    else if (sym->SymbolType == SymType::Int32Array)
+    {
         // get offset
         // depends on const exp implement
         std::vector<int> &dim = sym->ArrAttributes->ArrayDimVec;
-        if(lval->IndexVec.size()!=sym->ArrAttributes->ArrayDimVec.size()){
-            if(lval->IndexVec.size()==0)
+        int base = 1;
+        bool ArrFlag = false;
+        if (lval->IndexVec.size() != sym->ArrAttributes->ArrayDimVec.size())
+        {
+            if (lval->IndexVec.size() == 0)
             {
-                NameIRT* ident = new NameIRT(sym->GetLabelStr(*lval->VarIdent),sym->ArrAttributes->ArrayDimVec);
+                NameIRT *ident = new NameIRT(sym->GetLabelStr(*lval->VarIdent), sym->ArrAttributes->ArrayDimVec);
                 ir = new MemIRT(new ExpIRT(ident));
                 return;
             }
-            
-            LOG(ERROR)<<"Array Index of "<<*lval->VarIdent <<" mismatch dimension\n";
-            exit(-1);
+            else if (lval->IndexVec.size() < sym->ArrAttributes->ArrayDimVec.size())
+            {
+                for (unsigned int i = lval->IndexVec.size(); i < sym->ArrAttributes->ArrayDimVec.size(); ++i)
+                {
+                    base *= sym->ArrAttributes->ArrayDimVec[i];
+                }
+                ArrFlag = true;
+            }
+            else
+            {
+                LOG(ERROR) << "Array Index of " << *lval->VarIdent << " mismatch dimension\n";
+                exit(-1);
+            }
         }
-        int base = 1;
-        BaseIRT* LastIndex;
-        this->logic_exp_dealer(lval->IndexVec[lval->IndexVec.size()-1],LastIndex);
-        ExpIRT* offset = new ExpIRT(new BinOpIRT(BinOpKind::mul,reinterpret_cast<ExpIRT*>(LastIndex),new ExpIRT(new ConstIRT(4))));
-        for(int i = lval->IndexVec.size()-2;i>-1;i--){
+        BaseIRT *LastIndex;
+        this->logic_exp_dealer(lval->IndexVec[lval->IndexVec.size() - 1], LastIndex);
+        ExpIRT *offset = new ExpIRT(new BinOpIRT(BinOpKind::mul, reinterpret_cast<ExpIRT *>(LastIndex), new ExpIRT(new ConstIRT(4 * base))));
+        for (int i = lval->IndexVec.size() - 2; i > -1; i--)
+        {
             base *= dim[i];
-            BaseIRT* indexExp;
-            this->logic_exp_dealer(lval->IndexVec[i],indexExp);
-            ExpIRT* additem = new ExpIRT(new ConstIRT(base<<2));
-            additem = new ExpIRT(new BinOpIRT(BinOpKind::mul,additem,reinterpret_cast<ExpIRT*>(indexExp)));
-            offset = new ExpIRT(new BinOpIRT(BinOpKind::plus,additem,offset));
+            BaseIRT *indexExp;
+            this->logic_exp_dealer(lval->IndexVec[i], indexExp);
+            ExpIRT *additem = new ExpIRT(new ConstIRT(base << 2));
+            additem = new ExpIRT(new BinOpIRT(BinOpKind::mul, additem, reinterpret_cast<ExpIRT *>(indexExp)));
+            offset = new ExpIRT(new BinOpIRT(BinOpKind::plus, additem, offset));
         }
-        NameIRT* ident = new NameIRT(sym->GetLabelStr(*lval->VarIdent),sym->ArrAttributes->ArrayDimVec);
-        ir = new MemIRT(new ExpIRT(new BinOpIRT(BinOpKind::plus,new ExpIRT(ident),offset)));
+        NameIRT *ident = new NameIRT(sym->GetLabelStr(*lval->VarIdent), sym->ArrAttributes->ArrayDimVec);
+        ir = new MemIRT(new ExpIRT(new BinOpIRT(BinOpKind::plus, new ExpIRT(ident), offset)));
     }
     // may add more lval type
-    else{
-        DLOG(ERROR)<<"Illegal Left Value \n";
+    else
+    {
+        DLOG(ERROR) << "Illegal Left Value \n";
         exit(-1);
     }
-
 }
-void Program::AssignTranslater(AssignAST* assign, BaseIRT* &ir){
-    BaseIRT* ExpIr,*LvalIr;
-    Program::LValTranslater(reinterpret_cast<LValAST*>(assign->LVal),LvalIr);
-    Program::logic_exp_dealer(assign->ValueExp,ExpIr);
-    ir =  new StatementIRT(new MoveIRT(reinterpret_cast<MemIRT*>(LvalIr),reinterpret_cast<ExpIRT*>(ExpIr)));
+void Program::AssignTranslater(AssignAST *assign, BaseIRT *&ir)
+{
+    BaseIRT *ExpIr, *LvalIr;
+    Program::LValTranslater(reinterpret_cast<LValAST *>(assign->LVal), LvalIr);
+    Program::logic_exp_dealer(assign->ValueExp, ExpIr);
+    ir = new StatementIRT(new MoveIRT(reinterpret_cast<MemIRT *>(LvalIr), reinterpret_cast<ExpIRT *>(ExpIr)));
 }
-void Program::BranchConditionJudge(ExpIRT* ir_condition_exp, ExpIRT* &leftExp, ExpIRT* &rightExp, BinOpKind &opkind){
-    if (ir_condition_exp->ContentKind == ExpKind::BinOp) {
+void Program::BranchConditionJudge(ExpIRT *ir_condition_exp, ExpIRT *&leftExp, ExpIRT *&rightExp, BinOpKind &opkind)
+{
+    if (ir_condition_exp->ContentKind == ExpKind::BinOp)
+    {
         // condition expression with two sides
-        BinOpIRT* ir_condition_binop = reinterpret_cast<BinOpIRT* >(ir_condition_exp->ExpContent);
-        if (ir_condition_binop != nullptr) {
+        BinOpIRT *ir_condition_binop = reinterpret_cast<BinOpIRT *>(ir_condition_exp->ExpContent);
+        if (ir_condition_binop != nullptr)
+        {
             opkind = ir_condition_binop->OpKind;
             leftExp = ir_condition_binop->LeftExp;
             rightExp = ir_condition_binop->RightExp;
-        } else {
+        }
+        else
+        {
             DLOG(ERROR) << "Haven't implement error handling.";
         }
-    } else {
+    }
+    else
+    {
         // condition expresssion with only one side, now we need to add one side
         // assert(ir_condition_exp->ContentKind == ExpKind::Const);
-        ExpIRT* zero_irt = new ExpIRT(new ConstIRT(0));
+        ExpIRT *zero_irt = new ExpIRT(new ConstIRT(0));
         opkind = BinOpKind::IsNe;
         leftExp = reinterpret_cast<ExpIRT *>(ir_condition_exp->ExpContent);
         rightExp = zero_irt;
     }
 }
-void Program::BranchTranslater(StmtAST* stmt_available, BaseIRT* &ir, bool has_else){
-    if (!has_else){
-        assert(stmt_available->ret_exp == nullptr); // not used in If statement
+void Program::BranchTranslater(StmtAST *stmt_available, BaseIRT *&ir, bool has_else)
+{
+    if (!has_else)
+    {
+        assert(stmt_available->ret_exp == nullptr);   // not used in If statement
         assert(stmt_available->stmt_else == nullptr); // here the else statement block should not be used.
         assert(stmt_available->cond_exp != nullptr && stmt_available->stmt_if != nullptr);
         DLOG(WARNING) << "If statement";
@@ -149,28 +187,29 @@ void Program::BranchTranslater(StmtAST* stmt_available, BaseIRT* &ir, bool has_e
         // the type is LOrExpAST
 
         /* 1. first part: deal with the condition of the expression, construct the CJUMP IR tree. */
-        BaseIRT* ir_cjump = nullptr; // this is used to receive the cjump ir tree.
-        LOrExpAST* conditional_exp = reinterpret_cast<LOrExpAST *>(stmt_available->cond_exp);
-        BaseIRT* ir_condition;
+        BaseIRT *ir_cjump = nullptr; // this is used to receive the cjump ir tree.
+        LOrExpAST *conditional_exp = reinterpret_cast<LOrExpAST *>(stmt_available->cond_exp);
+        BaseIRT *ir_condition;
         // note that the ExpIRT is the type of ir_condition
         logic_exp_dealer(conditional_exp, ir_condition);
         // short circuit? haven't implemented yet. Please do not use this trait in your program.
-        ExpIRT * ir_condition_exp = dynamic_cast<ExpIRT*>(ir_condition);
+        ExpIRT *ir_condition_exp = dynamic_cast<ExpIRT *>(ir_condition);
         DLOG(WARNING) << "Condition of IF statement is: " << ir_condition_exp->ExpDump();
         BinOpKind opkind;
         ExpIRT *leftExp = nullptr, *rightExp = nullptr;
-        // use BranchConditionJudge to extract the condition of if-statement    
+        // use BranchConditionJudge to extract the condition of if-statement
         BranchConditionJudge(ir_condition_exp, leftExp, rightExp, opkind);
-        LabelIRT* if_block = new LabelIRT(std::string("if"));
-        LabelIRT* end_label = new LabelIRT(std::string("end"));
+        LabelIRT *if_block = new LabelIRT(std::string("if"));
+        LabelIRT *end_label = new LabelIRT(std::string("end"));
         ir_cjump = new StatementIRT(StmKind::Cjump, new CjumpIRT(opkind, leftExp, rightExp, if_block, end_label));
 
         /* 2. deal with the label, attach the label to the IR tree */
-        BaseIRT* ir_block = nullptr;
-        BaseAST* stmt_if_ast = stmt_available->stmt_if;
+        BaseIRT *ir_block = nullptr;
+        BaseAST *stmt_if_ast = stmt_available->stmt_if;
         assert(stmt_if_ast->type() == std::string("StmtAST"));
-        stmt_dealer(reinterpret_cast<StmtAST*>(stmt_if_ast), ir_block);
-        if (ir_block == nullptr) {
+        stmt_dealer(reinterpret_cast<StmtAST *>(stmt_if_ast), ir_block);
+        if (ir_block == nullptr)
+        {
             // attach the if_label to the start of the block
             ir_block = new StatementIRT(if_block);
             // attach the unconditional jump to the end of if block to construct a basic block
@@ -178,8 +217,10 @@ void Program::BranchTranslater(StmtAST* stmt_available, BaseIRT* &ir, bool has_e
             // attach the end_label to the end of the block
             ir_block = new StatementIRT(StmKind::Sequence, new SequenceIRT(reinterpret_cast<StatementIRT *>(ir_block), new StatementIRT(end_label)));
             // attach the cjump ir to the block ir
-            ir = new StatementIRT(StmKind::Sequence, new SequenceIRT(reinterpret_cast<StatementIRT *>(ir_cjump), reinterpret_cast<StatementIRT*>(ir_block)));
-        } else {
+            ir = new StatementIRT(StmKind::Sequence, new SequenceIRT(reinterpret_cast<StatementIRT *>(ir_cjump), reinterpret_cast<StatementIRT *>(ir_block)));
+        }
+        else
+        {
             // attach the if_label to the start of the block
             ir_block = new StatementIRT(StmKind::Sequence, new SequenceIRT(new StatementIRT(if_block), reinterpret_cast<StatementIRT *>(ir_block)));
             // attach the unconditional jump to the end of if block to construct a basic block
@@ -187,46 +228,51 @@ void Program::BranchTranslater(StmtAST* stmt_available, BaseIRT* &ir, bool has_e
             // attach the end_label to the end of the block
             ir_block = new StatementIRT(StmKind::Sequence, new SequenceIRT(reinterpret_cast<StatementIRT *>(ir_block), new StatementIRT(end_label)));
             // attach the cjump ir to the block ir
-            ir = new StatementIRT(StmKind::Sequence, new SequenceIRT(reinterpret_cast<StatementIRT *>(ir_cjump), reinterpret_cast<StatementIRT*>(ir_block)));
+            ir = new StatementIRT(StmKind::Sequence, new SequenceIRT(reinterpret_cast<StatementIRT *>(ir_cjump), reinterpret_cast<StatementIRT *>(ir_block)));
         }
-    } else {
+    }
+    else
+    {
         assert(stmt_available->ret_exp == nullptr); // not used in If statement
         assert(stmt_available->cond_exp != nullptr && stmt_available->stmt_if != nullptr && stmt_available->stmt_else != nullptr);
         DLOG(WARNING) << "If else statement";
-        
+
         /* 1. first part: deal with the condition of the expression, construct the CJUMP IR tree. */
-        BaseIRT* ir_cjump = nullptr; // this is used to receive the cjump ir tree.
-        LOrExpAST* conditional_exp = reinterpret_cast<LOrExpAST *>(stmt_available->cond_exp);
-        BaseIRT* ir_condition;
+        BaseIRT *ir_cjump = nullptr; // this is used to receive the cjump ir tree.
+        LOrExpAST *conditional_exp = reinterpret_cast<LOrExpAST *>(stmt_available->cond_exp);
+        BaseIRT *ir_condition;
         // note that the ExpIRT is the type of ir_condition
         logic_exp_dealer(conditional_exp, ir_condition);
         // short circuit? haven't implemented yet. Please do not use this trait in your program.
-        ExpIRT * ir_condition_exp = dynamic_cast<ExpIRT*>(ir_condition);
+        ExpIRT *ir_condition_exp = dynamic_cast<ExpIRT *>(ir_condition);
         DLOG(WARNING) << "Condition of IF-ELSE statement is: " << ir_condition_exp->ExpDump();
         BinOpKind opkind;
         ExpIRT *leftExp = nullptr, *rightExp = nullptr;
-        // use BranchConditionJudge to extract the condition of if-statement    
+        // use BranchConditionJudge to extract the condition of if-statement
         BranchConditionJudge(ir_condition_exp, leftExp, rightExp, opkind);
-        LabelIRT* if_block = new LabelIRT(std::string("if"));
-        LabelIRT* else_label = new LabelIRT(std::string("else"));
-        LabelIRT* end_label = new LabelIRT(std::string("end"));
+        LabelIRT *if_block = new LabelIRT(std::string("if"));
+        LabelIRT *else_label = new LabelIRT(std::string("else"));
+        LabelIRT *end_label = new LabelIRT(std::string("end"));
         ir_cjump = new StatementIRT(StmKind::Cjump, new CjumpIRT(opkind, leftExp, rightExp, if_block, else_label));
-    
+
         /* 2. deal with the label, attach the label to the IR tree */
         BaseIRT *ir_block = nullptr, *else_block = nullptr;
         BaseAST *stmt_if_ast = stmt_available->stmt_if;
         BaseAST *stmt_else_ast = stmt_available->stmt_else;
         assert(stmt_if_ast->type() == std::string("StmtAST"));
-        stmt_dealer(reinterpret_cast<StmtAST*>(stmt_if_ast), ir_block);
-        stmt_dealer(reinterpret_cast<StmtAST*>(stmt_else_ast), else_block);
-        if (ir_block != nullptr && else_block != nullptr) {
+        stmt_dealer(reinterpret_cast<StmtAST *>(stmt_if_ast), ir_block);
+        stmt_dealer(reinterpret_cast<StmtAST *>(stmt_else_ast), else_block);
+        if (ir_block != nullptr && else_block != nullptr)
+        {
             // attach the if_label to the start of the block
             ir_block = new StatementIRT(StmKind::Sequence, new SequenceIRT(new StatementIRT(if_block), reinterpret_cast<StatementIRT *>(ir_block)));
             // attach the else_label to the start of the else block
             else_block = new StatementIRT(StmKind::Sequence, new SequenceIRT(new StatementIRT(else_label), reinterpret_cast<StatementIRT *>(else_block)));
         }
-        else{
-            ir_block = new StatementIRT(if_block); else_block = new StatementIRT(else_label);
+        else
+        {
+            ir_block = new StatementIRT(if_block);
+            else_block = new StatementIRT(else_label);
         }
         // attach the unconditional jump to the end of the block
         ir_block = new StatementIRT(StmKind::Sequence, new SequenceIRT(reinterpret_cast<StatementIRT *>(ir_block), new StatementIRT(StmKind::Jump, new JumpIRT(end_label))));
@@ -235,44 +281,45 @@ void Program::BranchTranslater(StmtAST* stmt_available, BaseIRT* &ir, bool has_e
         // attach the end_label to the end of else block
         else_block = new StatementIRT(StmKind::Sequence, new SequenceIRT(reinterpret_cast<StatementIRT *>(else_block), new StatementIRT(end_label)));
         // attach the if block to the else block
-        BaseIRT *ir_combine = new StatementIRT(StmKind::Sequence, new SequenceIRT(reinterpret_cast<StatementIRT*>(ir_block), reinterpret_cast<StatementIRT*>(else_block)));
+        BaseIRT *ir_combine = new StatementIRT(StmKind::Sequence, new SequenceIRT(reinterpret_cast<StatementIRT *>(ir_block), reinterpret_cast<StatementIRT *>(else_block)));
         // attach the cjump ir to the block ir
-        ir = new StatementIRT(StmKind::Sequence, new SequenceIRT(reinterpret_cast<StatementIRT *>(ir_cjump), reinterpret_cast<StatementIRT*>(ir_combine)));
+        ir = new StatementIRT(StmKind::Sequence, new SequenceIRT(reinterpret_cast<StatementIRT *>(ir_cjump), reinterpret_cast<StatementIRT *>(ir_combine)));
     }
 }
 
-void Program::WhileTranslater(StmtAST* stmt_available, BaseIRT* &ir){
+void Program::WhileTranslater(StmtAST *stmt_available, BaseIRT *&ir)
+{
     assert(stmt_available->ret_exp == nullptr); // not used in If statement
     assert(stmt_available->cond_exp != nullptr && stmt_available->stmt_while != nullptr);
     DLOG(WARNING) << "While statement";
-    LOrExpAST* conditional_exp = reinterpret_cast<LOrExpAST *>(stmt_available->cond_exp);
-    BaseIRT* ir_condition;
+    LOrExpAST *conditional_exp = reinterpret_cast<LOrExpAST *>(stmt_available->cond_exp);
+    BaseIRT *ir_condition;
     // note that the ExpIRT is the type of ir_condition
     logic_exp_dealer(conditional_exp, ir_condition);
     // short circuit? haven't implemented yet. Please do not use this trait in your program.
-    ExpIRT * ir_condition_exp = dynamic_cast<ExpIRT*>(ir_condition);
+    ExpIRT *ir_condition_exp = dynamic_cast<ExpIRT *>(ir_condition);
     DLOG(WARNING) << "Condition of While statement is: " << ir_condition_exp->ExpDump();
     BinOpKind opkind;
     ExpIRT *leftExp = nullptr, *rightExp = nullptr;
-    // use BranchConditionJudge to extract the condition of if-statement    
+    // use BranchConditionJudge to extract the condition of if-statement
     BranchConditionJudge(ir_condition_exp, leftExp, rightExp, opkind);
-    LabelIRT* entry_label = new LabelIRT(std::string("loop_entry"));
-    LabelIRT* body_label = new LabelIRT(std::string("loop_body"));
-    LabelIRT* end_label = new LabelIRT(std::string("loop_end"));
+    LabelIRT *entry_label = new LabelIRT(std::string("loop_entry"));
+    LabelIRT *body_label = new LabelIRT(std::string("loop_body"));
+    LabelIRT *end_label = new LabelIRT(std::string("loop_end"));
     ir = new StatementIRT(StmKind::Sequence, new SequenceIRT(new StatementIRT(new JumpIRT(entry_label)), new StatementIRT(entry_label)));
-    ir = new StatementIRT(StmKind::Sequence, new SequenceIRT(reinterpret_cast<StatementIRT*>(ir), new StatementIRT(StmKind::Cjump, new CjumpIRT(opkind, leftExp, rightExp, body_label, end_label))));
-    ir = new StatementIRT(StmKind::Sequence, new SequenceIRT(reinterpret_cast<StatementIRT*>(ir), new StatementIRT(StmKind::Lable, body_label)));
-    
-    //add label in while frame
+    ir = new StatementIRT(StmKind::Sequence, new SequenceIRT(reinterpret_cast<StatementIRT *>(ir), new StatementIRT(StmKind::Cjump, new CjumpIRT(opkind, leftExp, rightExp, body_label, end_label))));
+    ir = new StatementIRT(StmKind::Sequence, new SequenceIRT(reinterpret_cast<StatementIRT *>(ir), new StatementIRT(StmKind::Lable, body_label)));
+
+    // add label in while frame
     WhileFrame::push_back(entry_label, end_label);
 
-    BaseIRT* stmt_ir = nullptr;
-    stmt_dealer(reinterpret_cast<StmtAST*>(stmt_available->stmt_while), stmt_ir);
-    if(stmt_ir != nullptr)
-        ir = new StatementIRT(StmKind::Sequence, new SequenceIRT(reinterpret_cast<StatementIRT*>(ir), reinterpret_cast<StatementIRT*>(stmt_ir)));
-    ir = new StatementIRT(StmKind::Sequence, new SequenceIRT(reinterpret_cast<StatementIRT*>(ir), new StatementIRT(StmKind::Jump, new JumpIRT(entry_label))));
-    ir = new StatementIRT(StmKind::Sequence, new SequenceIRT(reinterpret_cast<StatementIRT*>(ir), new StatementIRT(StmKind::Lable, end_label)));
+    BaseIRT *stmt_ir = nullptr;
+    stmt_dealer(reinterpret_cast<StmtAST *>(stmt_available->stmt_while), stmt_ir);
+    if (stmt_ir != nullptr)
+        ir = new StatementIRT(StmKind::Sequence, new SequenceIRT(reinterpret_cast<StatementIRT *>(ir), reinterpret_cast<StatementIRT *>(stmt_ir)));
+    ir = new StatementIRT(StmKind::Sequence, new SequenceIRT(reinterpret_cast<StatementIRT *>(ir), new StatementIRT(StmKind::Jump, new JumpIRT(entry_label))));
+    ir = new StatementIRT(StmKind::Sequence, new SequenceIRT(reinterpret_cast<StatementIRT *>(ir), new StatementIRT(StmKind::Lable, end_label)));
 
-    //pop label in while frame
+    // pop label in while frame
     WhileFrame::pop_back();
 }
