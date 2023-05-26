@@ -87,6 +87,10 @@ int main() {
         putch(101);
         putch(110);
         putch(115);
+        putch(105);
+        putch(111);
+        putch(110);
+        putch(115);
         putch(10);
         
         return 0;
