@@ -2,11 +2,25 @@
 int SymbolTable::UnNamedStringCounter;
 std::vector<std::map<std::string,Symbol*>> SymbolTable::TableVec;
 std::map<std::string,std::string> SymbolTable::ConstStringMap;
+void replace_str(std::string& str, const std::string& before, const std::string& after)
+{
+	for (std::string::size_type pos(0); pos != std::string::npos; pos += after.length())
+	{
+		pos = str.find(before, pos);
+		if (pos != std::string::npos)
+			str.replace(pos, before.length(), after);
+		else
+			break;
+	}
+}
 void SymbolTable::PrintConstStringDeclare()
 {
     for(auto &it:ConstStringMap)
     {
-        std::cout<<it.second<<" = private unnamed_addr constant [ "<<it.first.length() + 1<<" x i8 ]c\""<<it.first<<"\\00\", align 1\n";
+        // it.first.replace(it.first.find("\n"),1,"\\0A");
+        std::string str(it.first);
+        replace_str(str,"\n","\\0A");
+        std::cout<<it.second<<" = private unnamed_addr constant [ "<<it.first.length() + 1<<" x i8 ]c\""<<str<<"\\00\", align 1\n";
     }
 }
 bool SymbolTable::AddSymbol(std::string name,Symbol* sym){
@@ -51,6 +65,7 @@ std::string SymbolTable::AddConstString(std::string &str)
     if (str.back() == '"') {
         str.pop_back();
     }
+    replace_str(str,"\\n","\n");
     auto it = ConstStringMap.find(str);
     DLOG(WARNING) << "CONST STR: " << str;
     if(ConstStringMap.find(str)!=ConstStringMap.end())

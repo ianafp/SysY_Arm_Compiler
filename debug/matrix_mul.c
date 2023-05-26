@@ -67,28 +67,8 @@ int main() {
 
     // 判断维度是否满足乘法要求
     if (N_A != M_B) {
-        // putf("Incompatible Dimensions\n");
-        putch(73);
-        putch(110);
-        putch(99);
-        putch(111);
-        putch(109);
-        putch(112);
-        putch(97);
-        putch(116);
-        putch(105);
-        putch(98);
-        putch(108);
-        putch(101);
-        putch(32);
-        putch(68);
-        putch(105);
-        putch(109);
-        putch(101);
-        putch(110);
-        putch(115);
-        putch(10);
-        
+        printf("Incompatible Dimensions\n");
+        // printf("Incompatible Dimens\n");
         return 0;
     }
     // 调用矩阵乘法函数
