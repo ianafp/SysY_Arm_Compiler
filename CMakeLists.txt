@@ -25,6 +25,7 @@ set(INC_DIR "$ENV{CDE_INCLUDE_PATH}" CACHE STRING "directory of includes")
 set(THIRD_PARTY_DIR ${PROJECT_SOURCE_DIR}/thirdparty)
 set(GLOG_DIR ${THIRD_PARTY_DIR}/glog-master)
 set(GLOG_SOURCE_DIR ${THIRD_PARTY_DIR}/glog-master/src)
+SET(GTEST_INCLUDE_DIR ${THIRD_PARTY_DIR}/googletest/include)
 set(THIRD_PARTY_BINIRY_DIR ${PROJECT_BINARY_DIR}/thirdparty)
 set(GLOG_BINIRY_DIR ${THIRD_PARTY_BINIRY_DIR}/glog-master)
 message(STATUS "Library directory: ${LIB_DIR}")
@@ -44,7 +45,8 @@ if(NOT (L_SOURCES STREQUAL "" AND Y_SOURCES STREQUAL ""))
   bison_target(Parser ${Y_SOURCES} ${Y_OUTPUTS})
   add_flex_bison_dependency(Lexer Parser)
 endif()
-
+message(STATUS "Lex_out in ${L_OUTPUTS}")
+message(STATUS "Yacc_out in ${Y_OUTPUTS}")
 # project link directories
 link_directories(${LIB_DIR})
 
@@ -61,12 +63,17 @@ file(GLOB_RECURSE CC_SOURCES "src/*.cc" "src/*/*.cc" "src/*/*/*.cc")
 set(SOURCES ${C_SOURCES} ${CXX_SOURCES} ${CC_SOURCES}
             ${FLEX_Lexer_OUTPUTS} ${BISON_Parser_OUTPUT_SOURCE})
 
-
-
+#add parse lib for test
+add_library(parse SHARED ${L_OUTPUTS} ${Y_OUTPUTS} ${SOURCES})
+#add gtest
+ADD_SUBDIRECTORY(${THIRD_PARTY_DIR}/googletest ${CMAKE_BINARY_DIR}/googletest-build)
 # add glog
 add_subdirectory(${GLOG_DIR})
+add_subdirectory(Unit_Test)
 include_directories(${GLOG_BINIRY_DIR})
 include_directories(${GLOG_SOURCE_DIR})
+target_compile_options(gtest PRIVATE "-fPIC")
+target_compile_options(gtest_main PRIVATE "-fPIC")
 # include_directories(${GLOG_DIR}/build ${GLOG_DIR}/src)
 # executable
 add_executable(compiler ${SOURCES})
@@ -98,7 +105,7 @@ add_custom_target(
 
 add_custom_target(
   quicksort
-  COMMAND ${CMAKE_BINARY_DIR}/${PROJECT_NAME} test ${CMAKE_SOURCE_DIR}/test/quick_sort.c -o ${CMAKE_SOURCE_DIR}/debug/quick_sort.ll
+  COMMAND ${CMAKE_BINARY_DIR}/${PROJECT_NAME} test ${CMAKE_SOURCE_DIR}/test/quicksort.c -o ${CMAKE_SOURCE_DIR}/debug/quicksort.ll
 
 )
 
@@ -112,14 +119,14 @@ add_custom_target(
 add_custom_target(
   matrix_mul
 
-  COMMAND ${CMAKE_BINARY_DIR}/${PROJECT_NAME} test ${CMAKE_SOURCE_DIR}/test/matrix_multiply.c -o ${CMAKE_SOURCE_DIR}/debug/matrix_mul.ll
+  COMMAND ${CMAKE_BINARY_DIR}/${PROJECT_NAME} test ${CMAKE_SOURCE_DIR}/test/matrix_mul.c -o ${CMAKE_SOURCE_DIR}/debug/matrix_mul.ll
 )
 
 add_custom_target(
   build_quicksort
-  COMMAND llc -march=x86-64 ${CMAKE_SOURCE_DIR}/debug/quick_sort.ll -o ${CMAKE_SOURCE_DIR}/debug/quick_sort.s
-  COMMAND as ${CMAKE_SOURCE_DIR}/debug/quick_sort.s -o ${CMAKE_SOURCE_DIR}/debug/quick_sort.o
-  COMMAND clang -Wall -Werror ${CMAKE_SOURCE_DIR}/debug/quick_sort.o -o ${CMAKE_SOURCE_DIR}/debug/quick_sort -I${CMAKE_SOURCE_DIR}/sysy-runtime-lib-master/src -L${CMAKE_SOURCE_DIR}/sysy-runtime-lib-master/build -lsysy -O1
+  COMMAND llc -march=x86-64 ${CMAKE_SOURCE_DIR}/debug/quicksort.ll -o ${CMAKE_SOURCE_DIR}/debug/quicksort.s
+  COMMAND as ${CMAKE_SOURCE_DIR}/debug/quicksort.s -o ${CMAKE_SOURCE_DIR}/debug/quicksort.o
+  COMMAND clang -Wall -Werror ${CMAKE_SOURCE_DIR}/debug/quicksort.o -o ${CMAKE_SOURCE_DIR}/debug/quicksort -I${CMAKE_SOURCE_DIR}/sysy-runtime-lib-master/src -L${CMAKE_SOURCE_DIR}/sysy-runtime-lib-master/build -lsysy -O1
   COMMENT "quicksort Linked"
 )
 

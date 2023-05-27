@@ -1,0 +1,33 @@
+FILE(GLOB_RECURSE COMPILER_TEST_SOURCES ${PROJECT_SOURCE_DIR}/Unit_Test/*/*test.cpp)
+MESSAGE(STATUS "Test Files: ${COMPILER_TEST_SOURCES}")
+
+SET(TEST_MAIN_PATH ${PROJECT_SOURCE_DIR}/Unit_Test/main_test.cpp)
+ADD_EXECUTABLE(compiler_test ${COMPILER_TEST_SOURCES} ${TEST_MAIN_PATH})
+ADD_LIBRARY(compiler_test_main ${TEST_MAIN_PATH})
+TARGET_LINK_LIBRARIES(compiler_test_main glog gtest parse)
+TARGET_LINK_LIBRARIES(compiler_test glog gtest parse)
+
+include_directories(${CMAKE_BINARY_DIR})
+
+foreach (test_source ${COMPILER_TEST_SOURCES})
+    # Create test suit
+    get_filename_component(test_filename ${test_source} NAME)
+    string(REPLACE ".cpp" "" test_name ${test_filename})
+    MESSAGE(STATUS "Create test suit: ${test_name}")
+
+    # Add the test target separately and as part of "make check-tests".
+    add_executable(${test_name} EXCLUDE_FROM_ALL ${test_source})
+    target_link_libraries(${test_name} glog gtest compiler_test_main parse)
+    # target_link_libraries(${test_name} minisql_shared glog gtest gtest_main)
+
+    # Set test target properties and dependencies.
+    set_target_properties(${test_name}
+            PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/test"
+            COMMAND ${test_name}
+            )
+
+    # Add the test under CTest.
+    add_test(${test_name} ${CMAKE_BINARY_DIR}/test/${test_name} --gtest_color=yes
+            --gtest_output=xml:${CMAKE_BINARY_DIR}/test/${test_name}.xml)
+endforeach (test_source ${COMPILER_TEST_SOURCES})
